@@ -74,8 +74,8 @@ public class RoundManager : MonoBehaviourPunCallbacks
     {
         GameEvents.PlayerUIDead(player.photonView.Owner.ActorNumber);
 
-        playerRegistry.TryGetPlayerByActorNumber(_attackerNum, out var attacker);
-        GameEvents.Kill(attacker.photonView.Owner.NickName, player.photonView.Owner.NickName);
+        if (playerRegistry.TryGetPlayerByActorNumber(_attackerNum, out var attacker))
+            GameEvents.Kill(attacker.photonView.Owner.NickName, player.photonView.Owner.NickName);
 
         if (_attackerNum == PhotonNetwork.LocalPlayer.ActorNumber)
             GameEvents.KillFloat(player.transform.position);
