@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class FurnitureBreakEffectManager : MonoBehaviour
@@ -46,7 +46,7 @@ public class FurnitureBreakEffectManager : MonoBehaviour
                 return effect;
             }
         }
-        // Ç® ¼ÒÁø ½Ã »õ·Î »ı¼º
+        // í’€ ì†Œì§„ ì‹œ ìƒˆë¡œ ìƒì„±
         return Instantiate(prefab);
     }
 }
