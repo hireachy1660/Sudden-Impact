@@ -163,11 +163,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41e2dcb43ea40f843aca90db156fc56f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Projectile
-  speed: 100
+  speed: 70
   damageType: 0
-  obstacleLayer:
+  hitMask:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 1073280
   bulletTrail: {fileID: -3853605543058356745}
 --- !u!114 &5817062822972647581
 MonoBehaviour:

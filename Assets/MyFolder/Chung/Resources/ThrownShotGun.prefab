@@ -52,9 +52,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ThrownWeapon
   speed: 100
   damageType: 2
-  obstacleLayer:
+  hitMask:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 1073280
   bulletTrail: {fileID: 3194718659654689247}
   visualMesh: {fileID: 3984339771703676942}
   rotateSpeed: 1080

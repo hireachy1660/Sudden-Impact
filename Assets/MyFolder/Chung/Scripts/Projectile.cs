@@ -7,19 +7,19 @@ public class Projectile : MonoBehaviourPun, IPunInstantiateMagicCallback
     protected float damage;
     protected int attackActorNum;
     protected int team;
+    bool hasHit = false;
 
     protected Rigidbody rb;
 
     [SerializeField]
     protected DamageType damageType;
     [SerializeField]
-    private LayerMask obstacleLayer;
+    private LayerMask hitMask;
     [SerializeField]
     private BulletTrail bulletTrail;
 
     protected virtual void Awake()
     {
-        
         rb = GetComponent<Rigidbody>();
     }
 
@@ -35,38 +35,41 @@ public class Projectile : MonoBehaviourPun, IPunInstantiateMagicCallback
 
     protected virtual void Update()
     {
-        rb.MovePosition(transform.position + transform.forward * speed * Time.deltaTime);
+        //rb.MovePosition(transform.position + transform.forward * speed * Time.deltaTime);
     }
 
     private void FixedUpdate()
     {
-        if(Physics.SphereCast(transform.position,0.2f, transform.forward, out RaycastHit hit, 100f*Time.fixedDeltaTime))
+        // 중복 호출 방지
+        if (hasHit) return;
+
+        if (Physics.SphereCast(transform.position,0.2f, transform.forward, out RaycastHit hit, speed*Time.fixedDeltaTime, hitMask))
         {
-            HandleHit(hit.collider);
+            hasHit = true;
+            rb.MovePosition(hit.point);
+            HandleHit(hit);
+            return;
         }
+
+        rb.MovePosition(transform.position + transform.forward * speed * Time.fixedDeltaTime);
     }
 
-    private void HandleHit(Collider other)
+    private void HandleHit(RaycastHit hitInfo)
     {
         // 맞았는지의 검사는 공격을 한 클라이언트에서 실행
         if (!photonView.IsMine) return;
 
+
         // 이 대상이 내가 부딪혀야 할 대상(리시버 or 장애물)인지 확인
-        bool isReceiver = other.TryGetComponent<IAttackReceiver>(out var receiver);
-        bool isObstacle = ((1 << other.gameObject.layer) & obstacleLayer) != 0;
+        bool isReceiver = hitInfo.transform.TryGetComponent<IAttackReceiver>(out var receiver);
+        //bool isObstacle = ((1 << hitInfo.transform.gameObject.layer) & hitMask) != 0;
+        bool isObstacle = !isReceiver;
 
         // 부딪히는 대상이 아니면 무시 (트리거 통과)
         if (!isReceiver && !isObstacle) return;
 
-        // 충돌 히트포인트 계산 (non-convex MeshCollider는 ClosestPoint 미지원 → transform.position 폴백)
-        // Vector3 hitPoint = other.ClosestPoint(transform.position);
-        MeshCollider mc = other as MeshCollider;
-        Vector3 hitPoint = (mc != null && !mc.convex)
-            ? transform.position
-            : other.ClosestPoint(transform.position);
-        Vector3 hitNormal = -transform.forward;
 
-        HitEffectManager.Instance.SpawnEffect(hitPoint, hitNormal);
+        HitEffectManager.Instance.SpawnEffect(hitInfo.point, hitInfo.normal);
 
 
         // 데미지 처리는 리시버인 경우에만 수행
@@ -78,12 +81,13 @@ public class Projectile : MonoBehaviourPun, IPunInstantiateMagicCallback
                 attackerActorNumber = attackActorNum,
                 attackerTeam = team,
                 type = damageType,
-                hitPoint = hitPoint,
-                hitNormal = hitNormal
+                hitPoint = hitInfo.point,
+                hitNormal = hitInfo.normal
             };
             receiver.OnReceiveImpact(data);
         }
 
+        Debug.Log($"[Projectile] HandleHit : isReceiver? {isReceiver}, isObstacle? {isObstacle}");
         // 최종적으로 총알 파괴 (벽이든 사람이든 무조건 부서짐)
         PhotonNetwork.Destroy(gameObject);
     }
