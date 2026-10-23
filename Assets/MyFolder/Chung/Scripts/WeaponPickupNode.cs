@@ -85,7 +85,6 @@ public class WeaponPickupNode : MonoBehaviourPun
     [PunRPC]
     private void RPC_Setup(Vector3 _position, int _typeInt, int _ammo, bool _visible)
     {
-        Debug.Log($"[Node RPC] {gameObject.name} 가 {(Weapon.EWeaponType)_typeInt} 로 세팅됨. Visible: {_visible}");
         transform.position = _position;
         weaponType = (Weapon.EWeaponType)_typeInt;
         currentAmmo = _ammo;

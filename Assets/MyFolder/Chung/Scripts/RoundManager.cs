@@ -134,8 +134,6 @@ public class RoundManager : MonoBehaviourPunCallbacks
     // 여기서 마스터 클라이언트에게 "나 이거 먹었어!" 라고 RPC를 쏴서 동기화
     public void OnLocalPlayerTouchedFlag(int enemyflagTeam)
     {
-        Debug.Log("[DebugGameManager] OnLocalPlayerTouchedFlag Calld");
-
         // 1. 레지스트리에서 '나'를 찾는다. 
         int myActorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
 
@@ -153,8 +151,6 @@ public class RoundManager : MonoBehaviourPunCallbacks
     // 득점 RPC 호출 (섬멸전 때 짰던 OnRoundEndRPC 재활용)
     public void OnLocalPlayerReachedGoal(int goalTeam)
     {
-        Debug.Log("[DebugGameManager] OnLocalPlayerReachedGoal Calld");
-
         int myActorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
 
         if (!playerRegistry.TryGetPlayerByActorNumber(myActorNumber, out PlayerController myPlayer)) return;
@@ -183,18 +179,15 @@ public class RoundManager : MonoBehaviourPunCallbacks
             }
         }
         if (stolenFlag == null) return;
-        Debug.Log($"[디버그] 도난당한 깃발 팀: {stolenFlag.myTeam} / 이 컴퓨터의 내 팀: {playerRegistry.MyTeam}");
         if (stolenFlag.myTeam == playerRegistry.MyTeam) // 아군 깃발을 집으면 깃발과 깃발 쥔 사람이 표시되어야 함
         {
             flagPointer.UpdateAllyObject(myPlayer.gameObject);
             flagPointer.HasAllyFlag = true;
-            Debug.Log("HasAllyFlag :" + flagPointer.HasAllyFlag);
         }
         else  // 적 깃발을 집으면 깃발과 깃발 쥔 사람이 표시되어야 함
         {
             flagPointer.UpdateEnemyObject(myPlayer.gameObject);
             flagPointer.HasEnemyFlag = true;
-            Debug.Log("HasEnemyFlag :" + flagPointer.HasEnemyFlag);
             if(PhotonNetwork.LocalPlayer.ActorNumber == _myActorNumber)
             {
                 flagPointer.SetBaseCamp((int)PhotonNetwork.LocalPlayer.CustomProperties["Team"]);
