@@ -57,9 +57,6 @@ public class Projectile : MonoBehaviourPun, IPunInstantiateMagicCallback
 
         // 이 대상이 내가 부딪혀야 할 대상(리시버 or 장애물)인지 확인
         bool isReceiver = hitInfo.transform.TryGetComponent<IAttackReceiver>(out var receiver);
-        bool isObstacle = !isReceiver;
-
-
 
         HitEffectManager.Instance.SpawnEffect(hitInfo.point, hitInfo.normal);
 
