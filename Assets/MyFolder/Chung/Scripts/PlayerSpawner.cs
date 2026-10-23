@@ -1,4 +1,4 @@
-using Photon.Pun;
+ï»¿using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
 
@@ -11,30 +11,30 @@ public class PlayerSpawner : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        // 1. ÀÌ¹Ì ¹æ¿¡ µé¾î¿Í ÀÖ´Â »óÅÂÀÎ°¡? (·Îºñ¿¡¼­ Á¤»óÀûÀ¸·Î ³Ñ¾î¿Â °æ¿ì)
+        // 1. ì´ë¯¸ ë°©ì— ë“¤ì–´ì™€ ìˆëŠ” ìƒíƒœì¸ê°€? (ë¡œë¹„ì—ì„œ ì •ìƒì ìœ¼ë¡œ ë„˜ì–´ì˜¨ ê²½ìš°)
         if (PhotonNetwork.InRoom)
         {
-            Debug.Log("[PlayerSpawner] ÀÌ¹Ì ¹æ¿¡ Á¢¼ÓµÇ¾î ÀÖ½À´Ï´Ù. Áï½Ã ½ºÆùÀ» ÁøÇàÇÕ´Ï´Ù.");
+            Debug.Log("[PlayerSpawner] ì´ë¯¸ ë°©ì— ì ‘ì†ë˜ì–´ ìˆìŠµë‹ˆë‹¤. ì¦‰ì‹œ ìŠ¤í°ì„ ì§„í–‰í•©ë‹ˆë‹¤.");
             SpawnProcess();
         }
-        // 2. ¾ÆÁ÷ Á¢¼Ó ÀüÀÎ°¡? (DebugJoiner µîÀ» ÅëÇØ Á¢¼Ó ÁßÀÎ °æ¿ì)
+        // 2. ì•„ì§ ì ‘ì† ì „ì¸ê°€? (DebugJoiner ë“±ì„ í†µí•´ ì ‘ì† ì¤‘ì¸ ê²½ìš°)
         else
         {
-            Debug.Log("[PlayerSpawner] ¾ÆÁ÷ Á¢¼Ó ÀüÀÔ´Ï´Ù. OnJoinedRoom Äİ¹éÀ» ±â´Ù¸³´Ï´Ù.");
+            Debug.Log("[PlayerSpawner] ì•„ì§ ì ‘ì† ì „ì…ë‹ˆë‹¤. OnJoinedRoom ì½œë°±ì„ ê¸°ë‹¤ë¦½ë‹ˆë‹¤.");
         }
     }
 
-    // ±âÁ¸ OnJoinedRoom Äİ¹éµµ À¯Áö (µğ¹ö±× Á¶ÀÌ³Ê¿ë)
+    // ê¸°ì¡´ OnJoinedRoom ì½œë°±ë„ ìœ ì§€ (ë””ë²„ê·¸ ì¡°ì´ë„ˆìš©)
     public override void OnJoinedRoom()
     {
-        Debug.Log("[PlayerSpawner] ¹æ ÀÔÀåÀÌ ¿Ï·áµÇ¾ú½À´Ï´Ù. ½ºÆùÀ» ÁøÇàÇÕ´Ï´Ù.");
+        Debug.Log("[PlayerSpawner] ë°© ì…ì¥ì´ ì™„ë£Œë˜ì—ˆìŠµë‹ˆë‹¤. ìŠ¤í°ì„ ì§„í–‰í•©ë‹ˆë‹¤.");
         SpawnProcess();
     }
 
-    // ½ÇÁ¦ ½ºÆù ·ÎÁ÷À» º°µµ ÇÔ¼ö·Î ºĞ¸®
+    // ì‹¤ì œ ìŠ¤í° ë¡œì§ì„ ë³„ë„ í•¨ìˆ˜ë¡œ ë¶„ë¦¬
     private void SpawnProcess()
     {
-        // 1. ÆÀ Á¤º¸ È®ÀÎ (±âº»°ª ¼³Á¤)
+        // 1. íŒ€ ì •ë³´ í™•ì¸ (ê¸°ë³¸ê°’ ì„¤ì •)
         int team = 1;
         if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("Team"))
         {
@@ -42,14 +42,14 @@ public class PlayerSpawner : MonoBehaviourPunCallbacks
         }
         else
         {
-            Debug.LogWarning("[PlayerSpawner] ÆÀ Á¤º¸°¡ ¾ø¾î ¿¢ÅÍ ³Ñ¹ö·Î ¼³Á¤");
+            Debug.LogWarning("[PlayerSpawner] íŒ€ ì •ë³´ê°€ ì—†ì–´ ì—‘í„° ë„˜ë²„ë¡œ ì„¤ì •");
             team = (PhotonNetwork.LocalPlayer.ActorNumber % 2) + 1;
         }
 
-        // 2. Ä³¸¯ÅÍ »ı¼º
+        // 2. ìºë¦­í„° ìƒì„±
         var go = PhotonNetwork.Instantiate(playerPrefab.name, Vector3.zero, Quaternion.identity);
 
-        // 3. ·¹Áö½ºÆ®¸® µî·Ï RPC
+        // 3. ë ˆì§€ìŠ¤íŠ¸ë¦¬ ë“±ë¡ RPC
         photonView.RPC(nameof(RegisterToRegistry), RpcTarget.AllBuffered,
                        go.GetComponent<PhotonView>().ViewID, team);
     }
@@ -62,11 +62,11 @@ public class PlayerSpawner : MonoBehaviourPunCallbacks
 
         PlayerController player = pv.GetComponent<PlayerController>();
         playerRegistry.RegisterPlayerTeam(player, _team);
-        Debug.Log("playerRegistery µî·ÏµÈ ÆÀ : " + _team);
+        Debug.Log("playerRegistery ë“±ë¡ëœ íŒ€ : " + _team);
 
         if (player.photonView.IsMine)
         {
-            playerRegistry.RegisterLocalPlayer(player); // ·ÎÄÃ ÇÃ·¹ÀÌ¾î ÁÖÀÔ
+            playerRegistry.RegisterLocalPlayer(player); // ë¡œì»¬ í”Œë ˆì´ì–´ ì£¼ì…
             playerRegistry.RegisterMyTeam(_team);
             player.gameObject.layer = layerNumber;
 
@@ -84,12 +84,12 @@ public class PlayerSpawner : MonoBehaviourPunCallbacks
 
         if (_team == actualLocalTeam)
         {
-            // FOV´Â ³×Æ®¿öÅ© µ¿±âÈ­°¡ ÇÊ¿ä ¾ø´Â ¼ø¼ö ·ÎÄÃ ½Ã°¢ È¿°úÀÌ¹Ç·Î ÀÏ¹İ Instantiate »ç¿ë
-            // ´Ü, ÀÌ¹Ì FOV°¡ ´Ş·ÁÀÖ´ÂÁö Áßº¹ »ı¼º ¹æÁö Ã¼Å©¸¦ ±ÇÀåÇÕ´Ï´Ù.
+            // FOVëŠ” ë„¤íŠ¸ì›Œí¬ ë™ê¸°í™”ê°€ í•„ìš” ì—†ëŠ” ìˆœìˆ˜ ë¡œì»¬ ì‹œê° íš¨ê³¼ì´ë¯€ë¡œ ì¼ë°˜ Instantiate ì‚¬ìš©
+            // ë‹¨, ì´ë¯¸ FOVê°€ ë‹¬ë ¤ìˆëŠ”ì§€ ì¤‘ë³µ ìƒì„± ë°©ì§€ ì²´í¬ë¥¼ ê¶Œì¥í•©ë‹ˆë‹¤.
             if (player.transform.Find(FOVPrefab.name) == null)
             {
                 GameObject fov = Instantiate(FOVPrefab, player.transform);
-                fov.name = FOVPrefab.name; // ÀÌ¸§ ¸ÂÃçÁÖ±â (Áßº¹ Ã¼Å©¿ë)
+                fov.name = FOVPrefab.name; // ì´ë¦„ ë§ì¶°ì£¼ê¸° (ì¤‘ë³µ ì²´í¬ìš©)
             }
         }
     }

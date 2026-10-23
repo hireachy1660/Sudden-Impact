@@ -1,22 +1,22 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 
 /// <summary>
-/// µğ¹ö±×¿ë ºü¸¥ Á¢¼Ó ½ºÅ©¸³Æ®
-/// ¾À¿¡ ¹èÄ¡ÇÏ¸é ÀÚµ¿À¸·Î Photon Á¢¼Ó ¹× ¹æ ÀÔÀå
+/// ë””ë²„ê·¸ìš© ë¹ ë¥¸ ì ‘ì† ìŠ¤í¬ë¦½íŠ¸
+/// ì”¬ì— ë°°ì¹˜í•˜ë©´ ìë™ìœ¼ë¡œ Photon ì ‘ì† ë° ë°© ì…ì¥
 /// </summary>
 public class DebugJoiner : MonoBehaviourPunCallbacks
 {
-    [Header("¹æ ¼³Á¤")]
+    [Header("ë°© ì„¤ì •")]
     [SerializeField] private string roomName = "DebugRoom";
     [SerializeField] private int maxPlayers = 4;
 
-    [Header("½ºÆù ¼³Á¤")]
+    [Header("ìŠ¤í° ì„¤ì •")]
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private Transform[] spawnPoints;
 
-    [Header("µğ¹ö±×")]
+    [Header("ë””ë²„ê·¸")]
     [SerializeField] private bool autoConnect = true;
     [SerializeField] private bool showGUI = true;
 
@@ -38,24 +38,24 @@ public class DebugJoiner : MonoBehaviourPunCallbacks
             return;
         }
 
-        Log("¸¶½ºÅÍ ¼­¹ö Á¢¼Ó Áß...");
+        Log("ë§ˆìŠ¤í„° ì„œë²„ ì ‘ì† ì¤‘...");
         PhotonNetwork.ConnectUsingSettings();
     }
 
     private void JoinOrCreateRoom()
     {
-        Log($"¹æ ÀÔÀå ½Ãµµ: {roomName}");
+        Log($"ë°© ì…ì¥ ì‹œë„: {roomName}");
         RoomOptions options = new RoomOptions { MaxPlayers = (byte)maxPlayers };
         PhotonNetwork.JoinOrCreateRoom(roomName, options, TypedLobby.Default);
     }
 
     // -----------------------------------------------
-    // PUN Äİ¹é
+    // PUN ì½œë°±
     // -----------------------------------------------
 
     public override void OnConnectedToMaster()
     {
-        Log("¸¶½ºÅÍ ¼­¹ö Á¢¼Ó ¿Ï·á");
+        Log("ë§ˆìŠ¤í„° ì„œë²„ ì ‘ì† ì™„ë£Œ");
         JoinOrCreateRoom();
     }
 
@@ -65,45 +65,45 @@ public class DebugJoiner : MonoBehaviourPunCallbacks
         string myNickName = $"Player_{PhotonNetwork.LocalPlayer.ActorNumber}";
         PhotonNetwork.LocalPlayer.NickName = myNickName;
 
-        // µğ¹ö±×¿ë ÆÀ ¼³Á¤ (È¦¼ö ¹øÈ£´Â 1ÆÀ, Â¦¼ö ¹øÈ£´Â 0ÆÀ µî ÀÓÀÇ ¹èÁ¤)
+        // ë””ë²„ê·¸ìš© íŒ€ ì„¤ì • (í™€ìˆ˜ ë²ˆí˜¸ëŠ” 1íŒ€, ì§ìˆ˜ ë²ˆí˜¸ëŠ” 0íŒ€ ë“± ì„ì˜ ë°°ì •)
         int debugTeam = (PhotonNetwork.LocalPlayer.ActorNumber % 2 == 0) ? 0 : 1;
 
-        //ÇÁ·ÎÆÛÆ¼ ¼³Á¤
+        //í”„ë¡œí¼í‹° ì„¤ì •
         ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable();
         props["Team"] = debugTeam; 
         PhotonNetwork.LocalPlayer.SetCustomProperties(props);
 
-        Log($"¹æ ÀÔÀå ¿Ï·á | ´Ğ³×ÀÓ: {myNickName} | µğ¹ö±× ÆÀ: {debugTeam}");
-        Log($"¹æ ÀÔÀå ¿Ï·á | ´Ğ³×ÀÓ: {myNickName} | ÇÃ·¹ÀÌ¾î ¼ö: {PhotonNetwork.CurrentRoom.PlayerCount}");
+        Log($"ë°© ì…ì¥ ì™„ë£Œ | ë‹‰ë„¤ì„: {myNickName} | ë””ë²„ê·¸ íŒ€: {debugTeam}");
+        Log($"ë°© ì…ì¥ ì™„ë£Œ | ë‹‰ë„¤ì„: {myNickName} | í”Œë ˆì´ì–´ ìˆ˜: {PhotonNetwork.CurrentRoom.PlayerCount}");
 
         // SpawnPlayer(); 
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
-        Log($"¹æ ÀÔÀå ½ÇÆĞ: {message}");
+        Log($"ë°© ì…ì¥ ì‹¤íŒ¨: {message}");
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {
-        Log($"Á¢¼Ó ²÷±è: {cause}");
+        Log($"ì ‘ì† ëŠê¹€: {cause}");
     }
 
     // -----------------------------------------------
-    // ÇÃ·¹ÀÌ¾î ½ºÆù
+    // í”Œë ˆì´ì–´ ìŠ¤í°
     // -----------------------------------------------
 
     private void SpawnPlayer()
     {
         if (playerPrefab == null)
         {
-            Log("playerPrefabÀÌ ¾ø½À´Ï´Ù");
+            Log("playerPrefabì´ ì—†ìŠµë‹ˆë‹¤");
             return;
         }
 
         Vector3 spawnPos = GetSpawnPosition();
         PhotonNetwork.Instantiate(playerPrefab.name, spawnPos, Quaternion.identity);
-        Log($"ÇÃ·¹ÀÌ¾î ½ºÆù: {spawnPos}");
+        Log($"í”Œë ˆì´ì–´ ìŠ¤í°: {spawnPos}");
     }
 
     private Vector3 GetSpawnPosition()
@@ -114,12 +114,12 @@ public class DebugJoiner : MonoBehaviourPunCallbacks
             return spawnPoints[index].position;
         }
 
-        // ½ºÆù Æ÷ÀÎÆ® ¾øÀ¸¸é ·£´ı À§Ä¡
+        // ìŠ¤í° í¬ì¸íŠ¸ ì—†ìœ¼ë©´ ëœë¤ ìœ„ì¹˜
         return new Vector3(Random.Range(-3f, 3f), 0f, Random.Range(-3f, 3f));
     }
 
     // -----------------------------------------------
-    // µğ¹ö±× GUI
+    // ë””ë²„ê·¸ GUI
     // -----------------------------------------------
 
     private void Log(string message)
@@ -133,29 +133,29 @@ public class DebugJoiner : MonoBehaviourPunCallbacks
         if (!showGUI) return;
 
         GUILayout.BeginArea(new Rect(10, 10, 300, 200));
-        GUILayout.Label($"»óÅÂ: {PhotonNetwork.NetworkClientState}");
-        GUILayout.Label($"ÇÎ: {PhotonNetwork.GetPing()}ms");
+        GUILayout.Label($"ìƒíƒœ: {PhotonNetwork.NetworkClientState}");
+        GUILayout.Label($"í•‘: {PhotonNetwork.GetPing()}ms");
 
         if (PhotonNetwork.InRoom)
         {
-            GUILayout.Label($"¹æ: {PhotonNetwork.CurrentRoom.Name}");
-            GUILayout.Label($"ÇÃ·¹ÀÌ¾î: {PhotonNetwork.CurrentRoom.PlayerCount} / {maxPlayers}");
-            GUILayout.Label($"È£½ºÆ® ¿©ºÎ: {PhotonNetwork.IsMasterClient}");
+            GUILayout.Label($"ë°©: {PhotonNetwork.CurrentRoom.Name}");
+            GUILayout.Label($"í”Œë ˆì´ì–´: {PhotonNetwork.CurrentRoom.PlayerCount} / {maxPlayers}");
+            GUILayout.Label($"í˜¸ìŠ¤íŠ¸ ì—¬ë¶€: {PhotonNetwork.IsMasterClient}");
         }
 
-        GUILayout.Label($"·Î±×: {log}");
+        GUILayout.Label($"ë¡œê·¸: {log}");
 
         if (!PhotonNetwork.IsConnected)
         {
-            if (GUILayout.Button("Á¢¼Ó")) Connect();
+            if (GUILayout.Button("ì ‘ì†")) Connect();
         }
         else if (!PhotonNetwork.InRoom)
         {
-            if (GUILayout.Button("¹æ ÀÔÀå")) JoinOrCreateRoom();
+            if (GUILayout.Button("ë°© ì…ì¥")) JoinOrCreateRoom();
         }
         else
         {
-            if (GUILayout.Button("¹æ ³ª°¡±â")) PhotonNetwork.LeaveRoom();
+            if (GUILayout.Button("ë°© ë‚˜ê°€ê¸°")) PhotonNetwork.LeaveRoom();
         }
 
         GUILayout.EndArea();

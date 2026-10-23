@@ -1,4 +1,4 @@
-using Photon.Pun;
+ï»¿using Photon.Pun;
 using UnityEngine;
 
 public class PistolGun : Gun
@@ -6,19 +6,19 @@ public class PistolGun : Gun
     protected override void FireProjectile()
     {
         Vector3 direction = attackPoint.forward;
-        direction.y = 0; // ÃÑ¾ËÀÌ ¹Ù´Ú¿¡ ¹ÚÈ÷°Å³ª ÇÏ´Ã·Î ³¯¾Æ°¡Áö ¾Ê°Ô ¼öÆò(yÃà) °íÁ¤
+        direction.y = 0; // ì´ì•Œì´ ë°”ë‹¥ì— ë°•íˆê±°ë‚˜ í•˜ëŠ˜ë¡œ ë‚ ì•„ê°€ì§€ ì•Šê²Œ ìˆ˜í‰(yì¶•) ê³ ì •
 
-        // 2. ¹æÇâÀÌ 0ÀÌ ¾Æ´Ò ¶§¸¸ È¸Àü°ª Àû¿ë (Á¦ÀÚ¸® Å¬¸¯ ¿¡·¯ ¹æÁö)
+        // 2. ë°©í–¥ì´ 0ì´ ì•„ë‹ ë•Œë§Œ íšŒì „ê°’ ì ìš© (ì œìë¦¬ í´ë¦­ ì—ëŸ¬ ë°©ì§€)
         Quaternion bulletRotation = attackPoint.rotation;
         if (direction.sqrMagnitude > 0.001f)
         {
             bulletRotation = Quaternion.LookRotation(direction);
         }
 
-        // 3. ³Ñ°ÜÁÙ µ¥ÀÌÅÍ¸¦ object ¹è¿­·Î Æ÷ÀåÇÕ´Ï´Ù. (¼ø¼­°¡ ¸Å¿ì Áß¿ä!)
+        // 3. ë„˜ê²¨ì¤„ ë°ì´í„°ë¥¼ object ë°°ì—´ë¡œ í¬ì¥í•©ë‹ˆë‹¤. (ìˆœì„œê°€ ë§¤ìš° ì¤‘ìš”!)
         object[] bulletData = new object[] { ownerActorNumber, ownerTeam, damage };
 
-        // 4. InstantiateÀÇ 5¹øÂ° ¸Å°³º¯¼ö¿¡ ÀÌ ¹è¿­À» ²È¾Æ ³Ö½À´Ï´Ù.
+        // 4. Instantiateì˜ 5ë²ˆì§¸ ë§¤ê°œë³€ìˆ˜ì— ì´ ë°°ì—´ì„ ê½‚ì•„ ë„£ìŠµë‹ˆë‹¤.
         PhotonNetwork.Instantiate(
             projectilePrefab.name,
             attackPoint.position,

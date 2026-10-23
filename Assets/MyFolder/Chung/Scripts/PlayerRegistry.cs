@@ -1,4 +1,4 @@
-using JetBrains.Annotations;
+ï»¿using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -7,11 +7,11 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "PlayerRegistry", menuName = "SuddenImpact/PlayerRegistry")]
 public class PlayerRegistry : ScriptableObject
 {
-    [SerializeField] private List<PlayerController> teamA = new List<PlayerController>(); // ÆÀº° ÇÃ·¹ÀÌ¾î°¡ ´ã±â´Â °÷
+    [SerializeField] private List<PlayerController> teamA = new List<PlayerController>(); // íŒ€ë³„ í”Œë ˆì´ì–´ê°€ ë‹´ê¸°ëŠ” ê³³
     [SerializeField] private List<PlayerController> teamB = new List<PlayerController>();
 
     [Header("LocalData")]
-    [SerializeField] private PlayerController localPlayer; // ·ÎÄÃ ÇÃ·¹ÀÌ¾î¸¦ ´ã´Â °÷
+    [SerializeField] private PlayerController localPlayer; // ë¡œì»¬ í”Œë ˆì´ì–´ë¥¼ ë‹´ëŠ” ê³³
     [SerializeField] private int myTeam; 
 
     public List<PlayerController> TeamA { get { return teamA; } }
@@ -68,7 +68,7 @@ public class PlayerRegistry : ScriptableObject
         teamB.RemoveAll(p => p == null || (p.photonView != null && p.photonView.Owner.ActorNumber == actorNumber));
     }
 
-    // °ÔÀÓ Á¾·á ½Ã ¹İµå½Ã ÃÊ±âÈ­
+    // ê²Œì„ ì¢…ë£Œ ì‹œ ë°˜ë“œì‹œ ì´ˆê¸°í™”
     public void Clear()
     {
         localPlayer = null;

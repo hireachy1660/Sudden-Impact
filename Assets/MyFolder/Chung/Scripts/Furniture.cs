@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class Furniture : MonoBehaviour, IAttackReceiver
 {
@@ -8,7 +8,7 @@ public class Furniture : MonoBehaviour, IAttackReceiver
     protected bool isDestroyed = false;
     protected Vector3 lastHitNormal = Vector3.up;
 
-    // FurnitureNetworkManager°¡ ºÎ¿©ÇÏ´Â ¾À °íÀ¯ ÀÎµ¦½º
+    // FurnitureNetworkManagerê°€ ë¶€ì—¬í•˜ëŠ” ì”¬ ê³ ìœ  ì¸ë±ìŠ¤
     private int _index = -1;
     public bool IsDestroyed => isDestroyed;
     public void SetIndex(int index) => _index = index;
@@ -20,18 +20,18 @@ public class Furniture : MonoBehaviour, IAttackReceiver
         audioSource = GetComponent<AudioSource>();
     }
 
-    // [CH ¼öÁ¤] ±âÁ¸ OnReceiveImpact + RPC_ApplyDamage ¡æ ¸Å´ÏÀú À§ÀÓ ¹æ½ÄÀ¸·Î ±³Ã¼
-    // ¦¡¦¡ ±âÁ¸ ÄÚµå ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // [CH ìˆ˜ì •] ê¸°ì¡´ OnReceiveImpact + RPC_ApplyDamage â†’ ë§¤ë‹ˆì € ìœ„ì„ ë°©ì‹ìœ¼ë¡œ êµì²´
+    // â”€â”€ ê¸°ì¡´ ì½”ë“œ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // public virtual void OnReceiveImpact(ImpactData _data)
     // {
-    //     Debug.Log($" {gameObject.name}ÀÌ ¸Â¾Ò½À´Ï´Ù! ¹ŞÀº µ¥¹ÌÁö: {_data.damage}");
+    //     Debug.Log($" {gameObject.name}ì´ ë§ì•˜ìŠµë‹ˆë‹¤! ë°›ì€ ë°ë¯¸ì§€: {_data.damage}");
     //     if (isDestroyed) return;
     //     if (photonView == null)
     //     {
-    //         Debug.LogError("°¡±¸¿¡ PhotonView ÄÄÆ÷³ÍÆ®°¡ ¾ø½À´Ï´Ù!");
+    //         Debug.LogError("ê°€êµ¬ì— PhotonView ì»´í¬ë„ŒíŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤!");
     //         return;
     //     }
-    //     // ³×Æ®¿öÅ© ¸ğµç ÀÎ½ºÅÏ½º¿¡ µ¥¹ÌÁö µ¿±âÈ­
+    //     // ë„¤íŠ¸ì›Œí¬ ëª¨ë“  ì¸ìŠ¤í„´ìŠ¤ì— ë°ë¯¸ì§€ ë™ê¸°í™”
     //     photonView.RPC(nameof(RPC_ApplyDamage), RpcTarget.All, _data.damage, _data.hitNormal);
     // }
     //
@@ -40,16 +40,16 @@ public class Furniture : MonoBehaviour, IAttackReceiver
     // {
     //     lastHitNormal = _hitNormal;
     //     curHp -= _damage;
-    //     Debug.Log($"RPC µ¥¹ÌÁö Àû¿ë! ÇöÀç Ã¼·Â: {curHp}");
+    //     Debug.Log($"RPC ë°ë¯¸ì§€ ì ìš©! í˜„ì¬ ì²´ë ¥: {curHp}");
     //     if (curHp <= 0 && !isDestroyed)
     //     {
-    //         Debug.Log($"{gameObject.name} Ã¼·Â 0 ÀÌÇÏ! ÆÄ±«µË´Ï´Ù!");
+    //         Debug.Log($"{gameObject.name} ì²´ë ¥ 0 ì´í•˜! íŒŒê´´ë©ë‹ˆë‹¤!");
     //         OnBroken();
     //     }
     // }
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    // IAttackReceiver ±¸Çö ¡æ ¸Å´ÏÀú¿¡ À§ÀÓ
+    // IAttackReceiver êµ¬í˜„ â†’ ë§¤ë‹ˆì €ì— ìœ„ì„
     public virtual void OnReceiveImpact(ImpactData _data)
     {
         if (isDestroyed) return;
@@ -57,7 +57,7 @@ public class Furniture : MonoBehaviour, IAttackReceiver
         FurnitureNetworkManager.Instance.ReportHit(_index, _data.damage, _data.hitNormal);
     }
 
-    // ¸Å´ÏÀú RPC°¡ ¸ğµç Å¬¶óÀÌ¾ğÆ®¿¡¼­ È£Ãâ
+    // ë§¤ë‹ˆì € RPCê°€ ëª¨ë“  í´ë¼ì´ì–¸íŠ¸ì—ì„œ í˜¸ì¶œ
     public void LocalApplyDamage(float damage, Vector3 hitNormal)
     {
         if (isDestroyed) return;
@@ -66,12 +66,12 @@ public class Furniture : MonoBehaviour, IAttackReceiver
         if (curHp <= 0)
         {
             OnBroken();
-            // MasterClient°¡ RoomProperties ¾÷µ¥ÀÌÆ® (´ÊÂü µ¿±âÈ­¿ë)
+            // MasterClientê°€ RoomProperties ì—…ë°ì´íŠ¸ (ëŠ¦ì°¸ ë™ê¸°í™”ìš©)
             FurnitureNetworkManager.Instance?.ReportDestroyed(_index);
         }
     }
 
-    // ´ÊÂü Å¬¶óÀÌ¾ğÆ® »óÅÂ º¹¿ø¿ë (ºñÁÖ¾ó/»ç¿îµå ¾øÀÌ »óÅÂ¸¸)
+    // ëŠ¦ì°¸ í´ë¼ì´ì–¸íŠ¸ ìƒíƒœ ë³µì›ìš© (ë¹„ì£¼ì–¼/ì‚¬ìš´ë“œ ì—†ì´ ìƒíƒœë§Œ)
     public void ForceBreak()
     {
         if (isDestroyed) return;
@@ -99,7 +99,7 @@ public class Furniture : MonoBehaviour, IAttackReceiver
         {
             obstacle.Broken();
         }
-        // ºÎ¼­Áø ÈÄ ¹°¸® ÆÇÁ¤ Á¦°Å
+        // ë¶€ì„œì§„ í›„ ë¬¼ë¦¬ íŒì • ì œê±°
         //if (TryGetComponent<Collider>(out var col)) col.enabled = false;
         Collider[] colliders = GetComponentsInChildren<Collider>();
         foreach (Collider col in colliders)
@@ -111,7 +111,7 @@ public class Furniture : MonoBehaviour, IAttackReceiver
             col.enabled = false;
         }
 
-        // °í½ºÆ® Äİ¶óÀÌ´õ¸¸ ´Ù½Ã È°¼ºÈ­ (FOW°¡ °í½ºÆ® °¨Áö¿¡ »ç¿ë)
+        // ê³ ìŠ¤íŠ¸ ì½œë¼ì´ë”ë§Œ ë‹¤ì‹œ í™œì„±í™” (FOWê°€ ê³ ìŠ¤íŠ¸ ê°ì§€ì— ì‚¬ìš©)
         Item item2 = GetComponent<Item>();
         if (item2 != null && item2.ghostObject != null)
         {
@@ -119,7 +119,7 @@ public class Furniture : MonoBehaviour, IAttackReceiver
             if (ghostCol != null)
             {
                 ghostCol.enabled = true;
-                Debug.Log($"[Furniture] ghost collider ÀçÈ°¼ºÈ­: {ghostCol.name}");
+                Debug.Log($"[Furniture] ghost collider ì¬í™œì„±í™”: {ghostCol.name}");
             }
         }
     }

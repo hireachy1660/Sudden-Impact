@@ -1,16 +1,16 @@
-using System.Collections;
+ï»¿using System.Collections;
 using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// Å³ ·Î±× UIÀÇ ´ÜÀÏ Ç×¸ñ ÇÁ¸®ÆÕ ÄÄÆ÷³ÍÆ®.
+/// í‚¬ ë¡œê·¸ UIì˜ ë‹¨ì¼ í•­ëª© í”„ë¦¬íŒ¹ ì»´í¬ë„ŒíŠ¸.
 ///
-/// ¾À ¼³Á¤:
-///   - TextMeshProUGUI : Å³ ¸Ş½ÃÁö ÅØ½ºÆ®
-///   - CanvasGroup     : ÆäÀÌµå ¾Æ¿ô¿¡ »ç¿ë (¾ËÆÄ Á¦¾î)
+/// ì”¬ ì„¤ì •:
+///   - TextMeshProUGUI : í‚¬ ë©”ì‹œì§€ í…ìŠ¤íŠ¸
+///   - CanvasGroup     : í˜ì´ë“œ ì•„ì›ƒì— ì‚¬ìš© (ì•ŒíŒŒ ì œì–´)
 ///
-/// »ç¿ë¹ı:
-///   UIManager¿¡¼­ Instantiate ÈÄ entry.Show(killer, victim) È£Ãâ.
+/// ì‚¬ìš©ë²•:
+///   UIManagerì—ì„œ Instantiate í›„ entry.Show(killer, victim) í˜¸ì¶œ.
 /// </summary>
 public class KillLogEntry : MonoBehaviour
 {
@@ -18,13 +18,13 @@ public class KillLogEntry : MonoBehaviour
     [SerializeField] private CanvasGroup canvasGroup;
 
     [Header("Timing")]
-    [SerializeField] private float displayDuration = 3f;   // Ç¥½Ã Áö¼Ó ½Ã°£
-    [SerializeField] private float fadeDuration = 1f;   // ÆäÀÌµå ¾Æ¿ô ½Ã°£
+    [SerializeField] private float displayDuration = 3f;   // í‘œì‹œ ì§€ì† ì‹œê°„
+    [SerializeField] private float fadeDuration = 1f;   // í˜ì´ë“œ ì•„ì›ƒ ì‹œê°„
 
-    // ¦¡¦¡¦¡ ¿ÜºÎ È£Ãâ ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€ ì™¸ë¶€ í˜¸ì¶œ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /// <summary>
-    /// UIManager°¡ GameEvents.OnKillLog ¼ö½Å ½Ã È£ÃâÇÕ´Ï´Ù.
+    /// UIManagerê°€ GameEvents.OnKillLog ìˆ˜ì‹  ì‹œ í˜¸ì¶œí•©ë‹ˆë‹¤.
     /// </summary>
     public void Show(string killer, string victim)
     {
@@ -38,14 +38,14 @@ public class KillLogEntry : MonoBehaviour
         StartCoroutine(FadeOutAndDestroy());
     }
 
-    // ¦¡¦¡¦¡ ÆäÀÌµå ¾Æ¿ô ÄÚ·çÆ¾ ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€ í˜ì´ë“œ ì•„ì›ƒ ì½”ë£¨í‹´ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private IEnumerator FadeOutAndDestroy()
     {
-        // displayDuration µ¿¾È ¿ÏÀüÈ÷ Ç¥½Ã
+        // displayDuration ë™ì•ˆ ì™„ì „íˆ í‘œì‹œ
         yield return new WaitForSeconds(displayDuration);
 
-        // fadeDuration µ¿¾È ¼­¼­È÷ Åõ¸íÇØÁü
+        // fadeDuration ë™ì•ˆ ì„œì„œíˆ íˆ¬ëª…í•´ì§
         float elapsed = 0f;
         while (elapsed < fadeDuration)
         {
@@ -55,7 +55,7 @@ public class KillLogEntry : MonoBehaviour
             yield return null;
         }
 
-        // ¿ÏÀüÈ÷ »ç¶óÁø µÚ ¿ÀºêÁ§Æ® Á¦°Å
+        // ì™„ì „íˆ ì‚¬ë¼ì§„ ë’¤ ì˜¤ë¸Œì íŠ¸ ì œê±°
         Destroy(gameObject);
     }
 }

@@ -1,6 +1,6 @@
-public interface IInteractable
+ï»¿public interface IInteractable
 {
-    // ´©°¡ »óÈ£ÀÛ¿ëÀ» ½ÃµµÇß´ÂÁö Àü´Ş¹Ş½À´Ï´Ù.
+    // ëˆ„ê°€ ìƒí˜¸ì‘ìš©ì„ ì‹œë„í–ˆëŠ”ì§€ ì „ë‹¬ë°›ìŠµë‹ˆë‹¤.
     void Interact(PlayerController player);
 
 

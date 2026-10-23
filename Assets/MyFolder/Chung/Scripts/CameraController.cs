@@ -1,4 +1,4 @@
-using Photon.Pun;
+ï»¿using Photon.Pun;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -21,7 +21,7 @@ public class CameraController : MonoBehaviour
     [Header("ForDebug")]
     [SerializeField] private PlayerController player;
 
-    private GameObject observerTarget; // °¡Â¥ Å¸°Ù
+    private GameObject observerTarget; // ê°€ì§œ íƒ€ê²Ÿ
     private bool isObserverMode = false;
 
     private void Awake()
@@ -66,12 +66,12 @@ public class CameraController : MonoBehaviour
     {
         if (player != null && player.photonView.Owner.ActorNumber == deadActorNumber)
         {
-            isObserverMode = true; // ¿ÉÀú¹ö ¸ğµå ON
+            isObserverMode = true; // ì˜µì €ë²„ ëª¨ë“œ ON
 
-            // °¡Â¥ Å¸°ÙÀ» ³» ½ÃÃ¼ À§Ä¡·Î °¡Á®¿È
+            // ê°€ì§œ íƒ€ê²Ÿì„ ë‚´ ì‹œì²´ ìœ„ì¹˜ë¡œ ê°€ì ¸ì˜´
             observerTarget.transform.position = player.transform.position;
 
-            // Ä«¸Ş¶ó¿¡°Ô Å¸°ÙÀ» °¡Â¥·Î º¯°æ
+            // ì¹´ë©”ë¼ì—ê²Œ íƒ€ê²Ÿì„ ê°€ì§œë¡œ ë³€ê²½
             virtualCam.Follow = observerTarget.transform;
         }
     }
@@ -84,7 +84,7 @@ public class CameraController : MonoBehaviour
 
             virtualCam.Follow = targetGroup.transform;
 
-            Debug.Log("[Camera] ¿ÉÀú¹ö ¸ğµå ÇØÁ¦");
+            Debug.Log("[Camera] ì˜µì €ë²„ ëª¨ë“œ í•´ì œ");
         }
     }
 
@@ -96,17 +96,17 @@ public class CameraController : MonoBehaviour
 
         player = _player;
 
-        //  ÇÃ·¹ÀÌ¾î¸¦ ±×·ì ¸â¹ö 0¹øÀ¸·Î Ãß°¡ (°¡ÁßÄ¡ 1.0)
+        //  í”Œë ˆì´ì–´ë¥¼ ê·¸ë£¹ ë©¤ë²„ 0ë²ˆìœ¼ë¡œ ì¶”ê°€ (ê°€ì¤‘ì¹˜ 1.0)
         targetGroup.AddMember(_player.transform, 1f, 0f);
 
-        // ¿¡ÀÓ Å¸°ÙÀ» ±×·ì ¸â¹ö 1¹øÀ¸·Î Ãß°¡ (°¡ÁßÄ¡ 0.3 ~ 0.5)
-        // ÀÌ °¡ÁßÄ¡°¡ ³ôÀ»¼ö·Ï Ä«¸Ş¶ó°¡ ¸¶¿ì½º ÂÊÀ¸·Î ´õ ¸¹ÀÌ ½ò¸²
+        // ì—ì„ íƒ€ê²Ÿì„ ê·¸ë£¹ ë©¤ë²„ 1ë²ˆìœ¼ë¡œ ì¶”ê°€ (ê°€ì¤‘ì¹˜ 0.3 ~ 0.5)
+        // ì´ ê°€ì¤‘ì¹˜ê°€ ë†’ì„ìˆ˜ë¡ ì¹´ë©”ë¼ê°€ ë§ˆìš°ìŠ¤ ìª½ìœ¼ë¡œ ë” ë§ì´ ì ë¦¼
         targetGroup.AddMember(mouseAimTarget, 0.3f, 0f);
 
-        // Ä«¸Ş¶ó°¡ ±×·ì ÀüÃ¼¸¦ ÃßÀûÇÏ°Ô ¼³Á¤
+        // ì¹´ë©”ë¼ê°€ ê·¸ë£¹ ì „ì²´ë¥¼ ì¶”ì í•˜ê²Œ ì„¤ì •
         virtualCam.Follow = targetGroup.transform;
 
-        Debug.Log($"[Camera] {_player.photonView.Owner.NickName}¸¦ Ä«¸Ş¶ó Å¸°ÙÀ¸·Î ¼³Á¤ ¿Ï·á!");
+        Debug.Log($"[Camera] {_player.photonView.Owner.NickName}ë¥¼ ì¹´ë©”ë¼ íƒ€ê²Ÿìœ¼ë¡œ ì„¤ì • ì™„ë£Œ!");
     }
 
 }

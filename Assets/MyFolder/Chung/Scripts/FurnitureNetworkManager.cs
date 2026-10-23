@@ -1,4 +1,4 @@
-using ExitGames.Client.Photon;
+ï»¿using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
 using System.Linq;
@@ -6,8 +6,8 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
-/// ¾ÀÀÇ ¸ğµç Furniture¸¦ ´ÜÀÏ PhotonView·Î °ü¸®.
-/// RPC: ÇÇ°İ/ÆÄ±« µ¿±âÈ­ | RoomProperties: ´ÊÂü µ¿±âÈ­
+/// ì”¬ì˜ ëª¨ë“  Furnitureë¥¼ ë‹¨ì¼ PhotonViewë¡œ ê´€ë¦¬.
+/// RPC: í”¼ê²©/íŒŒê´´ ë™ê¸°í™” | RoomProperties: ëŠ¦ì°¸ ë™ê¸°í™”
 /// </summary>
 public class FurnitureNetworkManager : MonoBehaviourPunCallbacks
 {
@@ -18,12 +18,12 @@ public class FurnitureNetworkManager : MonoBehaviourPunCallbacks
     private Furniture[] _furnitures;
     private byte[] _stateBytes;
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void Awake()
     {
         Instance = this;
 
-        // À§Ä¡ ±âÁØ ¿À¸§Â÷¼ø Á¤·Ä ¡æ ¸ğµç Å¬¶óÀÌ¾ğÆ®¿¡¼­ µ¿ÀÏÇÑ ÀÎµ¦½º º¸Àå
+        // ìœ„ì¹˜ ê¸°ì¤€ ì˜¤ë¦„ì°¨ìˆœ ì •ë ¬ â†’ ëª¨ë“  í´ë¼ì´ì–¸íŠ¸ì—ì„œ ë™ì¼í•œ ì¸ë±ìŠ¤ ë³´ì¥
         _furnitures = FindObjectsOfType<Furniture>()
             .OrderBy(f => f.transform.position.x * 10000f + f.transform.position.z)
             .ToArray();
@@ -34,27 +34,27 @@ public class FurnitureNetworkManager : MonoBehaviourPunCallbacks
         for (int i = 0; i < _furnitures.Length; i++)
             _furnitures[i].SetIndex(i);
 
-        Debug.Log($"[FurnitureNetworkManager] °¡±¸ {_furnitures.Length}°³ µî·Ï ({byteCount} bytes)");
+        Debug.Log($"[FurnitureNetworkManager] ê°€êµ¬ {_furnitures.Length}ê°œ ë“±ë¡ ({byteCount} bytes)");
     }
 
     private void Start()
     {
-        // ´ÊÂü µ¿±âÈ­: ¹æ¿¡ ÀÌ¹Ì ÀÖ´ø ÆÄ±« »óÅÂ º¹¿ø
+        // ëŠ¦ì°¸ ë™ê¸°í™”: ë°©ì— ì´ë¯¸ ìˆë˜ íŒŒê´´ ìƒíƒœ ë³µì›
         if (PhotonNetwork.InRoom &&
             PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(STATE_KEY, out object val))
         {
             ApplyState((byte[])val);
-            Debug.Log("[FurnitureNetworkManager] ´ÊÂü µ¿±âÈ­ ¿Ï·á");
+            Debug.Log("[FurnitureNetworkManager] ëŠ¦ì°¸ ë™ê¸°í™” ì™„ë£Œ");
         }
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-    // ÇÇ°İ ¡æ ¸Å´ÏÀú PhotonView·Î ´ÜÀÏ RPC Àü¼Û
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // í”¼ê²© â†’ ë§¤ë‹ˆì € PhotonViewë¡œ ë‹¨ì¼ RPC ì „ì†¡
     public void ReportHit(int index, float damage, Vector3 hitNormal)
     {
         if (!PhotonNetwork.IsConnected)
         {
-            // ¿ÀÇÁ¶óÀÎ Å×½ºÆ®¿ë
+            // ì˜¤í”„ë¼ì¸ í…ŒìŠ¤íŠ¸ìš©
             _furnitures[index].LocalApplyDamage(damage, hitNormal);
             return;
         }
@@ -68,8 +68,8 @@ public class FurnitureNetworkManager : MonoBehaviourPunCallbacks
         _furnitures[index].LocalApplyDamage(damage, hitNormal);
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-    // ÆÄ±« È®Á¤ ¡æ MasterClient°¡ RoomProperties ¾÷µ¥ÀÌÆ®
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // íŒŒê´´ í™•ì • â†’ MasterClientê°€ RoomProperties ì—…ë°ì´íŠ¸
     public void ReportDestroyed(int index)
     {
         if (!PhotonNetwork.IsMasterClient) return;
@@ -79,7 +79,7 @@ public class FurnitureNetworkManager : MonoBehaviourPunCallbacks
             new Hashtable { { STATE_KEY, (byte[])_stateBytes.Clone() } });
     }
 
-    // ·ë ÇÁ·ÎÆÛÆ¼ º¯°æ Äİ¹é (MasterClient Æ÷ÇÔ ¸ğµç Å¬¶óÀÌ¾ğÆ®)
+    // ë£¸ í”„ë¡œí¼í‹° ë³€ê²½ ì½œë°± (MasterClient í¬í•¨ ëª¨ë“  í´ë¼ì´ì–¸íŠ¸)
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
         if (!propertiesThatChanged.ContainsKey(STATE_KEY)) return;

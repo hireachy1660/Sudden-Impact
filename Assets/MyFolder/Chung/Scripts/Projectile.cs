@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using Photon.Pun;
 
 public class Projectile : MonoBehaviourPun, IPunInstantiateMagicCallback
@@ -35,7 +35,7 @@ public class Projectile : MonoBehaviourPun, IPunInstantiateMagicCallback
 
     private void FixedUpdate()
     {
-        // Áßº¹ È£Ãâ ¹æÁö
+        // ì¤‘ë³µ í˜¸ì¶œ ë°©ì§€
         if (hasHit) return;
 
         if (Physics.SphereCast(transform.position,0.2f, transform.forward, out RaycastHit hit, speed*Time.fixedDeltaTime, hitMask))
@@ -51,17 +51,17 @@ public class Projectile : MonoBehaviourPun, IPunInstantiateMagicCallback
 
     private void HandleHit(RaycastHit hitInfo)
     {
-        // ¸Â¾Ò´ÂÁöÀÇ °Ë»ç´Â °ø°İÀ» ÇÑ Å¬¶óÀÌ¾ğÆ®¿¡¼­ ½ÇÇà
+        // ë§ì•˜ëŠ”ì§€ì˜ ê²€ì‚¬ëŠ” ê³µê²©ì„ í•œ í´ë¼ì´ì–¸íŠ¸ì—ì„œ ì‹¤í–‰
         if (!photonView.IsMine) return;
 
 
-        // ÀÌ ´ë»óÀÌ ³»°¡ ºÎµúÇô¾ß ÇÒ ´ë»ó(¸®½Ã¹ö or Àå¾Ö¹°)ÀÎÁö È®ÀÎ
+        // ì´ ëŒ€ìƒì´ ë‚´ê°€ ë¶€ë”ªí˜€ì•¼ í•  ëŒ€ìƒ(ë¦¬ì‹œë²„ or ì¥ì• ë¬¼)ì¸ì§€ í™•ì¸
         bool isReceiver = hitInfo.transform.TryGetComponent<IAttackReceiver>(out var receiver);
 
         HitEffectManager.Instance.SpawnEffect(hitInfo.point, hitInfo.normal);
 
 
-        // µ¥¹ÌÁö Ã³¸®´Â ¸®½Ã¹öÀÎ °æ¿ì¿¡¸¸ ¼öÇà
+        // ë°ë¯¸ì§€ ì²˜ë¦¬ëŠ” ë¦¬ì‹œë²„ì¸ ê²½ìš°ì—ë§Œ ìˆ˜í–‰
         if (isReceiver)
         {
             ImpactData data = new ImpactData
@@ -76,7 +76,7 @@ public class Projectile : MonoBehaviourPun, IPunInstantiateMagicCallback
             receiver.OnReceiveImpact(data);
         }
 
-        // ÃÖÁ¾ÀûÀ¸·Î ÃÑ¾Ë ÆÄ±« (º®ÀÌµç »ç¶÷ÀÌµç ¹«Á¶°Ç ºÎ¼­Áü)
+        // ìµœì¢…ì ìœ¼ë¡œ ì´ì•Œ íŒŒê´´ (ë²½ì´ë“  ì‚¬ëŒì´ë“  ë¬´ì¡°ê±´ ë¶€ì„œì§)
         PhotonNetwork.Destroy(gameObject);
     }
 
@@ -84,10 +84,10 @@ public class Projectile : MonoBehaviourPun, IPunInstantiateMagicCallback
     {
         object[] data = info.photonView.InstantiationData;
 
-        // µ¥ÀÌÅÍ°¡ Á¦´ë·Î µé¾î¿Ô´ÂÁö ¹æ¾î ÄÚµå
+        // ë°ì´í„°ê°€ ì œëŒ€ë¡œ ë“¤ì–´ì™”ëŠ”ì§€ ë°©ì–´ ì½”ë“œ
         if (data != null && data.Length >= 3)
         {
-            // object·Î ³Ñ¾î¿À¹Ç·Î ¿ø·¡ Å¸ÀÔÀ¸·Î Ä³½ºÆÃ(Unboxing)
+            // objectë¡œ ë„˜ì–´ì˜¤ë¯€ë¡œ ì›ë˜ íƒ€ì…ìœ¼ë¡œ ìºìŠ¤íŒ…(Unboxing)
             attackActorNum = (int)data[0];
             team = (int)data[1];
             damage = (float)data[2];
@@ -95,7 +95,7 @@ public class Projectile : MonoBehaviourPun, IPunInstantiateMagicCallback
         }
     }
 
-    // ¸ğµç »ç¶÷ÀÇ È­¸é¿¡¼­ ÀÌÆåÆ®¸¦ ¶ç¿ì±â À§ÇÑ RPC
+    // ëª¨ë“  ì‚¬ëŒì˜ í™”ë©´ì—ì„œ ì´í™íŠ¸ë¥¼ ë„ìš°ê¸° ìœ„í•œ RPC
     [PunRPC]
     public void RPC_PlayHitEffect(Vector3 pos, Vector3 normal)
     {

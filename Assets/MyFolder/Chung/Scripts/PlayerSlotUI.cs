@@ -1,15 +1,15 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// [±â´É 4] »ó´Ü ÆÀ »ıÁ¸ UIÀÇ °³º° ÇÃ·¹ÀÌ¾î ½½·Ô.
+/// [ê¸°ëŠ¥ 4] ìƒë‹¨ íŒ€ ìƒì¡´ UIì˜ ê°œë³„ í”Œë ˆì´ì–´ ìŠ¬ë¡¯.
 ///
-/// ¾À ¼³Á¤ (Horizontal Layout Group ÀÚ½Ä ¿ÀºêÁ§Æ®):
-///   - nameText     : ÇÃ·¹ÀÌ¾î ÀÌ¸§À» Ç¥½ÃÇÏ´Â TextMeshProUGUI
-///   - portraitImage: Ä³¸¯ÅÍ ÃÊ»óÈ­ Image (Èæ¹é Ã³¸® ´ë»ó)
-///   - teamBadge    : ÆÀ »ö»óÀ» Ç¥½ÃÇÏ´Â Image (¼±ÅÃ»çÇ×)
-///   - deadOverlay  : »ç¸Á Ç¥½Ã¿ë ¹İÅõ¸í ¿À¹ö·¹ÀÌ Image (¼±ÅÃ»çÇ×)
+/// ì”¬ ì„¤ì • (Horizontal Layout Group ìì‹ ì˜¤ë¸Œì íŠ¸):
+///   - nameText     : í”Œë ˆì´ì–´ ì´ë¦„ì„ í‘œì‹œí•˜ëŠ” TextMeshProUGUI
+///   - portraitImage: ìºë¦­í„° ì´ˆìƒí™” Image (í‘ë°± ì²˜ë¦¬ ëŒ€ìƒ)
+///   - teamBadge    : íŒ€ ìƒ‰ìƒì„ í‘œì‹œí•˜ëŠ” Image (ì„ íƒì‚¬í•­)
+///   - deadOverlay  : ì‚¬ë§ í‘œì‹œìš© ë°˜íˆ¬ëª… ì˜¤ë²„ë ˆì´ Image (ì„ íƒì‚¬í•­)
 /// </summary>
 public class PlayerSlotUI : MonoBehaviour
 {
@@ -17,21 +17,21 @@ public class PlayerSlotUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI nameText;
     [SerializeField] private Image portraitImage;
     [SerializeField] private Image teamBadge;
-    [SerializeField] private GameObject deadOverlay;    // »ç¸Á X Ç¥½Ã µî
+    [SerializeField] private GameObject deadOverlay;    // ì‚¬ë§ X í‘œì‹œ ë“±
 
     [Header("Team Colors")]
-    [SerializeField] private Color teamAColor = new Color(0.2f, 0.5f, 1f);   // ÆÄ¶û
-    [SerializeField] private Color teamBColor = new Color(1f, 0.3f, 0.3f);   // »¡°­
+    [SerializeField] private Color teamAColor = new Color(0.2f, 0.5f, 1f);   // íŒŒë‘
+    [SerializeField] private Color teamBColor = new Color(1f, 0.3f, 0.3f);   // ë¹¨ê°•
 
     [Header("Dead State")]
     [SerializeField] private Color deadTint = new Color(0.25f, 0.25f, 0.25f, 1f);
 
     public int ActorNumber { get; private set; }
 
-    // ¦¡¦¡¦¡ ÃÊ±âÈ­ ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€ ì´ˆê¸°í™” â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /// <summary>
-    /// UIManager°¡ GameEvents.OnPlayerUIInit ¼ö½Å ½Ã È£ÃâÇÕ´Ï´Ù.
+    /// UIManagerê°€ GameEvents.OnPlayerUIInit ìˆ˜ì‹  ì‹œ í˜¸ì¶œí•©ë‹ˆë‹¤.
     /// </summary>
     public void Init(int actorNumber, string playerName, int team)
     {
@@ -40,11 +40,11 @@ public class PlayerSlotUI : MonoBehaviour
         if (nameText != null)
             nameText.text = playerName;
 
-        // ÆÀ ¹èÁö »ö»ó ¼³Á¤
+        // íŒ€ ë°°ì§€ ìƒ‰ìƒ ì„¤ì •
         if (teamBadge != null)
             teamBadge.color = (team == 0) ? teamAColor : teamBColor;
 
-        // ÃÊ»óÈ­ ¿ø·¡ »öÀ¸·Î º¹¿ø (¶ó¿îµå Àç½ÃÀÛ ´ëºñ)
+        // ì´ˆìƒí™” ì›ë˜ ìƒ‰ìœ¼ë¡œ ë³µì› (ë¼ìš´ë“œ ì¬ì‹œì‘ ëŒ€ë¹„)
         if (portraitImage != null)
             portraitImage.color = Color.white;
 
@@ -54,22 +54,22 @@ public class PlayerSlotUI : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    // ¦¡¦¡¦¡ »ç¸Á Ã³¸® ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€ ì‚¬ë§ ì²˜ë¦¬ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /// <summary>
-    /// UIManager°¡ GameEvents.OnPlayerUIDead ¼ö½Å ½Ã È£ÃâÇÕ´Ï´Ù.
-    /// ½½·ÔÀ» ºñÈ°¼ºÈ­ÇÏÁö ¾Ê°í Èæ¹é/¾îµÓ°Ô Ã³¸®ÇØ »ç¸ÁÀ» ½Ã°¢È­ÇÕ´Ï´Ù.
+    /// UIManagerê°€ GameEvents.OnPlayerUIDead ìˆ˜ì‹  ì‹œ í˜¸ì¶œí•©ë‹ˆë‹¤.
+    /// ìŠ¬ë¡¯ì„ ë¹„í™œì„±í™”í•˜ì§€ ì•Šê³  í‘ë°±/ì–´ë‘¡ê²Œ ì²˜ë¦¬í•´ ì‚¬ë§ì„ ì‹œê°í™”í•©ë‹ˆë‹¤.
     /// </summary>
     public void SetDead()
     {
-        // ÃÊ»óÈ­¸¦ ¾îµÎ¿î ´Ü»öÀ¸·Î µ¤¾î Èæ¹é ´À³¦ ¿¬Ãâ
+        // ì´ˆìƒí™”ë¥¼ ì–´ë‘ìš´ ë‹¨ìƒ‰ìœ¼ë¡œ ë®ì–´ í‘ë°± ëŠë‚Œ ì—°ì¶œ
         if (portraitImage != null)
             portraitImage.color = deadTint;
 
         if (nameText != null)
             nameText.color = deadTint;
 
-        // ¼±ÅÃ»çÇ×: º°µµ ¿À¹ö·¹ÀÌ(¿¹: X ¾ÆÀÌÄÜ) È°¼ºÈ­
+        // ì„ íƒì‚¬í•­: ë³„ë„ ì˜¤ë²„ë ˆì´(ì˜ˆ: X ì•„ì´ì½˜) í™œì„±í™”
         if (deadOverlay != null)
             deadOverlay.SetActive(true);
     }

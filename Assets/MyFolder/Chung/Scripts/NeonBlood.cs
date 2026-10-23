@@ -1,33 +1,33 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections;
 
 public class NeonBlood : MonoBehaviour
 {
     [Header("BloodReference")]
     [SerializeField] private SpriteRenderer sr;
-    [SerializeField] private Sprite[] bloodSprites; // 3~4Á¾ Ç÷Èç ½ºÇÁ¶óÀÌÆ®
+    [SerializeField] private Sprite[] bloodSprites; // 3~4ì¢… í˜ˆí” ìŠ¤í”„ë¼ì´íŠ¸
 
     [Header("Parameter")]
     [SerializeField, Range(0f, 1f)] private float minScale = 0.1f;
     [SerializeField, Range(0f, 1f)] private float maxScale = 0.5f;
 
-    // HDRÀ» Áö¿øÇÏ´Â ÄÃ·¯ ¹è¿­ (ÀÎ½ºÆåÅÍ¿¡¼­ Çü±¤ ÇÎÅ©, Å©¸²½¼ ³×¿Â »ö»ó ¼¼ÆÃ)
+    // HDRì„ ì§€ì›í•˜ëŠ” ì»¬ëŸ¬ ë°°ì—´ (ì¸ìŠ¤í™í„°ì—ì„œ í˜•ê´‘ í•‘í¬, í¬ë¦¼ìŠ¨ ë„¤ì˜¨ ìƒ‰ìƒ ì„¸íŒ…)
     [ColorUsage(true, true)]
     [SerializeField] private Color[] neonColors;
 
     private void OnEnable()
     {
-        // ¶ó¿îµå Á¾·á ÀÌº¥Æ® ±¸µ¶ (¾Ë¾Æ¼­ Ã»¼Ò µÊ)
+        // ë¼ìš´ë“œ ì¢…ë£Œ ì´ë²¤íŠ¸ êµ¬ë… (ì•Œì•„ì„œ ì²­ì†Œ ë¨)
         GameEvents.OnRoundStart += ReturnToPool;
 
-        // ·£´ı ½ºÇÁ¶óÀÌÆ® ¹× ³×¿Â »ö»ó Àû¿ë
+        // ëœë¤ ìŠ¤í”„ë¼ì´íŠ¸ ë° ë„¤ì˜¨ ìƒ‰ìƒ ì ìš©
         if (bloodSprites.Length > 0) sr.sprite = bloodSprites[Random.Range(0, bloodSprites.Length)];
         if (neonColors.Length > 0) sr.color = neonColors[Random.Range(0, neonColors.Length)];
 
-        // ·£´ı È¸Àü (¹Ù´Ú¿¡ ´©¿î »óÅÂ¿¡¼­ YÃà(¶Ç´Â 2D¸é ZÃà) ·£´ı È¸Àü)
+        // ëœë¤ íšŒì „ (ë°”ë‹¥ì— ëˆ„ìš´ ìƒíƒœì—ì„œ Yì¶•(ë˜ëŠ” 2Dë©´ Zì¶•) ëœë¤ íšŒì „)
         transform.localRotation = Quaternion.Euler(90f, Random.Range(0f, 360f), 0f);
 
-        // ½ºÇÃ·¡ÅÍ ¾Ö´Ï¸ŞÀÌ¼Ç ½ÇÇà (ÇÇ°¡ È® ÆÛÁö´Â ¿¬Ãâ)
+        // ìŠ¤í”Œë˜í„° ì• ë‹ˆë©”ì´ì…˜ ì‹¤í–‰ (í”¼ê°€ í™• í¼ì§€ëŠ” ì—°ì¶œ)
         StartCoroutine(SplatterAnimation());
     }
 
@@ -38,25 +38,25 @@ public class NeonBlood : MonoBehaviour
 
     private IEnumerator SplatterAnimation()
     {
-        // ½ºÄÉÀÏ: 0.3 ~ 0.8
+        // ìŠ¤ì¼€ì¼: 0.3 ~ 0.8
         float targetScale = Random.Range(0.3f, 0.8f);
         float time = 0f;
-        float duration = 0.1f; // 0.1ÃÊ ¸¸¿¡ ÆÛÁü 
+        float duration = 0.1f; // 0.1ì´ˆ ë§Œì— í¼ì§ 
 
-        Vector3 startScale = Vector3.one * 0.05f; // ¾ÆÁÖ ÀÛÀº Á¡¿¡¼­ ½ÃÀÛ
+        Vector3 startScale = Vector3.one * 0.05f; // ì•„ì£¼ ì‘ì€ ì ì—ì„œ ì‹œì‘
         Vector3 endScale = Vector3.one * targetScale;
 
         while (time < duration)
         {
             time += Time.deltaTime;
-            // Lerp¸¦ ÅëÇØ ºÎµå·´°í ºü¸£°Ô Å©±â ÆØÃ¢
+            // Lerpë¥¼ í†µí•´ ë¶€ë“œëŸ½ê³  ë¹ ë¥´ê²Œ í¬ê¸° íŒ½ì°½
             transform.localScale = Vector3.Lerp(startScale, endScale, time / duration);
             yield return null;
         }
         transform.localScale = endScale;
     }
 
-    // ¶ó¿îµå Á¾·á ½Ã ¾Ë¾Æ¼­ ºñÈ°¼ºÈ­ (¿ÀºêÁ§Æ® Ç®¸µ¿ë)
+    // ë¼ìš´ë“œ ì¢…ë£Œ ì‹œ ì•Œì•„ì„œ ë¹„í™œì„±í™” (ì˜¤ë¸Œì íŠ¸ í’€ë§ìš©)
     private void ReturnToPool()
     {
         Destroy(gameObject);

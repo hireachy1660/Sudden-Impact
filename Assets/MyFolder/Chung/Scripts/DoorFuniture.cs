@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using Photon.Pun;
 using System.Collections;
 
@@ -8,22 +8,22 @@ public class Door : Furniture, IInteractable
     [SerializeField] private Transform doorPivot;
     [SerializeField] private Transform spawnPivot;
     [SerializeField] private float openAngle = 90f;
-    [SerializeField] private float openSpeed = 5f; // ¹® ¿­¸®´Â ¼Óµµ
+    [SerializeField] private float openSpeed = 5f; // ë¬¸ ì—´ë¦¬ëŠ” ì†ë„
 
     [Header("Crumble Effect")]
     [SerializeField] private Transform originDoor;
     [SerializeField] private GameObject fracturedPrefab;
 
-    // Furniture´Â MonoBehaviour·Î ¹Ù²î¾úÀ¸¹Ç·Î PhotonView¸¦ Á÷Á¢ Ä³½Ì
+    // FurnitureëŠ” MonoBehaviourë¡œ ë°”ë€Œì—ˆìœ¼ë¯€ë¡œ PhotonViewë¥¼ ì§ì ‘ ìºì‹±
     private PhotonView _pv;
 
     public AudioClip doorSound;
     private bool isOpen = false;
-    private Coroutine doorCoroutine; // Áßº¹ ½ÇÇà ¹æÁö¿ë
+    private Coroutine doorCoroutine; // ì¤‘ë³µ ì‹¤í–‰ ë°©ì§€ìš©
 
-    // [CH ¼öÁ¤] Furniture°¡ MonoBehaviourPun ¡æ MonoBehaviour·Î ¹Ù²î¸é¼­
-    // photonView ÇÁ·ÎÆÛÆ¼°¡ »ç¶óÁü ¡æ GetComponent·Î Á÷Á¢ Ä³½Ì
-    // ±âÁ¸: photonView.RPC(...) ¡æ _pv.RPC(...)
+    // [CH ìˆ˜ì •] Furnitureê°€ MonoBehaviourPun â†’ MonoBehaviourë¡œ ë°”ë€Œë©´ì„œ
+    // photonView í”„ë¡œí¼í‹°ê°€ ì‚¬ë¼ì§ â†’ GetComponentë¡œ ì§ì ‘ ìºì‹±
+    // ê¸°ì¡´: photonView.RPC(...) â†’ _pv.RPC(...)
 
     
     protected override void Awake()
@@ -43,7 +43,7 @@ public class Door : Furniture, IInteractable
         if (isDestroyed) return;
 
         isOpen = !isOpen;
-        // ±âÁ¸¿¡ ¿òÁ÷ÀÌ°í ÀÖ¾ú´Ù¸é ¸ØÃß°í »õ·Î ½ÃÀÛ
+        // ê¸°ì¡´ì— ì›€ì§ì´ê³  ìˆì—ˆë‹¤ë©´ ë©ˆì¶”ê³  ìƒˆë¡œ ì‹œì‘
         if (doorCoroutine != null) return;
        
         float targetAngle = 0f;
@@ -86,7 +86,7 @@ public class Door : Furniture, IInteractable
             GameObject fractured = Instantiate(fracturedPrefab, originDoor.position, originDoor.rotation, transform.parent);
             fractured.transform.localScale = transform.localScale;
 
-            // ¹«³Ê¶ß¸®±â ½ºÅ©¸³Æ® ½ÇÇà (¾ÈÀüÀåÄ¡ Æ÷ÇÔ)
+            // ë¬´ë„ˆëœ¨ë¦¬ê¸° ìŠ¤í¬ë¦½íŠ¸ ì‹¤í–‰ (ì•ˆì „ì¥ì¹˜ í¬í•¨)
             Crumble crumble = fractured.GetComponent<Crumble>();
             if (crumble != null)
             {
@@ -94,11 +94,11 @@ public class Door : Furniture, IInteractable
             }
             else
             {
-                Debug.LogError($"[Àå¾Ö¹° ÆÄ±«] {fracturedPrefab.name}¿¡ CrumbleTutorialScript°¡ ¾ø½À´Ï´Ù!");
+                Debug.LogError($"[ì¥ì• ë¬¼ íŒŒê´´] {fracturedPrefab.name}ì— CrumbleTutorialScriptê°€ ì—†ìŠµë‹ˆë‹¤!");
             }
         }
         base.OnBroken();
-        // ÆÄ±« ÆÄÆ¼Å¬ (BoxCollider ±âÁØ Å©±â + ¸ÓÆ¼¸®¾ó »ö»ó)
+        // íŒŒê´´ íŒŒí‹°í´ (BoxCollider ê¸°ì¤€ í¬ê¸° + ë¨¸í‹°ë¦¬ì–¼ ìƒ‰ìƒ)
         //    if (FurnitureBreakEffectManager.Instance != null)
         //    {
         //        var col = GetComponentInChildren<BoxCollider>();

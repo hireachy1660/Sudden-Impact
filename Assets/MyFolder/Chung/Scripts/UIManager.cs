@@ -1,9 +1,9 @@
-using TMPro;
+ï»¿using TMPro;
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 /// <summary>
-/// ÀüÃ¼ HUD °ü¸® ¸Å´ÏÀú.
+/// ì „ì²´ HUD ê´€ë¦¬ ë§¤ë‹ˆì €.
 /// </summary>
 public class UIManager : MonoBehaviour
 {
@@ -15,38 +15,38 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private GameObject ammoPanel;
 
-    // ÆÀ »ıÁ¸ ½½·Ô UI 
+    // íŒ€ ìƒì¡´ ìŠ¬ë¡¯ UI 
     [Header("Team Status UI")]
-    [Tooltip("È­¸é ÁÂÃø ÃÖ»ó´Ü¿¡ ¹èÄ¡µÈ AÆÀ ½½·Ôµé (4°³)")]
+    [Tooltip("í™”ë©´ ì¢Œì¸¡ ìµœìƒë‹¨ì— ë°°ì¹˜ëœ AíŒ€ ìŠ¬ë¡¯ë“¤ (4ê°œ)")]
     [SerializeField] private PlayerSlotUI[] teamASlots;
 
-    [Tooltip("È­¸é ¿ìÃø ÃÖ»ó´Ü¿¡ ¹èÄ¡µÈ BÆÀ ½½·Ôµé (4°³)")]
+    [Tooltip("í™”ë©´ ìš°ì¸¡ ìµœìƒë‹¨ì— ë°°ì¹˜ëœ BíŒ€ ìŠ¬ë¡¯ë“¤ (4ê°œ)")]
     [SerializeField] private PlayerSlotUI[] teamBSlots;
 
-    // Å³ ·Î±× UI
+    // í‚¬ ë¡œê·¸ UI
     [Header("Kill Log UI")]
-    [Tooltip("Vertical Layout Group ºÎ¸ğ Transform")]
+    [Tooltip("Vertical Layout Group ë¶€ëª¨ Transform")]
     [SerializeField] private Transform killLogParent;
 
-    [Tooltip("KillLogEntry ÄÄÆ÷³ÍÆ®°¡ ºÙÀº UI ÅØ½ºÆ® ÇÁ¸®ÆÕ")]
+    [Tooltip("KillLogEntry ì»´í¬ë„ŒíŠ¸ê°€ ë¶™ì€ UI í…ìŠ¤íŠ¸ í”„ë¦¬íŒ¹")]
     [SerializeField] private KillLogEntry killLogEntryPrefab;
 
     [Header("Crosshair Settings")]
-    [SerializeField] private float baseSize = 60f;        // ±âº» ¿¡ÀÓ Å©±â (ÇÈ¼¿)
-    [SerializeField] private float spreadSensitivity = 5f; // 1µµ´ç ¹ú¾îÁú ÇÈ¼¿ °Å¸® (Áß¿ä!)
+    [SerializeField] private float baseSize = 60f;        // ê¸°ë³¸ ì—ì„ í¬ê¸° (í”½ì…€)
+    [SerializeField] private float spreadSensitivity = 5f; // 1ë„ë‹¹ ë²Œì–´ì§ˆ í”½ì…€ ê±°ë¦¬ (ì¤‘ìš”!)
     [SerializeField] private RectTransform crosshairUI;
-    [SerializeField] private Transform targetTransform; // InputManagerÀÇ mouseAimTarget
+    [SerializeField] private Transform targetTransform; // InputManagerì˜ mouseAimTarget
 
     [Header("Result UI")]
-    [SerializeField] private GameObject resultPanel; // ½Â¸®/ÆĞ¹è ÆĞ³Î
+    [SerializeField] private GameObject resultPanel; // ìŠ¹ë¦¬/íŒ¨ë°° íŒ¨ë„
     [SerializeField] private TextMeshProUGUI resultText;
 
     [Header("Pickup UI")]
-    [SerializeField] private RectTransform pickupUIRect; // ÇÈ¾÷ ÅØ½ºÆ®ÀÇ ºÎ¸ğ RectTransform
+    [SerializeField] private RectTransform pickupUIRect; // í”½ì—… í…ìŠ¤íŠ¸ì˜ ë¶€ëª¨ RectTransform
     [SerializeField] private TextMeshProUGUI pickupUIText;
 
     [Header("Pause UI")]
-    [SerializeField] private GameObject menuPanel; // ESC ¸Ş´º ÆĞ³Î ¿¬°á
+    [SerializeField] private GameObject menuPanel; // ESC ë©”ë‰´ íŒ¨ë„ ì—°ê²°
     [SerializeField] private CRTController crtController;
     private bool usingCRT = true;
 
@@ -56,25 +56,25 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI roundWinner;
     [SerializeField] private TextMeshProUGUI roundLeftTime;
 
-    //  ÇÃ·¹ÀÌ¾î ¹ß¹Ø ÃßÀû UI (Screen Space, WorldToScreenPoint·Î À§Ä¡ ÀÌµ¿)
-    [Header("Player Status UI (¹ß¹Ø ÃßÀû)")]
-    [Tooltip("PlayerRegistry ScriptableObject - registry.LocalPlayer.transformÀ¸·Î À§Ä¡ ÃßÀû")]
+    //  í”Œë ˆì´ì–´ ë°œë°‘ ì¶”ì  UI (Screen Space, WorldToScreenPointë¡œ ìœ„ì¹˜ ì´ë™)
+    [Header("Player Status UI (ë°œë°‘ ì¶”ì )")]
+    [Tooltip("PlayerRegistry ScriptableObject - registry.LocalPlayer.transformìœ¼ë¡œ ìœ„ì¹˜ ì¶”ì ")]
     [SerializeField] private PlayerRegistry registry;
-    [Tooltip("HP¸µ/±¸¸£±â¸µ/¹«±âÅØ½ºÆ®¸¦ ¹­Àº ºÎ¸ğ RectTransform")]
+    [Tooltip("HPë§/êµ¬ë¥´ê¸°ë§/ë¬´ê¸°í…ìŠ¤íŠ¸ë¥¼ ë¬¶ì€ ë¶€ëª¨ RectTransform")]
     [SerializeField] private RectTransform playerStatusPanel;
-    [Tooltip("Ã¼·Â ¿øÇü ¸µ Image (Filled, Radial 360)")]
+    [Tooltip("ì²´ë ¥ ì›í˜• ë§ Image (Filled, Radial 360)")]
     [SerializeField] private Image hpRingImage;
     [SerializeField] private Color hpFullColor = Color.green;
     [SerializeField] private Color hpLowColor = Color.red;
     [SerializeField][Range(0f, 1f)] private float lowHpThreshold = 0.3f;
-    [Tooltip("±¸¸£±â Äğ´Ù¿î ¿øÇü ¸µ Image (Filled, Radial 360)")]
+    [Tooltip("êµ¬ë¥´ê¸° ì¿¨ë‹¤ìš´ ì›í˜• ë§ Image (Filled, Radial 360)")]
     [SerializeField] private Image rollRingImage;
     [SerializeField] private Color rollReadyColor = Color.cyan;
     [SerializeField] private Color rollCooldownColor = Color.gray;
 
-    // [CH Ãß°¡] ¶ó¿îµå ½ÃÀÛ Àü ÀüÃ¼ È­¸éÀ» °¡¸®´Â Ä¿¹ö ÆĞ³Î
-    // ÀÎ½ºÆåÅÍ¿¡¼­ Canvas °¡Àå ¾Æ·¡(ÃÖ»óÀ§ ·»´õ) ÀüÃ¼ »çÀÌÁî PanelÀ» ¿¬°á
-    // ±âº»°ª: È°¼º(SetActive true), ¶ó¿îµå ½ÃÀÛ ½Ã SetActive(false)·Î Á¦°Å
+    // [CH ì¶”ê°€] ë¼ìš´ë“œ ì‹œì‘ ì „ ì „ì²´ í™”ë©´ì„ ê°€ë¦¬ëŠ” ì»¤ë²„ íŒ¨ë„
+    // ì¸ìŠ¤í™í„°ì—ì„œ Canvas ê°€ì¥ ì•„ë˜(ìµœìƒìœ„ ë Œë”) ì „ì²´ ì‚¬ì´ì¦ˆ Panelì„ ì—°ê²°
+    // ê¸°ë³¸ê°’: í™œì„±(SetActive true), ë¼ìš´ë“œ ì‹œì‘ ì‹œ SetActive(false)ë¡œ ì œê±°
     [Header("Initial Cover")]
     [SerializeField] private GameObject initialCoverPanel;
 
@@ -82,19 +82,19 @@ public class UIManager : MonoBehaviour
 
     private Camera mainCam;
     private Coroutine crosshairCoroutine;
-    private float currentSpread = 1f;   // UI°¡ ÇöÀç º¸¿©ÁÖ´Â ºÎµå·¯¿î °ª
-    private float lastRecRate = 15f;    // °¡Àå ÃÖ±Ù ÃÑ±â¿¡¼­ ¹ŞÀº È¸º¹ ¼Óµµ
-    private float lastBaseSpread = 1f;  // °¡Àå ÃÖ±Ù ÃÑ±â¿¡¼­ ¹ŞÀº ±âº» Å©±â
+    private float currentSpread = 1f;   // UIê°€ í˜„ì¬ ë³´ì—¬ì£¼ëŠ” ë¶€ë“œëŸ¬ìš´ ê°’
+    private float lastRecRate = 15f;    // ê°€ì¥ ìµœê·¼ ì´ê¸°ì—ì„œ ë°›ì€ íšŒë³µ ì†ë„
+    private float lastBaseSpread = 1f;  // ê°€ì¥ ìµœê·¼ ì´ê¸°ì—ì„œ ë°›ì€ ê¸°ë³¸ í¬ê¸°
 
     private Vector3 targetPickupPos;
     private bool isPickupUIActive = false;
 
     
 
-    // ¶óÀÌÇÁ»çÀÌÅ¬
+    // ë¼ì´í”„ì‚¬ì´í´
     private void Awake()
     {
-        // 1. AÆÀ ½½·Ô Àü¿ø ºñÈ°¼ºÈ­
+        // 1. AíŒ€ ìŠ¬ë¡¯ ì „ì› ë¹„í™œì„±í™”
         if (teamASlots != null)
         {
             foreach (var slot in teamASlots)
@@ -103,7 +103,7 @@ public class UIManager : MonoBehaviour
             }
         }
 
-        // 2. BÆÀ ½½·Ô Àü¿ø ºñÈ°¼ºÈ­
+        // 2. BíŒ€ ìŠ¬ë¡¯ ì „ì› ë¹„í™œì„±í™”
         if (teamBSlots != null)
         {
             foreach (var slot in teamBSlots)
@@ -113,12 +113,12 @@ public class UIManager : MonoBehaviour
         }
 
         mainCam = Camera.main;
-        // ÀÌº¥Æ® ¹ö½º ±¸µ¶: ¹«±â°¡ ¹ß»çµÉ ¶§ Å©·Î½ºÇì¾î Å°¿ì±â
+        // ì´ë²¤íŠ¸ ë²„ìŠ¤ êµ¬ë…: ë¬´ê¸°ê°€ ë°œì‚¬ë  ë•Œ í¬ë¡œìŠ¤í—¤ì–´ í‚¤ìš°ê¸°
 
-        //¸¶¿ì½ºÀÇ ºñÁÖ¾óÀ» ²û
+        //ë§ˆìš°ìŠ¤ì˜ ë¹„ì£¼ì–¼ì„ ë”
         Cursor.visible = false;
 
-        // ¸¶¿ì½º°¡ °ÔÀÓ Ã¢ ¹ÛÀ¸·Î ³ª°¡Áö ¸øÇÏ°Ô 
+        // ë§ˆìš°ìŠ¤ê°€ ê²Œì„ ì°½ ë°–ìœ¼ë¡œ ë‚˜ê°€ì§€ ëª»í•˜ê²Œ 
         Cursor.lockState = CursorLockMode.Confined;
 
         pickupUIRect.gameObject.SetActive(false);
@@ -127,9 +127,9 @@ public class UIManager : MonoBehaviour
         audiosource = GetComponent<AudioSource>();
     }
 
-    #region ÀÌº¥Æ® °ü¸®
+    #region ì´ë²¤íŠ¸ ê´€ë¦¬
     /// <summary>
-    /// ÀÌº¥Æ® ±¸µ¶
+    /// ì´ë²¤íŠ¸ êµ¬ë…
     /// </summary>
     private void OnEnable()
     {
@@ -154,7 +154,7 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ÀÌº¥Æ® ±¸µ¶ ÇØÁ¦
+    /// ì´ë²¤íŠ¸ êµ¬ë… í•´ì œ
     /// </summary>
     private void OnDisable()
     {
@@ -184,24 +184,24 @@ public class UIManager : MonoBehaviour
     }
     private void Update()
     {
-        // È¸º¹ ·ÎÁ÷: ÃÑ±â(AutomaticGun)ÀÇ MoveTowards¿Í µ¿ÀÏÇÑ ¼ö½Ä »ç¿ë
+        // íšŒë³µ ë¡œì§: ì´ê¸°(AutomaticGun)ì˜ MoveTowardsì™€ ë™ì¼í•œ ìˆ˜ì‹ ì‚¬ìš©
         if (currentSpread > lastBaseSpread)
         {
             currentSpread = Mathf.MoveTowards(currentSpread, lastBaseSpread, lastRecRate * Time.deltaTime);
         }
 
-        // 9-½½¶óÀÌ½º ½ºÄÉÀÏ Àû¿ë
+        // 9-ìŠ¬ë¼ì´ìŠ¤ ìŠ¤ì¼€ì¼ ì ìš©
         if (crosshairUI != null)
         {
-            // ¼öÁ¤: ¹èÀ²ÀÌ ¾Æ´Ï¶ó '´õÇÏ±â' ¹æ½ÄÀ¸·Î °Å¸® Á¶Àı
-            // ¿¹: ÅºÆÛÁüÀÌ 5µµ ´Ã¾î³ª¸é ¿¡ÀÓ Å©±â´Â 5 * 5 = 25ÇÈ¼¿¸¸ ´õ Ä¿Áü
+            // ìˆ˜ì •: ë°°ìœ¨ì´ ì•„ë‹ˆë¼ 'ë”í•˜ê¸°' ë°©ì‹ìœ¼ë¡œ ê±°ë¦¬ ì¡°ì ˆ
+            // ì˜ˆ: íƒ„í¼ì§ì´ 5ë„ ëŠ˜ì–´ë‚˜ë©´ ì—ì„ í¬ê¸°ëŠ” 5 * 5 = 25í”½ì…€ë§Œ ë” ì»¤ì§
             float addedSize = (currentSpread - lastBaseSpread) * spreadSensitivity;
             float targetUISize = baseSize + addedSize;
 
-            // 9½½¶óÀÌ½º°¡ ÀÛµ¿ÇÏµµ·Ï sizeDelta¸¦ ¼öÁ¤
+            // 9ìŠ¬ë¼ì´ìŠ¤ê°€ ì‘ë™í•˜ë„ë¡ sizeDeltaë¥¼ ìˆ˜ì •
             crosshairUI.sizeDelta = new Vector2(targetUISize, targetUISize);
 
-            // localScaleÀº ¹«Á¶°Ç (1,1,1)ÀÌ¾î¾ß ¼±ÀÌ ¾È ±½¾îÁı´Ï´Ù!
+            // localScaleì€ ë¬´ì¡°ê±´ (1,1,1)ì´ì–´ì•¼ ì„ ì´ ì•ˆ êµµì–´ì§‘ë‹ˆë‹¤!
             crosshairUI.localScale = Vector3.one;
         }
     }
@@ -210,13 +210,13 @@ public class UIManager : MonoBehaviour
     {
         if (isPickupUIActive && pickupUIRect != null && mainCam != null)
         {
-            // ÃÑ±â ¹Ù·Î À§ÂÊ¿¡ ¶ç¿ì±â À§ÇØ YÃàÀ¸·Î »ìÂ¦ ¿Ã¸² (+1.5f µî Á¶Á¤)
+            // ì´ê¸° ë°”ë¡œ ìœ„ìª½ì— ë„ìš°ê¸° ìœ„í•´ Yì¶•ìœ¼ë¡œ ì‚´ì§ ì˜¬ë¦¼ (+1.5f ë“± ì¡°ì •)
             Vector3 offsetPos = targetPickupPos + new Vector3(0, 1.0f, 0);
             pickupUIRect.position = mainCam.WorldToScreenPoint(offsetPos);
         }
 
-        // [CH Ãß°¡] playerStatusPanelÀ» ·ÎÄÃ ÇÃ·¹ÀÌ¾î ¹ß¹Ø À§Ä¡·Î ÀÌµ¿
-        // registry.LocalPlayer´Â PlayerController.Awake¿¡¼­ µî·ÏµÊ (½ºÆù Àü¿£ null)
+        // [CH ì¶”ê°€] playerStatusPanelì„ ë¡œì»¬ í”Œë ˆì´ì–´ ë°œë°‘ ìœ„ì¹˜ë¡œ ì´ë™
+        // registry.LocalPlayerëŠ” PlayerController.Awakeì—ì„œ ë“±ë¡ë¨ (ìŠ¤í° ì „ì—” null)
         if (registry != null && registry.LocalPlayer != null && playerStatusPanel != null)
         {
             playerStatusPanel.position = mainCam.WorldToScreenPoint(registry.LocalPlayer.transform.position);
@@ -224,7 +224,7 @@ public class UIManager : MonoBehaviour
 
         if (targetTransform == null || crosshairUI == null) return;
 
-        // ¿ùµå ÁÂÇ¥ -> ½ºÅ©¸° ÁÂÇ¥ º¯È¯ ÈÄ UI ¹èÄ¡
+        // ì›”ë“œ ì¢Œí‘œ -> ìŠ¤í¬ë¦° ì¢Œí‘œ ë³€í™˜ í›„ UI ë°°ì¹˜
         crosshairUI.position = mainCam.WorldToScreenPoint(targetTransform.position);
 
 
@@ -234,7 +234,7 @@ public class UIManager : MonoBehaviour
 
     private void HandleSpreadUpdate(float _cur, float _rec, float _baseVal)
     {
-        // ÃÑÀ» ½î´Â ¼ø°£, ÇöÀç UIÀÇ ÆÛÁü Á¤µµ¸¦ ÃÑ±âÀÇ ½ÇÁ¦ ÅºÆÛÁü °ªÀ¸·Î Á¡ÇÁ½ÃÅ´
+        // ì´ì„ ì˜ëŠ” ìˆœê°„, í˜„ì¬ UIì˜ í¼ì§ ì •ë„ë¥¼ ì´ê¸°ì˜ ì‹¤ì œ íƒ„í¼ì§ ê°’ìœ¼ë¡œ ì í”„ì‹œí‚´
         currentSpread = _cur;
         lastRecRate = _rec;
         lastBaseSpread = _baseVal;
@@ -248,7 +248,7 @@ public class UIManager : MonoBehaviour
     {
         hpText.text = $"HP: {_hp} / 100";
 
-        // [CH Ãß°¡] Ã¼·Â ¸µ ¾÷µ¥ÀÌÆ®
+        // [CH ì¶”ê°€] ì²´ë ¥ ë§ ì—…ë°ì´íŠ¸
         if (hpRingImage != null)
         {
             float ratio = Mathf.Clamp01(_hp / 100f);
@@ -257,7 +257,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // ±¸¸£±â Äğ´Ù¿î ¸µ ¾Ö´Ï¸ŞÀÌ¼Ç
+    // êµ¬ë¥´ê¸° ì¿¨ë‹¤ìš´ ë§ ì• ë‹ˆë©”ì´ì…˜
     private void HandleRollStarted(float cooldownDuration)
     {
         if (rollRingImage == null) return;
@@ -293,16 +293,16 @@ public class UIManager : MonoBehaviour
     private void HandleScoreChanged(int _aTeam, int _bTeam)
         => scoreText.text = $"{_aTeam} : {_bTeam}";
 
-    // ÆÀ ½½·Ô ÇÚµé·¯
+    // íŒ€ ìŠ¬ë¡¯ í•¸ë“¤ëŸ¬
     /// <summary>
-    /// ÇÃ·¹ÀÌ¾î ÀÔÀå ½Ã ºó ½½·Ô¿¡ ÀÌ¸§¡¤ÆÀ Á¤º¸¸¦ Ã¤¿ì°í È°¼ºÈ­
+    /// í”Œë ˆì´ì–´ ì…ì¥ ì‹œ ë¹ˆ ìŠ¬ë¡¯ì— ì´ë¦„Â·íŒ€ ì •ë³´ë¥¼ ì±„ìš°ê³  í™œì„±í™”
     /// </summary>
     private void HandlePlayerUIInit(int actorNumber, string playerName, int team)
     {
-        // ÀÌ¹Ì µé¾î¿Â »ç¶÷ÀÎÁö È®ÀÎ (ÀçÁ¢¼Ó ¹æÁö)
+        // ì´ë¯¸ ë“¤ì–´ì˜¨ ì‚¬ëŒì¸ì§€ í™•ì¸ (ì¬ì ‘ì† ë°©ì§€)
         PlayerSlotUI slot = FindSlotByActor(actorNumber);
 
-        // Ã³À½ µé¾î¿Â »ç¶÷ÀÌ¸é ÆÀ¿¡ ¸Â´Â ºó ½½·Ô Ã£±â
+        // ì²˜ìŒ ë“¤ì–´ì˜¨ ì‚¬ëŒì´ë©´ íŒ€ì— ë§ëŠ” ë¹ˆ ìŠ¬ë¡¯ ì°¾ê¸°
         if (slot == null)
         {
             slot = FindEmptySlot(team);
@@ -310,7 +310,7 @@ public class UIManager : MonoBehaviour
 
         if (slot == null)
         {
-            Debug.LogWarning($"[UIManager] {team}ÆÀÀÇ ³²Àº ÇÃ·¹ÀÌ¾î ½½·ÔÀÌ ¾ø½À´Ï´Ù!");
+            Debug.LogWarning($"[UIManager] {team}íŒ€ì˜ ë‚¨ì€ í”Œë ˆì´ì–´ ìŠ¬ë¡¯ì´ ì—†ìŠµë‹ˆë‹¤!");
             return;
         }
 
@@ -319,17 +319,17 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ÇÃ·¹ÀÌ¾î »ç¸Á ½Ã ÇØ´ç ½½·ÔÀ» Èæ¹é/¾îµÓ°Ô Ã³¸® (SetActive false ¾Æ´Ô)
+    /// í”Œë ˆì´ì–´ ì‚¬ë§ ì‹œ í•´ë‹¹ ìŠ¬ë¡¯ì„ í‘ë°±/ì–´ë‘¡ê²Œ ì²˜ë¦¬ (SetActive false ì•„ë‹˜)
     /// </summary>
     private void HandlePlayerUIDead(int actorNumber)
     {
         PlayerSlotUI slot = FindSlotByActor(actorNumber);
         slot?.SetDead();
     }
-    // Å³ ·Î±× ÇÚµé·¯
+    // í‚¬ ë¡œê·¸ í•¸ë“¤ëŸ¬
     /// <summary>
-    /// Å³ ¹ß»ı ½Ã killLogParent ¾Æ·¡¿¡ »õ ¿£Æ®¸®¸¦ Instantiate.
-    /// KillLogEntry ÀÚÃ¼°¡ 3ÃÊ Ç¥½Ã ÈÄ ÆäÀÌµå ¾Æ¿ô ¡æ ÀÚ±â ÀÚ½ÅÀ» Destroy.
+    /// í‚¬ ë°œìƒ ì‹œ killLogParent ì•„ë˜ì— ìƒˆ ì—”íŠ¸ë¦¬ë¥¼ Instantiate.
+    /// KillLogEntry ìì²´ê°€ 3ì´ˆ í‘œì‹œ í›„ í˜ì´ë“œ ì•„ì›ƒ â†’ ìê¸° ìì‹ ì„ Destroy.
     /// </summary>
     private void HandleKillLog(string killer, string victim)
     {
@@ -344,7 +344,7 @@ public class UIManager : MonoBehaviour
         if (resultPanel != null)
         {
             resultPanel.SetActive(true);
-            // ³» ÆÀ Á¤º¸¸¦ ·¹Áö½ºÆ®¸®³ª ·ÎÄÃ ¼Ó¼º¿¡¼­ °¡Á®¿Í ½ÂÆĞ ÆÇ´Ü
+            // ë‚´ íŒ€ ì •ë³´ë¥¼ ë ˆì§€ìŠ¤íŠ¸ë¦¬ë‚˜ ë¡œì»¬ ì†ì„±ì—ì„œ ê°€ì ¸ì™€ ìŠ¹íŒ¨ íŒë‹¨
             resultText.text = (winTeam == 1) ? "TEAM A WIN" : "TEAM B WIN";
         }
     }
@@ -355,7 +355,7 @@ public class UIManager : MonoBehaviour
             menuPanel.SetActive(isShow);
     }
 
-    // ³ª°¡±â ¹öÆ°ÀÇ OnClick ÀÌº¥Æ®¿¡ ¿¬°áÇÒ ÇÔ¼ö
+    // ë‚˜ê°€ê¸° ë²„íŠ¼ì˜ OnClick ì´ë²¤íŠ¸ì— ì—°ê²°í•  í•¨ìˆ˜
     public void OnClickLeaveGame()
     {
         RoundManager.Instance.LeaveGame();
@@ -376,16 +376,16 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // À¯Æ¿¸®Æ¼
+    // ìœ í‹¸ë¦¬í‹°
     private PlayerSlotUI FindSlotByActor(int actorNumber)
     {
-        // AÆÀ ½½·Ô
+        // AíŒ€ ìŠ¬ë¡¯
         foreach (var slot in teamASlots)
         {
             if (slot.gameObject.activeSelf && slot.ActorNumber == actorNumber)
                 return slot;
         }
-        // ¾øÀ¸¸é BÆÀ ½½·Ô 
+        // ì—†ìœ¼ë©´ BíŒ€ ìŠ¬ë¡¯ 
         foreach (var slot in teamBSlots)
         {
             if (slot.gameObject.activeSelf && slot.ActorNumber == actorNumber)
@@ -394,10 +394,10 @@ public class UIManager : MonoBehaviour
         return null;
     }
 
-    // ÆÀ ¹øÈ£¿¡ µû¶ó ¿Ã¹Ù¸¥ ¹è¿­¿¡¼­ ºóÀÚ¸®¸¦ Ã£¾ÆÁÖ´Â ÇÔ¼ö
+    // íŒ€ ë²ˆí˜¸ì— ë”°ë¼ ì˜¬ë°”ë¥¸ ë°°ì—´ì—ì„œ ë¹ˆìë¦¬ë¥¼ ì°¾ì•„ì£¼ëŠ” í•¨ìˆ˜
     private PlayerSlotUI FindEmptySlot(int team)
     {
-        PlayerSlotUI[] targetSlots = (team == 1) ? teamASlots : teamBSlots; // 0ÀÌ¸é AÆÀ, ¾Æ´Ï¸é BÆÀ
+        PlayerSlotUI[] targetSlots = (team == 1) ? teamASlots : teamBSlots; // 0ì´ë©´ AíŒ€, ì•„ë‹ˆë©´ BíŒ€
 
         foreach (var slot in targetSlots)
         {
@@ -412,10 +412,10 @@ public class UIManager : MonoBehaviour
         if (audiosource != null && usingCRT)
             audiosource.Play();
 
-        // [CH Ãß°¡] ¶ó¿îµå ½ÃÀÛ ½Ã Ä¿¹ö ÆĞ³Î Á¦°Å (ÀÌ¹Ì ºñÈ°¼ºÀÌ¸é no-op)
+        // [CH ì¶”ê°€] ë¼ìš´ë“œ ì‹œì‘ ì‹œ ì»¤ë²„ íŒ¨ë„ ì œê±° (ì´ë¯¸ ë¹„í™œì„±ì´ë©´ no-op)
         if (initialCoverPanel != null) initialCoverPanel.SetActive(false);
 
-        // [CH Ãß°¡] ¶ó¿îµå ½ÃÀÛ ½Ã ¸µ ÃÊ±âÈ­
+        // [CH ì¶”ê°€] ë¼ìš´ë“œ ì‹œì‘ ì‹œ ë§ ì´ˆê¸°í™”
         if (hpRingImage != null) { hpRingImage.fillAmount = 1f; hpRingImage.color = hpFullColor; }
         if (_rollCooldownCoroutine != null) { StopCoroutine(_rollCooldownCoroutine); _rollCooldownCoroutine = null; }
         if (rollRingImage != null) { rollRingImage.fillAmount = 1f; rollRingImage.color = rollReadyColor; }

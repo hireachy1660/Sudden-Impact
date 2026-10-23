@@ -1,50 +1,50 @@
-using System;
+ï»¿using System;
 using UnityEngine;
 
-// °ÔÀÓ Àü¿ª ÀÌº¥Æ® ¹ö½º (static Å¬·¡½º).
+// ê²Œì„ ì „ì—­ ì´ë²¤íŠ¸ ë²„ìŠ¤ (static í´ë˜ìŠ¤).
 public static class GameEvents
 {
     public static event Action<float> OnHpChanged;
 
-    //±¸¸£±â ½ÃÀÛ ½Ã Äğ´Ù¿î Áö¼Ó ½Ã°£À» Àü´Ş(PlayerWorldUI ¸µ ¾Ö´Ï¸ŞÀÌ¼Ç¿ë)
+    //êµ¬ë¥´ê¸° ì‹œì‘ ì‹œ ì¿¨ë‹¤ìš´ ì§€ì† ì‹œê°„ì„ ì „ë‹¬(PlayerWorldUI ë§ ì• ë‹ˆë©”ì´ì…˜ìš©)
     public static event Action<float> OnRollStarted;
     public static event Action<string, bool> OnWeaponChanged;
     public static event Action<int, int> OnAmmoChanged;
     public static event Action<int, int> OnScoreChanged;
     public static Action<float, float, float> OnSpreadUpdated;
-    // Å³·Î±× (°ø°İÀÚ ÀÌ¸§, »ç¸ÁÀÚ ÀÌ¸§)
+    // í‚¬ë¡œê·¸ (ê³µê²©ì ì´ë¦„, ì‚¬ë§ì ì´ë¦„)
     public static event Action<string, string> OnKillLog;
 
-    // ÇÃ·¹ÀÌ¾î UI ÃÊ±âÈ­ (¾×ÅÍ¹øÈ£, ÀÌ¸§, ÆÀ¹øÈ£)
+    // í”Œë ˆì´ì–´ UI ì´ˆê¸°í™” (ì•¡í„°ë²ˆí˜¸, ì´ë¦„, íŒ€ë²ˆí˜¸)
     public static event Action<int, string, int> OnPlayerUIInit;
 
-    // ÇÃ·¹ÀÌ¾î »ç¸Á UI (¾×ÅÍ¹øÈ£)
+    // í”Œë ˆì´ì–´ ì‚¬ë§ UI (ì•¡í„°ë²ˆí˜¸)
     public static event Action<int> OnPlayerUIDead;
 
-    // ¶ó¿îµå ½ÃÀÛ / Á¾·á
+    // ë¼ìš´ë“œ ì‹œì‘ / ì¢…ë£Œ
     public static event Action OnRoundStart;
     public static event Action<int> OnRoundEnd;
-    public static event Action<int> OnMatchEnd; // ½Â¸® ÆÀ ¹øÈ£¸¦ Àü´Ş
+    public static event Action<int> OnMatchEnd; // ìŠ¹ë¦¬ íŒ€ ë²ˆí˜¸ë¥¼ ì „ë‹¬
 
-    // ¹«±â³ëµå¿¡ ´ê¾ÒÀ» ‹š
-    public static event Action<bool, Vector3, string> OnPickupUIUpdate; // (ÄÑ±â/²ô±â, ¿ùµåÁÂÇ¥, ¹«±âÀÌ¸§)
+    // ë¬´ê¸°ë…¸ë“œì— ë‹¿ì•˜ì„ ë–„
+    public static event Action<bool, Vector3, string> OnPickupUIUpdate; // (ì¼œê¸°/ë„ê¸°, ì›”ë“œì¢Œí‘œ, ë¬´ê¸°ì´ë¦„)
 
-    // ¸Ş´º¿­±â
+    // ë©”ë‰´ì—´ê¸°
     public static event Action<bool> OnMenuUIUpdate;
 
-    // ÇÃ·ÎÆÃ ÅØ½ºÆ® ¿ë
+    // í”Œë¡œíŒ… í…ìŠ¤íŠ¸ ìš©
     public static event Action<Vector3> OnKillFloat;
 
     public static event Action OnLocalPlayerDeath;
 
 
 
-    #region È£Ãâ ¸Ş¼­µå
-    //  È£Ãâ ¸Ş¼­µå
+    #region í˜¸ì¶œ ë©”ì„œë“œ
+    //  í˜¸ì¶œ ë©”ì„œë“œ
     public static void HpChanged(float _hp)                             
         => OnHpChanged?.Invoke(_hp);
 
-    //±¸¸£±â Äğ´Ù¿î ÀÌº¥Æ® È£Ãâ ¸Ş¼­µå
+    //êµ¬ë¥´ê¸° ì¿¨ë‹¤ìš´ ì´ë²¤íŠ¸ í˜¸ì¶œ ë©”ì„œë“œ
     public static void RollStarted(float _cooldownDuration)
         => OnRollStarted?.Invoke(_cooldownDuration);
 

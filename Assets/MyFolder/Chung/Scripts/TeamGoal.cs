@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class TeamGoal : MonoBehaviour
 {
@@ -6,7 +6,7 @@ public class TeamGoal : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // "Àú °ÅÁ¡ÀÔ´Ï´Ù! ´©°¡ µµÂøÇß¾î¿ä!"
+        // "ì € ê±°ì ì…ë‹ˆë‹¤! ëˆ„ê°€ ë„ì°©í–ˆì–´ìš”!"
         RoundManager.Instance.OnLocalPlayerReachedGoal(myTeam);
     }
 }

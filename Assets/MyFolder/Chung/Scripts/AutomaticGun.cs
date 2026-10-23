@@ -1,34 +1,34 @@
-using Photon.Pun;
+ï»¿using Photon.Pun;
 using UnityEngine;
 
 public class AutomaticGun : Gun
 {
     [Header("Dynamic Spread Settings")]
-    [Tooltip("±âº» ÅºÆÛÁü °¢µµ (ÃÊÅº ¸íÁß·ü - ÀÛÀ»¼ö·Ï Á¤±³ÇÔ)")]
+    [Tooltip("ê¸°ë³¸ íƒ„í¼ì§ ê°ë„ (ì´ˆíƒ„ ëª…ì¤‘ë¥  - ì‘ì„ìˆ˜ë¡ ì •êµí•¨)")]
     [SerializeField] private float baseSpread = 1f;
 
-    [Tooltip("ÃÖ´ë ÅºÆÛÁü °¢µµ (¿ÏÀü ³­»ç ½Ã ÃÖ´ëÄ¡)")]
+    [Tooltip("ìµœëŒ€ íƒ„í¼ì§ ê°ë„ (ì™„ì „ ë‚œì‚¬ ì‹œ ìµœëŒ€ì¹˜)")]
     [SerializeField] private float maxSpread = 15f;
 
-    [Tooltip("ÇÑ ¹ß ½ò ¶§¸¶´Ù ´©ÀûÇØ¼­ Áõ°¡ÇÏ´Â °¢µµ")]
+    [Tooltip("í•œ ë°œ ì  ë•Œë§ˆë‹¤ ëˆ„ì í•´ì„œ ì¦ê°€í•˜ëŠ” ê°ë„")]
     [SerializeField] private float spreadIncreasePerShot = 2f;
 
-    [Tooltip("»ç°İÀ» ¸ØÃèÀ» ¶§ ÃÊ´ç ¿¡ÀÓÀÌ È¸º¹µÇ´Â(Á¼ÇôÁö´Â) ¼Óµµ")]
+    [Tooltip("ì‚¬ê²©ì„ ë©ˆì·„ì„ ë•Œ ì´ˆë‹¹ ì—ì„ì´ íšŒë³µë˜ëŠ”(ì¢í˜€ì§€ëŠ”) ì†ë„")]
     [SerializeField] private float spreadRecoveryRate = 15f;
 
-    // ÇöÀç ¹ß»ç¿¡ Àû¿ëµÉ ½Ç½Ã°£ ÅºÆÛÁü °¢µµ
+    // í˜„ì¬ ë°œì‚¬ì— ì ìš©ë  ì‹¤ì‹œê°„ íƒ„í¼ì§ ê°ë„
     private float currentSpread;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        currentSpread = baseSpread; // ¹«±â¸¦ ²¨³¾ ¶§´Â ÃÊÅº ¸íÁß·ü·Î ÃÊ±âÈ­
+        currentSpread = baseSpread; // ë¬´ê¸°ë¥¼ êº¼ë‚¼ ë•ŒëŠ” ì´ˆíƒ„ ëª…ì¤‘ë¥ ë¡œ ì´ˆê¸°í™”
     }
 
     private void Update()
     {
-        // ÃÑÀ» ½îÁö ¾Ê´Â µ¿¾È(È¤Àº ½î´Â ¿ÍÁß¿¡µµ ÇÁ·¹ÀÓ¸¶´Ù) 
-        // ´©ÀûµÈ ÅºÆÛÁüÀ» ±âº»°ª(baseSpread)À¸·Î ¼­¼­È÷ µÇµ¹¸³´Ï´Ù.
+        // ì´ì„ ì˜ì§€ ì•ŠëŠ” ë™ì•ˆ(í˜¹ì€ ì˜ëŠ” ì™€ì¤‘ì—ë„ í”„ë ˆì„ë§ˆë‹¤) 
+        // ëˆ„ì ëœ íƒ„í¼ì§ì„ ê¸°ë³¸ê°’(baseSpread)ìœ¼ë¡œ ì„œì„œíˆ ë˜ëŒë¦½ë‹ˆë‹¤.
         if (currentSpread > baseSpread)
         {
             currentSpread = Mathf.MoveTowards(currentSpread, baseSpread, spreadRecoveryRate * Time.deltaTime);
@@ -37,7 +37,7 @@ public class AutomaticGun : Gun
 
     protected override void FireProjectile()
     {
-        // 1. ±âº» ¹æÇâ °è»ê
+        // 1. ê¸°ë³¸ ë°©í–¥ ê³„ì‚°
         Vector3 direction = attackPoint.forward;
         direction.y = 0;
 
@@ -47,17 +47,17 @@ public class AutomaticGun : Gun
             baseRotation = Quaternion.LookRotation(direction);
         }
 
-        // ´©ÀûµÈ ÅºÆÛÁü(currentSpread) Àû¿ë
+        // ëˆ„ì ëœ íƒ„í¼ì§(currentSpread) ì ìš©
         float randomSpread = Random.Range(-currentSpread, currentSpread);
         Quaternion finalSpreadRotation = baseRotation * Quaternion.Euler(0f, randomSpread, 0f);
 
-        // ÅºÆÛÁü ´©Àû½ÃÅ´ (ÃÖ´ëÄ¡±îÁö¸¸)
+        // íƒ„í¼ì§ ëˆ„ì ì‹œí‚´ (ìµœëŒ€ì¹˜ê¹Œì§€ë§Œ)
         currentSpread = Mathf.Min(currentSpread + spreadIncreasePerShot, maxSpread);
 
-        // ÃÊ±âÈ­ µ¥ÀÌÅÍ Àü´Ş
+        // ì´ˆê¸°í™” ë°ì´í„° ì „ë‹¬
         object[] bulletData = new object[] { ownerActorNumber, ownerTeam, damage };
 
-        // ²ªÀÎ °¢µµ(finalSpreadRotation)·Î ÀÎ½ºÅÏ½º
+        // êº¾ì¸ ê°ë„(finalSpreadRotation)ë¡œ ì¸ìŠ¤í„´ìŠ¤
         PhotonNetwork.Instantiate(
             projectilePrefab.name,
             attackPoint.position,
@@ -66,7 +66,7 @@ public class AutomaticGun : Gun
             bulletData
         );
 
-        // ÇöÀç ÃÑ±âÀÇ ¹İµ¿/ÆÛÁü Á¤µµ¸¦ UI¿¡ Àü´Ş (¿¹: 1.0 ~ 5.0 »çÀÌÀÇ °ª)
+        // í˜„ì¬ ì´ê¸°ì˜ ë°˜ë™/í¼ì§ ì •ë„ë¥¼ UIì— ì „ë‹¬ (ì˜ˆ: 1.0 ~ 5.0 ì‚¬ì´ì˜ ê°’)
         GameEvents.SpreadUpdate(currentSpread, spreadRecoveryRate, baseSpread);
     }
 }

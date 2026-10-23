@@ -1,56 +1,56 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Photon.Pun;
 using System.Collections;
 
 /// <summary>
-/// ÇÃ·¹ÀÌ¾î ¹ß¹Ø¿¡ Ç¥½ÃµÇ´Â World Space UI
-/// - ¿øÇü Ã¼·Â ¸µ (Radial Fill Image)
-/// - ¹«±â ÀÌ¸§ / ³²Àº Åº¾à ÅØ½ºÆ®
+/// í”Œë ˆì´ì–´ ë°œë°‘ì— í‘œì‹œë˜ëŠ” World Space UI
+/// - ì›í˜• ì²´ë ¥ ë§ (Radial Fill Image)
+/// - ë¬´ê¸° ì´ë¦„ / ë‚¨ì€ íƒ„ì•½ í…ìŠ¤íŠ¸
 ///
-/// [ÇÁ¸®ÆÕ ¼³Á¤]
-/// 1. Player ÇÁ¸®ÆÕ ÇÏÀ§¿¡ ºó ¿ÀºêÁ§Æ® "WorldUI" Ãß°¡
-///    - Position: (0, 0.05, 0)  ¡ç ¹Ù´Ú À§¿¡ »ìÂ¦ ¶° ÀÖ°Ô
-///    - Rotation: (-90, 0, 0)   ¡ç Canvas°¡ À§¸¦ ÇâÇÏµµ·Ï ´¯Èû
-/// 2. WorldUI ÇÏÀ§¿¡ Canvas Ãß°¡
+/// [í”„ë¦¬íŒ¹ ì„¤ì •]
+/// 1. Player í”„ë¦¬íŒ¹ í•˜ìœ„ì— ë¹ˆ ì˜¤ë¸Œì íŠ¸ "WorldUI" ì¶”ê°€
+///    - Position: (0, 0.05, 0)  â† ë°”ë‹¥ ìœ„ì— ì‚´ì§ ë–  ìˆê²Œ
+///    - Rotation: (-90, 0, 0)   â† Canvasê°€ ìœ„ë¥¼ í–¥í•˜ë„ë¡ ëˆ•í˜
+/// 2. WorldUI í•˜ìœ„ì— Canvas ì¶”ê°€
 ///    - Render Mode: World Space
-///    - RectTransform: W=1, H=1  (= 1¹ÌÅÍ Å©±â)
+///    - RectTransform: W=1, H=1  (= 1ë¯¸í„° í¬ê¸°)
 ///    - Scale: (1, 1, 1)
-/// 3. Canvas ÇÏÀ§¿¡ Image Ãß°¡ ¡æ hpRingImage ½½·Ô¿¡ ¿¬°á
+/// 3. Canvas í•˜ìœ„ì— Image ì¶”ê°€ â†’ hpRingImage ìŠ¬ë¡¯ì— ì—°ê²°
 ///    - Image Type: Filled
 ///    - Fill Method: Radial 360
-///    - Fill Origin: Top (12½Ã ¹æÇâ ½ÃÀÛ)
-///    - ¿øÇü Å×µÎ¸® ½ºÇÁ¶óÀÌÆ® »ç¿ë ±ÇÀå (¾øÀ¸¸é ±âº» Èò ¿øµµ OK)
-/// 4. Canvas ÇÏÀ§¿¡ TextMeshProUGUI 2°³ Ãß°¡ ¡æ weaponText / ammoText ½½·Ô ¿¬°á
+///    - Fill Origin: Top (12ì‹œ ë°©í–¥ ì‹œì‘)
+///    - ì›í˜• í…Œë‘ë¦¬ ìŠ¤í”„ë¼ì´íŠ¸ ì‚¬ìš© ê¶Œì¥ (ì—†ìœ¼ë©´ ê¸°ë³¸ í° ì›ë„ OK)
+/// 4. Canvas í•˜ìœ„ì— TextMeshProUGUI 2ê°œ ì¶”ê°€ â†’ weaponText / ammoText ìŠ¬ë¡¯ ì—°ê²°
 /// </summary>
 public class PlayerWorldUI : MonoBehaviourPun
 {
-    [Header("Ã¼·Â ¸µ")]
+    [Header("ì²´ë ¥ ë§")]
     [SerializeField] private Image hpRingImage;
     [SerializeField] private Color hpFullColor = Color.green;
     [SerializeField] private Color hpLowColor = Color.red;
-    [Tooltip("ÀÌ ºñÀ² ÀÌÇÏ·Î ¶³¾îÁö¸é »¡°£»öÀ¸·Î º¯ÇÔ (0~1)")]
+    [Tooltip("ì´ ë¹„ìœ¨ ì´í•˜ë¡œ ë–¨ì–´ì§€ë©´ ë¹¨ê°„ìƒ‰ìœ¼ë¡œ ë³€í•¨ (0~1)")]
     [SerializeField][Range(0f, 1f)] private float lowHpThreshold = 0.3f;
 
-    [Header("±¸¸£±â Äğ´Ù¿î ¸µ")]
+    [Header("êµ¬ë¥´ê¸° ì¿¨ë‹¤ìš´ ë§")]
     [SerializeField] private Image rollRingImage;
     [SerializeField] private Color rollReadyColor = Color.cyan;
     [SerializeField] private Color rollCooldownColor = Color.gray;
 
     private Coroutine _rollCooldownCoroutine;
 
-    [Header("¹«±â / Åº¾à ÅØ½ºÆ®")]
+    [Header("ë¬´ê¸° / íƒ„ì•½ í…ìŠ¤íŠ¸")]
     [SerializeField] private TextMeshProUGUI weaponText;
     [SerializeField] private TextMeshProUGUI ammoText;
-    [SerializeField] private GameObject ammoPanel; // ±ÙÁ¢¹«±âÀÏ ¶§ ¼û±æ ÆĞ³Î
+    [SerializeField] private GameObject ammoPanel; // ê·¼ì ‘ë¬´ê¸°ì¼ ë•Œ ìˆ¨ê¸¸ íŒ¨ë„
 
-    private float maxHp = 100f; // PlayerController¿Í ¸ÂÃç¼­ ¼öÁ¤
+    private float maxHp = 100f; // PlayerControllerì™€ ë§ì¶°ì„œ ìˆ˜ì •
 
     private void Awake()
     {
-        // ³» Ä³¸¯ÅÍ°¡ ¾Æ´Ï¸é WorldUI ÀüÃ¼¸¦ ¼û±è
-        // (´Ù¸¥ ÇÃ·¹ÀÌ¾î ¹ß¹Ø¿¡ ¸µ/ÅØ½ºÆ®°¡ º¸ÀÌÁö ¾Êµµ·Ï)
+        // ë‚´ ìºë¦­í„°ê°€ ì•„ë‹ˆë©´ WorldUI ì „ì²´ë¥¼ ìˆ¨ê¹€
+        // (ë‹¤ë¥¸ í”Œë ˆì´ì–´ ë°œë°‘ì— ë§/í…ìŠ¤íŠ¸ê°€ ë³´ì´ì§€ ì•Šë„ë¡)
         if (!photonView.IsMine)
         {
             gameObject.SetActive(false);
@@ -59,8 +59,8 @@ public class PlayerWorldUI : MonoBehaviourPun
 
     private void OnEnable()
     {
-        // ÀÌ ÇÃ·¹ÀÌ¾î°¡ ³» Ä³¸¯ÅÍÀÏ ¶§¸¸ ÀÌº¥Æ® ±¸µ¶
-        // (´Ù¸¥ ÇÃ·¹ÀÌ¾î ÇÁ¸®ÆÕÀÇ WorldUI´Â ±¸µ¶ÇÏÁö ¾ÊÀ½)
+        // ì´ í”Œë ˆì´ì–´ê°€ ë‚´ ìºë¦­í„°ì¼ ë•Œë§Œ ì´ë²¤íŠ¸ êµ¬ë…
+        // (ë‹¤ë¥¸ í”Œë ˆì´ì–´ í”„ë¦¬íŒ¹ì˜ WorldUIëŠ” êµ¬ë…í•˜ì§€ ì•ŠìŒ)
         if (!photonView.IsMine) return;
 
         GameEvents.OnHpChanged += HandleHpChanged;
@@ -83,8 +83,8 @@ public class PlayerWorldUI : MonoBehaviourPun
 
     private void LateUpdate()
     {
-        // Ä³¸¯ÅÍ°¡ ¾î¶² ¹æÇâÀ¸·Î µ¹¾Æ°¡µµ WorldUI´Â Ç×»ó ¹Ù´Ú¿¡ ÆòÆòÇÏ°Ô °íÁ¤
-        // Euler(-90, 0, 0) = Äµ¹ö½º Á¤¸é(+Z)ÀÌ À§(+Y)¸¦ ÇâÇÏµµ·Ï ´¯Èû ¡æ Å¾´Ù¿î Ä«¸Ş¶ó¿¡¼­ Á¤»ó Ç¥½Ã
+        // ìºë¦­í„°ê°€ ì–´ë–¤ ë°©í–¥ìœ¼ë¡œ ëŒì•„ê°€ë„ WorldUIëŠ” í•­ìƒ ë°”ë‹¥ì— í‰í‰í•˜ê²Œ ê³ ì •
+        // Euler(-90, 0, 0) = ìº”ë²„ìŠ¤ ì •ë©´(+Z)ì´ ìœ„(+Y)ë¥¼ í–¥í•˜ë„ë¡ ëˆ•í˜ â†’ íƒ‘ë‹¤ìš´ ì¹´ë©”ë¼ì—ì„œ ì •ìƒ í‘œì‹œ
         transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
     }
 
@@ -95,7 +95,7 @@ public class PlayerWorldUI : MonoBehaviourPun
         float ratio = Mathf.Clamp01(hp / maxHp);
         hpRingImage.fillAmount = ratio;
 
-        // Ã¼·Â ºñÀ²¿¡ µû¶ó »ö»ó º¯°æ: lowHpThreshold ÀÌÇÏ¸é »¡°­, ÀÌ»óÀÌ¸é ÃÊ·Ï
+        // ì²´ë ¥ ë¹„ìœ¨ì— ë”°ë¼ ìƒ‰ìƒ ë³€ê²½: lowHpThreshold ì´í•˜ë©´ ë¹¨ê°•, ì´ìƒì´ë©´ ì´ˆë¡
         hpRingImage.color = ratio <= lowHpThreshold ? hpLowColor : hpFullColor;
     }
 
@@ -110,7 +110,7 @@ public class PlayerWorldUI : MonoBehaviourPun
         if (ammoText != null) ammoText.text = $"{cur}/{max}";
     }
 
-    // ¶ó¿îµå ½ÃÀÛ ½Ã Ã¼·Â/±¸¸£±â ¸µ ÃÊ±âÈ­
+    // ë¼ìš´ë“œ ì‹œì‘ ì‹œ ì²´ë ¥/êµ¬ë¥´ê¸° ë§ ì´ˆê¸°í™”
     private void HandleRoundStart()
     {
         if (hpRingImage != null)
@@ -119,7 +119,7 @@ public class PlayerWorldUI : MonoBehaviourPun
             hpRingImage.color = hpFullColor;
         }
 
-        // ¶ó¿îµå ½ÃÀÛ ½Ã Äğ´Ù¿î ÄÚ·çÆ¾ Áß´Ü ÈÄ Áï½Ã »ç¿ë °¡´É »óÅÂ·Î
+        // ë¼ìš´ë“œ ì‹œì‘ ì‹œ ì¿¨ë‹¤ìš´ ì½”ë£¨í‹´ ì¤‘ë‹¨ í›„ ì¦‰ì‹œ ì‚¬ìš© ê°€ëŠ¥ ìƒíƒœë¡œ
         if (_rollCooldownCoroutine != null)
         {
             StopCoroutine(_rollCooldownCoroutine);
@@ -132,7 +132,7 @@ public class PlayerWorldUI : MonoBehaviourPun
         }
     }
 
-    // ±¸¸£±â ½ÃÀÛ ¡æ Äğ´Ù¿î ¸µÀ» 0¿¡¼­ 1±îÁö ¼­¼­È÷ Ã¤¿ò
+    // êµ¬ë¥´ê¸° ì‹œì‘ â†’ ì¿¨ë‹¤ìš´ ë§ì„ 0ì—ì„œ 1ê¹Œì§€ ì„œì„œíˆ ì±„ì›€
     private void HandleRollStarted(float cooldownDuration)
     {
         if (rollRingImage == null) return;
@@ -153,7 +153,7 @@ public class PlayerWorldUI : MonoBehaviourPun
             yield return null;
         }
 
-        // Äğ´Ù¿î ¿Ï·á
+        // ì¿¨ë‹¤ìš´ ì™„ë£Œ
         rollRingImage.fillAmount = 1f;
         rollRingImage.color = rollReadyColor;
         _rollCooldownCoroutine = null;

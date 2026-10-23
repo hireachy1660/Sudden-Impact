@@ -1,4 +1,4 @@
-using Photon.Pun;
+ï»¿using Photon.Pun;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,7 +27,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     [SerializeField] private Weapon myKnife;
     [SerializeField] private PlayerRegistry registry;
     [SerializeField] private GameObject dummyFlagMesh;
-    [Tooltip("Ç÷Èç ÇÁ¸®ÆÕ")]
+    [Tooltip("í˜ˆí” í”„ë¦¬íŒ¹")]
     [SerializeField] private GameObject neonBloodPrefab; 
 
     [Header("Parameters")]
@@ -51,7 +51,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     [SerializeField] private LayerMask interactableLayer;
 
     [Header("Pre-Allocated Weapons")]
-    [Tooltip("¹Ì¸® ¸ğµç Á¾·ùÀÇ ÃÑÀ» µî·Ï")]
+    [Tooltip("ë¯¸ë¦¬ ëª¨ë“  ì¢…ë¥˜ì˜ ì´ì„ ë“±ë¡")]
     [SerializeField] private Gun[] allGuns;
 
     [Header("Camera Shake (Damage)")]
@@ -59,13 +59,13 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     [SerializeField] private float damageShakeForce = 1.5f;
 
     [Header("Animator Bridge Data")]
-    // ¾Ö´Ï¸ŞÀÌÅÍ°¡ ÀĞ¾î°¥ ÆÛºí¸¯ °ÔÅÍ
+    // ì• ë‹ˆë©”ì´í„°ê°€ ì½ì–´ê°ˆ í¼ë¸”ë¦­ ê²Œí„°
     public Vector3 CurrentVelocity => myRigidbody.linearVelocity;
     public float MoveSpeed => moveSpeed;
     public float NormalizedSpeed => CurrentVelocity.magnitude / moveSpeed;
     public bool UseGun => useGun;
 
-    // ¾Ö´Ï¸ŞÀÌÅÍ¿¡°Ô Çàµ¿À» ¾Ë¸®´Â ÀÌº¥Æ®
+    // ì• ë‹ˆë©”ì´í„°ì—ê²Œ í–‰ë™ì„ ì•Œë¦¬ëŠ” ì´ë²¤íŠ¸
     public event Action OnAttackEvent;
     public event Action OnRollEvent;
     public event Action OnThrowEvent;
@@ -75,7 +75,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     [Header("ForDebug")]
     [SerializeField] private float curHp;
-    [SerializeField] private WeaponPickupNode closestNode; // ÃÖ´Ü°Å¸® ³ëµå
+    [SerializeField] private WeaponPickupNode closestNode; // ìµœë‹¨ê±°ë¦¬ ë…¸ë“œ
     [SerializeField] private Weapon myEquippedGun;
     [SerializeField] private bool useGun;
     [SerializeField] private bool hasEnemyFlag;
@@ -120,7 +120,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     private void OnDisable()
     {
-        // Á×°Å³ª ²¨Áú ¶§, ¸¸¾à ³»°¡ ±âÀı »óÅÂ¿´´Ù¸é ÀÔ·ÂÀ» °­Á¦·Î º¹±¸ÇÏ°í ³ª°¨
+        // ì£½ê±°ë‚˜ êº¼ì§ˆ ë•Œ, ë§Œì•½ ë‚´ê°€ ê¸°ì ˆ ìƒíƒœì˜€ë‹¤ë©´ ì…ë ¥ì„ ê°•ì œë¡œ ë³µêµ¬í•˜ê³  ë‚˜ê°
         if (photonView.IsMine)
         {
             stunCallback?.Invoke(true);
@@ -131,10 +131,10 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     {
         if (!photonView.IsMine) return;
 
-        // ±¸¸£±â Áß¿¡´Â ±¸¸£±â ÄÚ·çÆ¾ÀÌ Ã³¸®.
+        // êµ¬ë¥´ê¸° ì¤‘ì—ëŠ” êµ¬ë¥´ê¸° ì½”ë£¨í‹´ì´ ì²˜ë¦¬.
         if (playerState == PlayerState.Rolling) return;
 
-        // »óÅÂ ÀÌ»óÀÏ ¶§´Â °­Á¦·Î ¼Óµµ¸¦ 0À¸·Î ¸¸µé°í ±âÀı
+        // ìƒíƒœ ì´ìƒì¼ ë•ŒëŠ” ê°•ì œë¡œ ì†ë„ë¥¼ 0ìœ¼ë¡œ ë§Œë“¤ê³  ê¸°ì ˆ
         if (playerState == PlayerState.Stunned || playerState == PlayerState.Dead || playerState == PlayerState.NotReady)
         {
             myRigidbody.linearVelocity = Vector3.zero;
@@ -142,29 +142,29 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
             return;
         }
 
-        // MovePositionÀ» ¹ö¸®°í linearVelocity(¹°¸® ¼Óµµ)¸¦ Á÷Á¢ Á¦¾îÇÕ´Ï´Ù.
+        // MovePositionì„ ë²„ë¦¬ê³  linearVelocity(ë¬¼ë¦¬ ì†ë„)ë¥¼ ì§ì ‘ ì œì–´í•©ë‹ˆë‹¤.
         if (curMoveInput.sqrMagnitude > 0.01f)
         {
             float currentSpeed = isSprinting ? (moveSpeed * sprintSpeed) : moveSpeed;
 
-            // ÀÔ·Â ¹æÇâÀ¸·Î ¸ñÇ¥ ¼Óµµ¸¦ °è»êÇÕ´Ï´Ù.
+            // ì…ë ¥ ë°©í–¥ìœ¼ë¡œ ëª©í‘œ ì†ë„ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤.
             Vector3 targetVelocity = curMoveInput.normalized * currentSpeed;
 
-            // ¹°¸® ¿£ÁøÀÇ ¼Óµµ(Velocity)¿¡ Á÷Á¢ °ªÀ» ³Ö½À´Ï´Ù. 
-            // ¿£ÁøÀÌ ½º½º·Î Ãæµ¹À» °è»êÇÏ¹Ç·Î ¾Æ¹«¸® ¾ãÀº º®ÀÌ¶óµµ Àı´ë ¶ÕÁö ¸øÇÕ´Ï´Ù.
+            // ë¬¼ë¦¬ ì—”ì§„ì˜ ì†ë„(Velocity)ì— ì§ì ‘ ê°’ì„ ë„£ìŠµë‹ˆë‹¤. 
+            // ì—”ì§„ì´ ìŠ¤ìŠ¤ë¡œ ì¶©ëŒì„ ê³„ì‚°í•˜ë¯€ë¡œ ì•„ë¬´ë¦¬ ì–‡ì€ ë²½ì´ë¼ë„ ì ˆëŒ€ ëš«ì§€ ëª»í•©ë‹ˆë‹¤.
             myRigidbody.linearVelocity = targetVelocity;
         }
         else
         {
-            // ÀÔ·ÂÀÌ ¾øÀ» ¶§´Â Áï½Ã ¼Óµµ¸¦ 0À¸·Î ¸¸µé¾î ºùÆÇ±æ ¹Ì²ô·¯ÁüÀ» ¹æÁö.
+            // ì…ë ¥ì´ ì—†ì„ ë•ŒëŠ” ì¦‰ì‹œ ì†ë„ë¥¼ 0ìœ¼ë¡œ ë§Œë“¤ì–´ ë¹™íŒê¸¸ ë¯¸ë„ëŸ¬ì§ì„ ë°©ì§€.
             myRigidbody.linearVelocity = Vector3.zero;
         }
 
-        // È¸Àü·ÂÀº ¸Å ÇÁ·¹ÀÓ Á×¿©¼­ ³Ñ¾îÁö´Â °ÍÀ» ¹æÁö
+        // íšŒì „ë ¥ì€ ë§¤ í”„ë ˆì„ ì£½ì—¬ì„œ ë„˜ì–´ì§€ëŠ” ê²ƒì„ ë°©ì§€
         myRigidbody.angularVelocity = Vector3.zero;
     }
 
-    // ½ºÆù ¸Ş´ÏÀú°¡ ½ºÆù½Ã ÃÊ±â µ¥ÀÌÅÍ ÁÖÀÔ¿ë
+    // ìŠ¤í° ë©”ë‹ˆì €ê°€ ìŠ¤í°ì‹œ ì´ˆê¸° ë°ì´í„° ì£¼ì…ìš©
     public void Init(int _myTeam)
     {
         myTeam = _myTeam;
@@ -176,7 +176,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         }
     }
 
-    // ¶ó¿îµå ½ÃÀÛ½Ã ÃÊ±âÈ­ ¸ñÀûÀ¸·Î È£Ãâ
+    // ë¼ìš´ë“œ ì‹œì‘ì‹œ ì´ˆê¸°í™” ëª©ì ìœ¼ë¡œ í˜¸ì¶œ
     public void Respawn(Vector3 _spawnPos)
     {
         curHp = maxHp;
@@ -189,23 +189,23 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         col.enabled = true;
     }
 
-    // ¶ó¿îµå Á¾·á ½Ã Áï°¢ÀûÀÎ ÃÊ±âÈ­ ¹× Á¶ÀÛ Â÷´Ü
+    // ë¼ìš´ë“œ ì¢…ë£Œ ì‹œ ì¦‰ê°ì ì¸ ì´ˆê¸°í™” ë° ì¡°ì‘ ì°¨ë‹¨
     public void OnRoundEndReset()
     {
         Debug.Log($"[OnRoundEndReset] called, myEquippedGun = {myEquippedGun?.name ?? "null"}");
 
-        // »óÅÂ¸¦ NotReady·Î ¹Ù²ã¼­ ¸ğµç Á¶ÀÛ(ÀÌµ¿, »ç°İ)À» ¸·À½
+        // ìƒíƒœë¥¼ NotReadyë¡œ ë°”ê¿”ì„œ ëª¨ë“  ì¡°ì‘(ì´ë™, ì‚¬ê²©)ì„ ë§‰ìŒ
         if (GetPlayerState != PlayerState.Dead)
             SetPlayerState(PlayerState.NotReady);
 
-        // ±ê¹ß »óÅÂ ÃÊ±âÈ­ ¹× ½Ã°¢Àû °¡Â¥ ±ê¹ß ²ô±â
+        // ê¹ƒë°œ ìƒíƒœ ì´ˆê¸°í™” ë° ì‹œê°ì  ê°€ì§œ ê¹ƒë°œ ë„ê¸°
         hasEnemyFlag = false;
         dummyFlagMesh.SetActive(false);
 
         
         CleanupWeapon();
 
-        //±¸¸£±â³ª ±âÀı ÄÚ·çÆ¾ÀÌ µ¹°í ÀÖ´Ù¸é Á¤Áö
+        //êµ¬ë¥´ê¸°ë‚˜ ê¸°ì ˆ ì½”ë£¨í‹´ì´ ëŒê³  ìˆë‹¤ë©´ ì •ì§€
         StopAllCoroutines();
     }
 
@@ -223,7 +223,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         armBandRenderer.SetPropertyBlock(mpb);
     }
 
-    #region ±ê¹ß ·ÎÁ÷
+    #region ê¹ƒë°œ ë¡œì§
 
     public void GetFlag()
     {
@@ -233,9 +233,9 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     #endregion
 
-    #region Á¶ÀÛ ·ÎÁ÷
+    #region ì¡°ì‘ ë¡œì§
 
-    #region ÀÌµ¿ ¹× ¹æÇâ ÀüÈ¯
+    #region ì´ë™ ë° ë°©í–¥ ì „í™˜
     public void MovePlayer(Vector3 _moveAxis)
     {
         lastMoveDir = _moveAxis.normalized;
@@ -266,7 +266,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     }
     #endregion
 
-    #region ±¸¸£±â ·ÎÁ÷
+    #region êµ¬ë¥´ê¸° ë¡œì§
     public void TryRoll(InputAction.CallbackContext ctx)
     {
         if (Time.time < lastRollTime + rollCooldown)
@@ -275,14 +275,14 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
             return;
         }
 
-        // ÀÌµ¿ ÄÚ·çÆ¾
+        // ì´ë™ ì½”ë£¨í‹´
         StartCoroutine(RollCoroutine());
 
-        // ±¸¸£±â Äğ´Ù¿î ½ÃÀÛ ÀÌº¥Æ® ¡æ PlayerWorldUIÀÇ Äğ´Ù¿î ¸µ ¾Ö´Ï¸ŞÀÌ¼Ç Æ®¸®°Å
-        // TryRollÀº ·ÎÄÃ ÇÃ·¹ÀÌ¾î ÀÔ·Â¿¡¼­¸¸ È£ÃâµÇ¹Ç·Î IsMine º¸ÀåµÊ
+        // êµ¬ë¥´ê¸° ì¿¨ë‹¤ìš´ ì‹œì‘ ì´ë²¤íŠ¸ â†’ PlayerWorldUIì˜ ì¿¨ë‹¤ìš´ ë§ ì• ë‹ˆë©”ì´ì…˜ íŠ¸ë¦¬ê±°
+        // TryRollì€ ë¡œì»¬ í”Œë ˆì´ì–´ ì…ë ¥ì—ì„œë§Œ í˜¸ì¶œë˜ë¯€ë¡œ IsMine ë³´ì¥ë¨
         GameEvents.RollStarted(rollCooldown);
 
-        // ¹«Àû RPC
+        // ë¬´ì  RPC
         photonView.RPC(nameof(StartRollCRP), RpcTarget.All);
         lastRollTime = Time.time;
 
@@ -322,25 +322,25 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
         while (elapsed < rollDuration)
         {
-            // ¹°¸® ÇÁ·¹ÀÓ ½Ã°£ ´©Àû
+            // ë¬¼ë¦¬ í”„ë ˆì„ ì‹œê°„ ëˆ„ì 
             elapsed += Time.fixedDeltaTime;
             float t = elapsed / rollDuration;
 
-            // ¼Óµµ¸¦ ¼±ÇüÀûÀ¸·Î ÁÙÀÓ(EaseOut)
+            // ì†ë„ë¥¼ ì„ í˜•ì ìœ¼ë¡œ ì¤„ì„(EaseOut)
             float currentSpeed = Mathf.Lerp(startSpeed, 0f, t);
 
-            // ¿ÀÁ÷ º§·Î½ÃÆ¼(Velocity)¸¸À¸·Î ±¸¸£±â
+            // ì˜¤ì§ ë²¨ë¡œì‹œí‹°(Velocity)ë§Œìœ¼ë¡œ êµ¬ë¥´ê¸°
             myRigidbody.linearVelocity = rollDirection * currentSpeed;
 
             yield return new WaitForFixedUpdate();
         }
 
-        // ±¸¸£±â°¡ ³¡³­ ÈÄ ÀÜ¿© ¼Óµµ¸¦ ¼Ò¸ê½ÃÄÑ ¹Ì²ô·¯Áü ¹æÁö
+        // êµ¬ë¥´ê¸°ê°€ ëë‚œ í›„ ì”ì—¬ ì†ë„ë¥¼ ì†Œë©¸ì‹œì¼œ ë¯¸ë„ëŸ¬ì§ ë°©ì§€
         myRigidbody.linearVelocity = Vector3.zero;
 
     }
 
-    // »óÅÂ ¼³Á¤¿ë
+    // ìƒíƒœ ì„¤ì •ìš©
     private IEnumerator RollingStateCoroutine()
     {
         OnRollEvent?.Invoke();
@@ -352,7 +352,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     #endregion
 
-    #region ¹«±â ÀüÈ¯
+    #region ë¬´ê¸° ì „í™˜
     public void TrySwapWeapon(InputAction.CallbackContext ctx)
     {
         if (myEquippedGun != null)
@@ -387,15 +387,15 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     }
     #endregion
 
-    #region ´Ş¸®±â
+    #region ë‹¬ë¦¬ê¸°
     public void SprintStart(InputAction.CallbackContext ctx)
     {
-        // ±âÀı, »ç¸Á µî Á¶ÀÛ ºÒ´É »óÅÂ¸é ´Ş¸®±â ¹«½Ã
+        // ê¸°ì ˆ, ì‚¬ë§ ë“± ì¡°ì‘ ë¶ˆëŠ¥ ìƒíƒœë©´ ë‹¬ë¦¬ê¸° ë¬´ì‹œ
         if (playerState == PlayerState.NotReady || playerState == PlayerState.Stunned || playerState == PlayerState.Dead) return;
 
         isSprinting = true;
         playerState = PlayerState.Sprint;
-        // ÇÊ¿äÇÏ´Ù¸é ¿©±â¼­ playerState = PlayerState.Sprint; ·Î º¯°æÇØµµ ÁÁ½À´Ï´Ù.
+        // í•„ìš”í•˜ë‹¤ë©´ ì—¬ê¸°ì„œ playerState = PlayerState.Sprint; ë¡œ ë³€ê²½í•´ë„ ì¢‹ìŠµë‹ˆë‹¤.
         Debug.Log("[PlayerController] Im Start Sprinting");
     }
 
@@ -428,33 +428,33 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     }
 
-    #region ´øÁö±â , Áİ±â
+    #region ë˜ì§€ê¸° , ì¤ê¸°
 
     public void PickUpAndDrop(InputAction.CallbackContext ctx)
     {
         if (!photonView.IsMine || !ctx.performed) return;
         if (Time.time < _pickupCooldownEnd) return;
 
-        // 1. ÁÖº¯¿¡ ³ëµå°¡ ÀÖÀ¸¸é (°¡¿ë ¿©ºÎ ¹«°ü) µå·Ó Â÷´Ü
+        // 1. ì£¼ë³€ì— ë…¸ë“œê°€ ìˆìœ¼ë©´ (ê°€ìš© ì—¬ë¶€ ë¬´ê´€) ë“œë¡­ ì°¨ë‹¨
         if (closestNode != null)
         {
             if (closestNode.IsAvailable)
             {
                 closestNode.RequestPickup(photonView.ViewID);
-                // RPC ¿Õº¹ Áö¿¬ µ¿¾È Q ÀçÀÔ·ÂÀ¸·Î TryThrow ¹æÁö
+                // RPC ì™•ë³µ ì§€ì—° ë™ì•ˆ Q ì¬ì…ë ¥ìœ¼ë¡œ TryThrow ë°©ì§€
                 _pickupCooldownEnd = Time.time + 0.5f;
             }
             closestNode = null;
             return;
         }
-        // 2. ³ëµå°¡ ¿ÏÀüÈ÷ ¾øÀ» ¶§¸¸ ´øÁö±â
+        // 2. ë…¸ë“œê°€ ì™„ì „íˆ ì—†ì„ ë•Œë§Œ ë˜ì§€ê¸°
         if (myEquippedGun != null && useGun)
         {
             photonView.RPC(nameof(RPC_TryThrow), RpcTarget.All, (int)((Gun)myEquippedGun).WeaponType);
         }
     }
 
-    #region Áİ±â
+    #region ì¤ê¸°
     private void OnTriggerEnter(Collider other)
     {
         if (!photonView.IsMine) return;
@@ -513,7 +513,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
                 }
             }
 
-            // Toggle label: ÀÌÀü ³ëµåÀÇ ·¹ÀÌºíÀ» ²ô°í »õ ³ëµåÀÇ ·¹ÀÌºíÀ» ÄÒ´Ù
+            // Toggle label: ì´ì „ ë…¸ë“œì˜ ë ˆì´ë¸”ì„ ë„ê³  ìƒˆ ë…¸ë“œì˜ ë ˆì´ë¸”ì„ ì¼ ë‹¤
             if (tempClosest != prevClosest)
             {
                 if (prevClosest != null)
@@ -531,7 +531,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
             closestNode = tempClosest;
         }
 
-        // ÁÖÀ§¿¡ ´õÀÌ»ó ³ëµå°¡ ¾øÀ» ‹š
+        // ì£¼ìœ„ì— ë”ì´ìƒ ë…¸ë“œê°€ ì—†ì„ ë–„
         if (closestNode != null) 
         {
             GameEvents.PickupUIUpdate(false, Vector3.zero);
@@ -580,7 +580,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
             photonView.RPC(nameof(SwapWeapon), RpcTarget.All, true);
         }
 
-        // ÀåÂø Á÷ÈÄ Q ¿¬Å¸·Î ¹ß ¹Ø ³ëµå¸¦ Áï½Ã Áİ´Â ·çÇÁ ¹æÁö
+        // ì¥ì°© ì§í›„ Q ì—°íƒ€ë¡œ ë°œ ë°‘ ë…¸ë“œë¥¼ ì¦‰ì‹œ ì¤ëŠ” ë£¨í”„ ë°©ì§€
         if (photonView.IsMine) _pickupCooldownEnd = Time.time + 0.4f;
     }
 
@@ -621,15 +621,15 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     #endregion
 
-    #region ´øÁö±â
+    #region ë˜ì§€ê¸°
 
     [PunRPC]
     private void TryThrow(int _viewID)
     {
-        // ³» ¼Õ¿¡ ÃÑÀÌ ¾ø°Å³ª, ´øÁö¶ó´Â ÃÑÀÇ ID°¡ ³» ¼ÕÀÇ ÃÑ°ú ´Ù¸£¸é ¹«½Ã
+        // ë‚´ ì†ì— ì´ì´ ì—†ê±°ë‚˜, ë˜ì§€ë¼ëŠ” ì´ì˜ IDê°€ ë‚´ ì†ì˜ ì´ê³¼ ë‹¤ë¥´ë©´ ë¬´ì‹œ
         if (myEquippedGun == null || myEquippedGun.photonView.ViewID != _viewID) return;
 
-        // ¹«±â°¡ GunÀÏ ¶§¸¸ ´øÁö±â(ThrowWeapon) ½ÇÇà
+        // ë¬´ê¸°ê°€ Gunì¼ ë•Œë§Œ ë˜ì§€ê¸°(ThrowWeapon) ì‹¤í–‰
         if (myEquippedGun is Gun myGun)
         {
             myGun.ThrowWeapon();
@@ -637,8 +637,8 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         }
         else
         {
-            // ¸¸¾à Ä®(MeleeKnife)µµ ³ªÁß¿¡ ´øÁö´Â ±â´ÉÀÌ »ı±ä´Ù¸é
-            Debug.Log("ÀÌ ¹«±â´Â ´øÁú ¼ö ¾ø´Â ¹«±âÀÔ´Ï´Ù (GunÀÌ ¾Æ´Ô).");
+            // ë§Œì•½ ì¹¼(MeleeKnife)ë„ ë‚˜ì¤‘ì— ë˜ì§€ëŠ” ê¸°ëŠ¥ì´ ìƒê¸´ë‹¤ë©´
+            Debug.Log("ì´ ë¬´ê¸°ëŠ” ë˜ì§ˆ ìˆ˜ ì—†ëŠ” ë¬´ê¸°ì…ë‹ˆë‹¤ (Gunì´ ì•„ë‹˜).");
         }
 
         if (photonView.IsMine)
@@ -657,18 +657,18 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     public void TryInteract(InputAction.CallbackContext ctx)
     {
-        // 1. ³» ÁÖº¯ 2m ¾ÈÀÇ °¡±¸/¿ÀºêÁ§Æ® °Ë»ö
+        // 1. ë‚´ ì£¼ë³€ 2m ì•ˆì˜ ê°€êµ¬/ì˜¤ë¸Œì íŠ¸ ê²€ìƒ‰
         Collider[] hits = Physics.OverlapSphere(transform.position, interactRadius, interactableLayer);
 
         foreach (var hit in hits)
         {
-            // 2. ÀÎÅÍÆäÀÌ½º ÃßÃâ ½Ãµµ
+            // 2. ì¸í„°í˜ì´ìŠ¤ ì¶”ì¶œ ì‹œë„
             if (hit.TryGetComponent<IInteractable>(out var target))
             {
-                // 3. µÈ´Ù¸é ½ÇÇà
+                // 3. ëœë‹¤ë©´ ì‹¤í–‰
                 target.Interact(this);
 
-                break; // ÇÑ ¹ø¿¡ ÇÏ³ª¸¸ »óÈ£ÀÛ¿ë
+                break; // í•œ ë²ˆì— í•˜ë‚˜ë§Œ ìƒí˜¸ì‘ìš©
             }
         }
     }
@@ -679,7 +679,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     public void OnReceiveImpact(ImpactData _data)
     {
         Debug.Log($"[PlayerController] On Impact actor: {_data.attackerActorNumber}, ATKteam : {_data.attackerTeam}, myTeam{myTeam} , Data : {_data.type}");
-        // »óÅÂ °Ë»ç
+        // ìƒíƒœ ê²€ì‚¬
         if (
             curHp <= 0
             || playerState == PlayerState.NotReady
@@ -696,7 +696,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
             return;
         }
 
-        //³»°¡ ½ğ ÃÑ¾ËÀÌ ¾Æ´Ï¸é µ¥¹ÌÁö RPCÈ£Ãâ
+        //ë‚´ê°€ ìœ ì´ì•Œì´ ì•„ë‹ˆë©´ ë°ë¯¸ì§€ RPCí˜¸ì¶œ
         if (_data.attackerActorNumber != photonView.Owner.ActorNumber)
         {
             photonView.RPC(nameof(TakeDamage), RpcTarget.All, _data.damage, _data.hitNormal, _data.attackerActorNumber);
@@ -712,7 +712,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         OnHitEvent?.Invoke();
         Debug.Log($"[PlayerController] <color=red> Hit </color> {photonView.Owner.ActorNumber}'s Hp Is : {curHp}");
 
-        // ÇÇ°İ Ä«¸Ş¶ó ½¦ÀÌÅ©
+        // í”¼ê²© ì¹´ë©”ë¼ ì‰ì´í¬
         if (photonView.IsMine && damageImpulseSource != null)
         {
             GameEvents.HpChanged(curHp);
@@ -741,7 +741,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     {
         DropWeapon();
         playerState = PlayerState.Dead;
-        // ÀÎÇ² ¸Ş´ÏÀú¿¡°Ô Äİ¹é ÇÊ¿ä
+        // ì¸í’‹ ë©”ë‹ˆì €ì—ê²Œ ì½œë°± í•„ìš”
         RoundManager.Instance?.OnPlayerDied(this, _attackerNum);
 
         if (hasEnemyFlag)
@@ -751,7 +751,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         }
         myRigidbody.Sleep();
 
-        // ½ÃÃ¼°¡ »ì¾ÆÀÖ´Â ÇÃ·¹ÀÌ¾î ÀÌµ¿À» ¸·Áö ¾Êµµ·Ï Äİ¶óÀÌ´õ ºñÈ°¼ºÈ­
+        // ì‹œì²´ê°€ ì‚´ì•„ìˆëŠ” í”Œë ˆì´ì–´ ì´ë™ì„ ë§‰ì§€ ì•Šë„ë¡ ì½œë¼ì´ë” ë¹„í™œì„±í™”
         if (col != null) col.enabled = false;
 
         StartCoroutine(DeathRoutine());

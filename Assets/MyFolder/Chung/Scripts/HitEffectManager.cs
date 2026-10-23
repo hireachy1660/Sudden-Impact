@@ -1,13 +1,13 @@
-using Photon.Pun;
+ï»¿using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon;
 
 /// <summary>
-/// ·¹ÀÌÄ³½ºÆ® ÇÇ°İ ÁöÁ¡¿¡ ÆÄÆ¼Å¬ ÀÌÆåÆ®¸¦ Àç»ıÇÏ´Â ½Ì±ÛÅæ ¸Å´ÏÀú.
+/// ë ˆì´ìºìŠ¤íŠ¸ í”¼ê²© ì§€ì ì— íŒŒí‹°í´ ì´í™íŠ¸ë¥¼ ì¬ìƒí•˜ëŠ” ì‹±ê¸€í†¤ ë§¤ë‹ˆì €.
 ///
-/// »ç¿ë¹ı (Gun ¼­ºêÅ¬·¡½ºÀÇ FireProjectile µî ·¹ÀÌÄ³½ºÆ® È÷Æ® Ã³¸® ºÎºĞ):
+/// ì‚¬ìš©ë²• (Gun ì„œë¸Œí´ë˜ìŠ¤ì˜ FireProjectile ë“± ë ˆì´ìºìŠ¤íŠ¸ íˆíŠ¸ ì²˜ë¦¬ ë¶€ë¶„):
 ///   if (Physics.Raycast(..., out RaycastHit hit))
 ///   {
 ///       HitEffectManager.Instance.PlayHitEffect(hit.point, hit.normal);
@@ -18,7 +18,7 @@ public class HitEffectManager : MonoBehaviourPun
     public static HitEffectManager Instance { get; private set; }
 
     [Header("References")]
-    [Tooltip("¾À Æú´õ¿¡ ÀúÀåµÈ ÇÇ°İ ÆÄÆ¼Å¬ ÇÁ¸®ÆÕ")]
+    [Tooltip("ì”¬ í´ë”ì— ì €ì¥ëœ í”¼ê²© íŒŒí‹°í´ í”„ë¦¬íŒ¹")]
     [SerializeField] private ParticleSystem hitEffectPrefab;
 
     [Header("Pool Settings")]
@@ -35,7 +35,7 @@ public class HitEffectManager : MonoBehaviourPun
         }
         Instance = this;
 
-        // ÃÊ±â Ç® »ı¼º
+        // ì´ˆê¸° í’€ ìƒì„±
         for (int i = 0; i < poolSize; i++)
         {
             var ps = Instantiate(hitEffectPrefab, transform);
@@ -44,7 +44,7 @@ public class HitEffectManager : MonoBehaviourPun
         }
     }
 
-    // ¿ÜºÎ È£Ãâ ÁøÀÔÁ¡
+    // ì™¸ë¶€ í˜¸ì¶œ ì§„ì…ì 
     public void SpawnEffect(Vector3 _position, Vector3 _normal)
     {
         PlayHitEffect(_position, _normal);
@@ -52,7 +52,7 @@ public class HitEffectManager : MonoBehaviourPun
     }
 
     /// <summary>
-    /// hit.point + hit.normalÀ» ¹Ş¾Æ ÀÌÆåÆ®¸¦ Àç»ıÇÏ°í 1ÃÊ ÈÄ Ç®¿¡ ¹İ³³ÇÕ´Ï´Ù.
+    /// hit.point + hit.normalì„ ë°›ì•„ ì´í™íŠ¸ë¥¼ ì¬ìƒí•˜ê³  1ì´ˆ í›„ í’€ì— ë°˜ë‚©í•©ë‹ˆë‹¤.
     /// </summary>
     [PunRPC]
 
@@ -67,7 +67,7 @@ public class HitEffectManager : MonoBehaviourPun
     }
 
     /// <summary>
-    /// È¸Àü°ªÀ» Á÷Á¢ ÁöÁ¤ÇØ¼­ ÀÌÆåÆ®¸¦ Àç»ıÇÕ´Ï´Ù.
+    /// íšŒì „ê°’ì„ ì§ì ‘ ì§€ì •í•´ì„œ ì´í™íŠ¸ë¥¼ ì¬ìƒí•©ë‹ˆë‹¤.
     /// </summary>
     public void PlayHitEffect(Vector3 _position, Quaternion _rotation)
     {
@@ -78,14 +78,14 @@ public class HitEffectManager : MonoBehaviourPun
         StartCoroutine(ReturnToPoolAfter(effect, 1f));
     }
 
-    // ¦¡¦¡¦¡ ³»ºÎ ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€ ë‚´ë¶€ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private ParticleSystem GetOrCreate()
     {
         if (pool.Count > 0)
             return pool.Dequeue();
 
-        // Ç®ÀÌ ºÎÁ·ÇÏ¸é ÀÓ½Ã »ı¼º (µå¹® ÄÉÀÌ½º)
+        // í’€ì´ ë¶€ì¡±í•˜ë©´ ì„ì‹œ ìƒì„± (ë“œë¬¸ ì¼€ì´ìŠ¤)
         return Instantiate(hitEffectPrefab, transform);
     }
 

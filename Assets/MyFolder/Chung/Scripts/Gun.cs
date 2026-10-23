@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using Photon.Pun;
 using Unity.Cinemachine;
 using System.Collections;
@@ -6,14 +6,14 @@ using System.Collections;
 public abstract class Gun : Weapon
 {
     [Header("Gun References")]
-    [SerializeField] protected GameObject projectilePrefab;     // ½î´Â ÃÑ¾Ë ÇÁ¸®ÆÕ
-    [SerializeField] protected GameObject thrownWeaponPrefab; // ´øÁö´Â ÃÑ(¹«±â) ÇÁ¸®ÆÕ
+    [SerializeField] protected GameObject projectilePrefab;     // ì˜ëŠ” ì´ì•Œ í”„ë¦¬íŒ¹
+    [SerializeField] protected GameObject thrownWeaponPrefab; // ë˜ì§€ëŠ” ì´(ë¬´ê¸°) í”„ë¦¬íŒ¹
     [SerializeField] private CinemachineImpulseSource impulseSource;
     [SerializeField] private GameObject ripple;
 
     [Header("Parameter")]
     [SerializeField] protected int maxAmmo = 30;
-    [SerializeField] protected float fireRate = 0.1f;         // ¿¬»ç ¼Óµµ 
+    [SerializeField] protected float fireRate = 0.1f;         // ì—°ì‚¬ ì†ë„ 
 
     [Header("MuzzleFlash")]
     [SerializeField] private Light flashLight;
@@ -24,16 +24,16 @@ public abstract class Gun : Weapon
     [SerializeField][Range(0f, 1f)] private float fireVolume = 1f;
 
     [Header("Ripple Setting")]
-    [Tooltip("¸®ÇÃ »ı¼º ½Ã°£ ÃÖ¼Ò °£°İ")]
+    [Tooltip("ë¦¬í”Œ ìƒì„± ì‹œê°„ ìµœì†Œ ê°„ê²©")]
     [SerializeField] private float rippleCooldown = 0.3f;
-    [Tooltip("ÇØ´ç °Å¸® ÀÌ»óÀÏ ¶§ ¸®ÇÃ »ı¼º")]
+    [Tooltip("í•´ë‹¹ ê±°ë¦¬ ì´ìƒì¼ ë•Œ ë¦¬í”Œ ìƒì„±")]
     [SerializeField] private float rippleMinDistance = 8f;
 
-    [Tooltip("Ã¼Å© ½Ã ²Ú ´©¸£¸é ¿¬»ç, ÇØÁ¦ ½Ã Å¬¸¯¸¶´Ù ´Ü¹ß")]
-    public bool isAutomatic = true;                           // ´Ü¹ß/¿¬»ç ±¸ºĞ¿ë ½ºÀ§Ä¡ (PlayerController¿¡¼­ ÀĞÀ½)
+    [Tooltip("ì²´í¬ ì‹œ ê¾¹ ëˆ„ë¥´ë©´ ì—°ì‚¬, í•´ì œ ì‹œ í´ë¦­ë§ˆë‹¤ ë‹¨ë°œ")]
+    public bool isAutomatic = true;                           // ë‹¨ë°œ/ì—°ì‚¬ êµ¬ë¶„ìš© ìŠ¤ìœ„ì¹˜ (PlayerControllerì—ì„œ ì½ìŒ)
 
     protected int currentAmmo;
-    protected float lastFireTime;                             // ¸¶Áö¸·À¸·Î ÃÑÀ» ½ğ ½Ã°£À» ±â¾ïÇÏ´Â º¯¼ö
+    protected float lastFireTime;                             // ë§ˆì§€ë§‰ìœ¼ë¡œ ì´ì„ ìœ ì‹œê°„ì„ ê¸°ì–µí•˜ëŠ” ë³€ìˆ˜
     private float lastRippleTime;
     private Coroutine flashCoroutine;
 
@@ -42,8 +42,8 @@ public abstract class Gun : Weapon
 
     protected virtual void OnEnable()
     {
-        //currentAmmo = maxAmmo; ÃÑÀ» ²¨³¾ ¶§ ÀåÅº¼ö Ã¤¿ì±â
-        lastFireTime = 0f;     // ¹«±â¸¦ ²¨³»ÀÚ¸¶ÀÚ ¹Ù·Î ½ò ¼ö ÀÖµµ·Ï Å¸ÀÌ¸Ó ÃÊ±âÈ­
+        //currentAmmo = maxAmmo; ì´ì„ êº¼ë‚¼ ë•Œ ì¥íƒ„ìˆ˜ ì±„ìš°ê¸°
+        lastFireTime = 0f;     // ë¬´ê¸°ë¥¼ êº¼ë‚´ìë§ˆì ë°”ë¡œ ì  ìˆ˜ ìˆë„ë¡ íƒ€ì´ë¨¸ ì´ˆê¸°í™”
     }
 
     public override void SetOwner(int _actorNumber, int _team)
@@ -62,19 +62,19 @@ public abstract class Gun : Weapon
 
     public override void Attack(bool isHeld = false)
     {
-        // ´Ü¹ß ¹«±â && ¸¶¿ì½º¸¦ ²Ú ´©¸£°í ÀÖ´Â(Hold) È£ÃâÀÌ¸é ¹«½Ã
+        // ë‹¨ë°œ ë¬´ê¸° && ë§ˆìš°ìŠ¤ë¥¼ ê¾¹ ëˆ„ë¥´ê³  ìˆëŠ”(Hold) í˜¸ì¶œì´ë©´ ë¬´ì‹œ
         if (!isAutomatic && isHeld) return;
 
-        // Äğ´Ù¿î ¹× ÀÜÅº È®ÀÎ °øÅë·ÎÁ÷
+        // ì¿¨ë‹¤ìš´ ë° ì”íƒ„ í™•ì¸ ê³µí†µë¡œì§
         if (Time.time < lastFireTime + fireRate) return;
 
         if (currentAmmo <= 0)
         {
-            Debug.Log("ÀåÅº¼ö°¡ ºÎÁ·ÇÕ´Ï´Ù! (ÀçÀåÀü ÇÊ¿ä)");
+            Debug.Log("ì¥íƒ„ìˆ˜ê°€ ë¶€ì¡±í•©ë‹ˆë‹¤! (ì¬ì¥ì „ í•„ìš”)");
             return;
         }
 
-        // °Ë»ç Åë°ú ½Ã°£ °»½Å ¹× Åº¾à ¼Ò¸ğ
+        // ê²€ì‚¬ í†µê³¼ ì‹œê°„ ê°±ì‹  ë° íƒ„ì•½ ì†Œëª¨
         lastFireTime = Time.time;
         currentAmmo--;
 
@@ -83,7 +83,7 @@ public abstract class Gun : Weapon
             GameEvents.AmmoChanged(currentAmmo, maxAmmo);
         }
 
-        // ½ÇÁ¦ ÅºÈ¯ »ı¼º ·ÎÁ÷
+        // ì‹¤ì œ íƒ„í™˜ ìƒì„± ë¡œì§
         FireProjectile();
         photonView.RPC(nameof(RPC_MuzzleFlash), RpcTarget.All);
         
@@ -100,23 +100,23 @@ public abstract class Gun : Weapon
         }
     }
 
-    // 3. ÀÚ½Ä Å¬·¡½ºµéÀÌ ¹İµå½Ã ±¸ÇöÇØ¾ß ÇÏ´Â '¼ø¼ö ¹ß»ç ·ÎÁ÷'
+    // 3. ìì‹ í´ë˜ìŠ¤ë“¤ì´ ë°˜ë“œì‹œ êµ¬í˜„í•´ì•¼ í•˜ëŠ” 'ìˆœìˆ˜ ë°œì‚¬ ë¡œì§'
     protected abstract void FireProjectile();
 
-    // PlayerController¿¡¼­ È£ÃâÇÏ´Â ¹«±â ´øÁö±â ±â´É
+    // PlayerControllerì—ì„œ í˜¸ì¶œí•˜ëŠ” ë¬´ê¸° ë˜ì§€ê¸° ê¸°ëŠ¥
     public virtual void ThrowWeapon()
     {
         if (thrownWeaponPrefab == null) return;
 
-        // Æ÷Åæ Äİ¹é »ç¿ë
+        // í¬í†¤ ì½œë°± ì‚¬ìš©
         object[] info = new object[]
         {
             ownerActorNumber, ownerTeam, 0f
         };
 
-        // ±âÁ¸: transform.position / rotation(ÃÑ ¸öÃ¼ ±âÁØ) ¡æ ¹æÇâ ¿À·ù
-        // ÃÑ¾Ë°ú µ¿ÀÏÇÏ°Ô attackPoint ±âÁØÀ¸·Î ¹ß»ç (PistolGun.FireProjectile Âü°í)
-        // ±âÁ¸: PhotonNetwork.Instantiate(..., transform.position, transform.rotation, ...)
+        // ê¸°ì¡´: transform.position / rotation(ì´ ëª¸ì²´ ê¸°ì¤€) â†’ ë°©í–¥ ì˜¤ë¥˜
+        // ì´ì•Œê³¼ ë™ì¼í•˜ê²Œ attackPoint ê¸°ì¤€ìœ¼ë¡œ ë°œì‚¬ (PistolGun.FireProjectile ì°¸ê³ )
+        // ê¸°ì¡´: PhotonNetwork.Instantiate(..., transform.position, transform.rotation, ...)
         Vector3 throwDir = attackPoint.forward;
         throwDir.y = 0f;
         Quaternion throwRotation = throwDir.sqrMagnitude > 0.001f
@@ -143,32 +143,32 @@ public abstract class Gun : Weapon
 
     private IEnumerator FlashCoroutine()
     {
-        //  ¸Å¹ø ºûÀÇ ¼¼±â(Intensity)¿Í Å©±â¸¦ ·£´ıÀ¸·Î
+        //  ë§¤ë²ˆ ë¹›ì˜ ì„¸ê¸°(Intensity)ì™€ í¬ê¸°ë¥¼ ëœë¤ìœ¼ë¡œ
         if (flashLight == null) yield break; 
             
-        flashLight.intensity = Random.Range(10f, 20f); // ¶óÀÌÆ® ¹à±â º¯È­
+        flashLight.intensity = Random.Range(10f, 20f); // ë¼ì´íŠ¸ ë°ê¸° ë³€í™”
         flashLight.range = Random.Range(7f, 13f);
 
-        // ÄÑ±â
+        // ì¼œê¸°
         if (flashLight != null) flashLight.enabled = true;
 
-        // Å¸ÀÌ¹ÖÀº 0.02ÃÊ ~ 0.04ÃÊ µ¿¾È ÄÑÁö°Ô
+        // íƒ€ì´ë°ì€ 0.02ì´ˆ ~ 0.04ì´ˆ ë™ì•ˆ ì¼œì§€ê²Œ
         yield return new WaitForSeconds(0.03f);
 
-        // ²ô±â
+        // ë„ê¸°
         if (flashLight != null) flashLight.enabled = false;
     }
 
     [PunRPC]
     public void SpawnRipple(Vector3 _pos, int _spawnTeam)
     {
-        // °°Àº ÆÀÀÌ¸é ½ºÅµ
+        // ê°™ì€ íŒ€ì´ë©´ ìŠ¤í‚µ
         if (_spawnTeam == (int)PhotonNetwork.LocalPlayer.CustomProperties["Team"]) return;
 
-        // Äğ´Ù¿î: °°Àº ÃÑ¿¡¼­ ³Ê¹« ÀÚÁÖ »ı¼º ¹æÁö
+        // ì¿¨ë‹¤ìš´: ê°™ì€ ì´ì—ì„œ ë„ˆë¬´ ìì£¼ ìƒì„± ë°©ì§€
         if (Time.time - lastRippleTime < rippleCooldown) return;
 
-        // °Å¸® Ã¼Å©: ³Ê¹« °¡±î¿ì¸é Á÷Á¢ º¸ÀÌ´Â »óÈ²ÀÌ¹Ç·Î ½ºÅµ (XZ Æò¸é ±âÁØ)
+        // ê±°ë¦¬ ì²´í¬: ë„ˆë¬´ ê°€ê¹Œìš°ë©´ ì§ì ‘ ë³´ì´ëŠ” ìƒí™©ì´ë¯€ë¡œ ìŠ¤í‚µ (XZ í‰ë©´ ê¸°ì¤€)
         Vector3 camPos = Camera.main.transform.position;
         float distSqr = (_pos.x - camPos.x) * (_pos.x - camPos.x)
                       + (_pos.z - camPos.z) * (_pos.z - camPos.z);

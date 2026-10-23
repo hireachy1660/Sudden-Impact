@@ -1,13 +1,13 @@
-using Photon.Pun;
+ï»¿using Photon.Pun;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MeleeKnife : Weapon
 {
     [Header("Melee Settings")]
-    [SerializeField] private Vector3 boxSize = new Vector3(2f, 1f, 1.5f); // ÀüÃ¼ Å©±â (°¡·Î, ¼¼·Î, ±íÀÌ)
-    [SerializeField] private float attackOffset = 1.0f; // Ä³¸¯ÅÍ Áß½ÉÀ¸·ÎºÎÅÍ ¾ó¸¶³ª ¾Õ¿¡¼­ ÆÇÁ¤ÀÌ »ı±æÁö
-    [SerializeField] private LayerMask targetLayer;       // ´ë»ó ·¹ÀÌ¾î (Player, Furniture µî)
+    [SerializeField] private Vector3 boxSize = new Vector3(2f, 1f, 1.5f); // ì „ì²´ í¬ê¸° (ê°€ë¡œ, ì„¸ë¡œ, ê¹Šì´)
+    [SerializeField] private float attackOffset = 1.0f; // ìºë¦­í„° ì¤‘ì‹¬ìœ¼ë¡œë¶€í„° ì–¼ë§ˆë‚˜ ì•ì—ì„œ íŒì •ì´ ìƒê¸¸ì§€
+    [SerializeField] private LayerMask targetLayer;       // ëŒ€ìƒ ë ˆì´ì–´ (Player, Furniture ë“±)
 
 
     [Header("Cooldown")]
@@ -23,26 +23,26 @@ public class MeleeKnife : Weapon
         if (Time.time < _cooldownEnd) return;
         _cooldownEnd = Time.time + attackCooldown;
 
-        // 1. ÆÇÁ¤ Áß½ÉÁ¡ °è»ê (¿¡ÀÓ ¹æÇâÀ¸·Î attackOffset¸¸Å­ ¶³¾îÁø °÷)
+        // 1. íŒì • ì¤‘ì‹¬ì  ê³„ì‚° (ì—ì„ ë°©í–¥ìœ¼ë¡œ attackOffsetë§Œí¼ ë–¨ì–´ì§„ ê³³)
         Vector3 attackPos = attackPoint.position;
         Quaternion orientation = attackPoint.rotation;
         Vector3 halfExtents = boxSize / 2f;
 
-        // 2. ÇØ´ç ¿µ¿ª ³»ÀÇ ¸ğµç Äİ¶óÀÌ´õ °ËÃâ
+        // 2. í•´ë‹¹ ì˜ì—­ ë‚´ì˜ ëª¨ë“  ì½œë¼ì´ë” ê²€ì¶œ
         Collider[] hitColliders = Physics.OverlapBox(attackPos, halfExtents, orientation, targetLayer);
 
-        // 3. Áßº¹ Å¸°İ ¹æÁö¸¦ À§ÇÑ ¼Â (ÇÑ ¹ø ÈÖµÑ·¯¼­ µ¿ÀÏ °´Ã¼ ¿©·¯ ¹ø Å¸°İ ¹æÁö)
+        // 3. ì¤‘ë³µ íƒ€ê²© ë°©ì§€ë¥¼ ìœ„í•œ ì…‹ (í•œ ë²ˆ íœ˜ë‘˜ëŸ¬ì„œ ë™ì¼ ê°ì²´ ì—¬ëŸ¬ ë²ˆ íƒ€ê²© ë°©ì§€)
         HashSet<IAttackReceiver> hitTargets = new HashSet<IAttackReceiver>();
 
         foreach (var hit in hitColliders)
         {
-            // ³ª ÀÚ½Å(¶Ç´Â ³» Ä³¸¯ÅÍ ÃÖ»ó´Ü)Àº Á¦¿Ü
+            // ë‚˜ ìì‹ (ë˜ëŠ” ë‚´ ìºë¦­í„° ìµœìƒë‹¨)ì€ ì œì™¸
             if (hit.transform.root == transform.root) continue;
 
             if (isDebugMode)
                 damage = 50;
 
-            // ÀÎÅÍÆäÀÌ½º ÃßÃâ
+            // ì¸í„°í˜ì´ìŠ¤ ì¶”ì¶œ
             IAttackReceiver receiver = hit.GetComponent<IAttackReceiver>();
 
             if (receiver != null && !hitTargets.Contains(receiver))
@@ -61,8 +61,8 @@ public class MeleeKnife : Weapon
                     hitNormal = attackPoint.forward,
                 };
 
-                // 4. µ¥¹ÌÁö Àü¼Û (¸ğµç Å¬¶óÀÌ¾ğÆ®¿¡¼­ µ¿ÀÏÇÏ°Ô Ã³¸®µÇµµ·Ï RPC È£Ãâ)
-                // ÇÇ°İÀÚ°¡ PhotonView¸¦ °¡Áö°í ÀÖ´Ù¸é ÇØ´ç °´Ã¼ÀÇ TakeDamage¸¦ È£ÃâÇÕ´Ï´Ù.
+                // 4. ë°ë¯¸ì§€ ì „ì†¡ (ëª¨ë“  í´ë¼ì´ì–¸íŠ¸ì—ì„œ ë™ì¼í•˜ê²Œ ì²˜ë¦¬ë˜ë„ë¡ RPC í˜¸ì¶œ)
+                // í”¼ê²©ìê°€ PhotonViewë¥¼ ê°€ì§€ê³  ìˆë‹¤ë©´ í•´ë‹¹ ê°ì²´ì˜ TakeDamageë¥¼ í˜¸ì¶œí•©ë‹ˆë‹¤.
                 receiver.OnReceiveImpact(date);
 
                 Debug.Log($"[Knife] <color=yellow>Hit!</color> Target: {hit.name} / Damage: {damage}");
@@ -70,7 +70,7 @@ public class MeleeKnife : Weapon
         }
     }
 
-    // ¿¡µğÅÍ¿¡¼­ °ø°İ ¹üÀ§¸¦ ½Ã°¢ÀûÀ¸·Î È®ÀÎÇÏ±â À§ÇÔ
+    // ì—ë””í„°ì—ì„œ ê³µê²© ë²”ìœ„ë¥¼ ì‹œê°ì ìœ¼ë¡œ í™•ì¸í•˜ê¸° ìœ„í•¨
     private void OnDrawGizmosSelected()
     {
         if(!isDebugMode) return;

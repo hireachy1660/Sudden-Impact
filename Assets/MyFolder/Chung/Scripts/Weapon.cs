@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using Photon.Pun;
 
 public abstract class Weapon : MonoBehaviourPun
@@ -18,26 +18,26 @@ public abstract class Weapon : MonoBehaviourPun
     [Header("Weapon Status")]
     [SerializeField] protected float damage = 10f;
 
-    [Tooltip("ÃÑ±¸ ¶Ç´Â Ä®ÀÇ °ø°İ ÁöÁ¡")]
+    [Tooltip("ì´êµ¬ ë˜ëŠ” ì¹¼ì˜ ê³µê²© ì§€ì ")]
     [SerializeField] protected Transform attackPoint;
 
-    // ¼ÒÀ¯ÀÚ Á¤º¸
+    // ì†Œìœ ì ì •ë³´
     protected int ownerActorNumber;
     protected int ownerTeam;
 
     public Transform AttackPoint { get { return attackPoint; } }
 
-    // ¿ÜºÎ(PlayerAnimator)¿¡¼­ ÀĞ¾î°¥ ¼ö ÀÖµµ·Ï ÇÁ·ÎÆÛÆ¼ °³¹æ
+    // ì™¸ë¶€(PlayerAnimator)ì—ì„œ ì½ì–´ê°ˆ ìˆ˜ ìˆë„ë¡ í”„ë¡œí¼í‹° ê°œë°©
     public EWeaponType WeaponType => weaponType;
 
 
-    // Initialize (PlayerControllerÀÇ SetOwner¿Í ¿¬°áµÊ)
+    // Initialize (PlayerControllerì˜ SetOwnerì™€ ì—°ê²°ë¨)
     public virtual void SetOwner(int _actorNumber, int _team)
     {
         ownerActorNumber = _actorNumber;
         ownerTeam = _team;
     }
 
-    // PlayerController¿¡¼­ È£ÃâÇÏ´Â °ø°İ ¸í·É (Ãß»ó ¸Ş¼­µå·Î °­Á¦)
+    // PlayerControllerì—ì„œ í˜¸ì¶œí•˜ëŠ” ê³µê²© ëª…ë ¹ (ì¶”ìƒ ë©”ì„œë“œë¡œ ê°•ì œ)
     public abstract void Attack(bool isHeld = false);
 }

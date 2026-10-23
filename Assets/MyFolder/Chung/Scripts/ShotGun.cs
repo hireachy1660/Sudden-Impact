@@ -1,19 +1,19 @@
-using Photon.Pun;
+ï»¿using Photon.Pun;
 using UnityEngine;
 
 public class Shotgun : Gun
 {
     [Header("Shotgun Settings")]
-    [Tooltip("ÇÑ ¹ø ½ò ¶§ ³ª°¡´Â ÆÄÆí(Pellet)ÀÇ °³¼ö")]
+    [Tooltip("í•œ ë²ˆ ì  ë•Œ ë‚˜ê°€ëŠ” íŒŒí¸(Pellet)ì˜ ê°œìˆ˜")]
     [SerializeField] private int pelletCount = 5;
 
-    [Tooltip("»êÅºÀÇ ½ÃÀÛ °¢µµ (°¡Àå ¿ŞÂÊ Æç¸´)")]
+    [Tooltip("ì‚°íƒ„ì˜ ì‹œì‘ ê°ë„ (ê°€ì¥ ì™¼ìª½ í ë¦¿)")]
     [SerializeField] private float startAngle = -10f;
 
-    [Tooltip("°¢ Æç¸´ »çÀÌÀÇ ±âº» °£°İ(°¢µµ)")]
+    [Tooltip("ê° í ë¦¿ ì‚¬ì´ì˜ ê¸°ë³¸ ê°„ê²©(ê°ë„)")]
     [SerializeField] private float angleStep = 5f;
 
-    [Tooltip("ÀÚ¿¬½º·¯¿òÀ» À§ÇÑ ·£´ı ³ëÀÌÁî ¹üÀ§")]
+    [Tooltip("ìì—°ìŠ¤ëŸ¬ì›€ì„ ìœ„í•œ ëœë¤ ë…¸ì´ì¦ˆ ë²”ìœ„")]
     [SerializeField] private float randomNoise = 2f;
 
     protected override void FireProjectile()
@@ -27,19 +27,19 @@ public class Shotgun : Gun
             baseRotation = Quaternion.LookRotation(direction);
         }
 
-        // »êÅº °ø½Ä 
+        // ì‚°íƒ„ ê³µì‹ 
         for (int i = 0; i < pelletCount; i++)
         {
-            // -10µµºÎÅÍ ½ÃÀÛÇØ 5µµ¾¿ ´õÇÏ°í, °Å±â¿¡ -2 ~ 2µµÀÇ ·£´ı ³ëÀÌÁî
+            // -10ë„ë¶€í„° ì‹œì‘í•´ 5ë„ì”© ë”í•˜ê³ , ê±°ê¸°ì— -2 ~ 2ë„ì˜ ëœë¤ ë…¸ì´ì¦ˆ
             float currentAngle = startAngle + (angleStep * i) + Random.Range(-randomNoise, randomNoise);
 
-            // º£ÀÌ½º È¸Àü°ª¿¡ °è»êµÈ °¢µµ¸¦ YÃàÀ»(ÁÂ¿ì) ±âÁØÀ¸·Î
+            // ë² ì´ìŠ¤ íšŒì „ê°’ì— ê³„ì‚°ëœ ê°ë„ë¥¼ Yì¶•ì„(ì¢Œìš°) ê¸°ì¤€ìœ¼ë¡œ
             Quaternion pelletRotation = baseRotation * Quaternion.Euler(0f, currentAngle, 0f);
 
-            // µ¥ÀÌÅÍ Æ÷Àå
+            // ë°ì´í„° í¬ì¥
             object[] bulletData = new object[] { ownerActorNumber, ownerTeam, damage };
 
-            // Æç¸´ 1¹ß »ı¼º (·çÆ®¸¦ µ¹¸ç ÃÑ 5¹ßÀÌ °ÅÀÇ µ¿½Ã¿¡ »ı¼º)
+            // í ë¦¿ 1ë°œ ìƒì„± (ë£¨íŠ¸ë¥¼ ëŒë©° ì´ 5ë°œì´ ê±°ì˜ ë™ì‹œì— ìƒì„±)
             PhotonNetwork.Instantiate(
                 projectilePrefab.name,
                 attackPoint.position,

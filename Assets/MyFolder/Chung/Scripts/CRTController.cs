@@ -1,33 +1,33 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections;
 
 /// <summary>
-/// RetroEffect.shader ÀÇ _CRTIntensity ¸¦ ·±Å¸ÀÓ¿¡ Á¦¾î.
-/// Shader.SetGlobalFloat À» »ç¿ëÇÏ¹Ç·Î ¸ÓÆ¼¸®¾ó ÂüÁ¶ ºÒÇÊ¿ä.
+/// RetroEffect.shader ì˜ _CRTIntensity ë¥¼ ëŸ°íƒ€ì„ì— ì œì–´.
+/// Shader.SetGlobalFloat ì„ ì‚¬ìš©í•˜ë¯€ë¡œ ë¨¸í‹°ë¦¬ì–¼ ì°¸ì¡° ë¶ˆí•„ìš”.
 /// </summary>
 public class CRTController : MonoBehaviour
 {
-    [Header("Death Effect (·ÎÄÃ ÇÃ·¹ÀÌ¾î »ç¸Á)")]
+    [Header("Death Effect (ë¡œì»¬ í”Œë ˆì´ì–´ ì‚¬ë§)")]
     [SerializeField][Range(0f, 1f)] private float deathMaxIntensity = 0.85f;
     [SerializeField] private float deathRampUp = 0.3f;
-    // ´ÙÀ½ ¶ó¿îµå ½ÃÀÛ Àü±îÁö ÄÑµÎ·Á¸é ÃæºĞÈ÷ Å« °ª, ÀÚµ¿ Á¾·á´Â ¿øÇÏ´Â ÃÊ·Î ¼³Á¤
-    // [CH Ãß°¡] È¦µå ÈÄ ¼­¼­È÷ ²¨Áö´Â ½Ã°£ (0ÀÌ¸é Áï½Ã ²¨Áü)
+    // ë‹¤ìŒ ë¼ìš´ë“œ ì‹œì‘ ì „ê¹Œì§€ ì¼œë‘ë ¤ë©´ ì¶©ë¶„íˆ í° ê°’, ìë™ ì¢…ë£ŒëŠ” ì›í•˜ëŠ” ì´ˆë¡œ ì„¤ì •
+    // [CH ì¶”ê°€] í™€ë“œ í›„ ì„œì„œíˆ êº¼ì§€ëŠ” ì‹œê°„ (0ì´ë©´ ì¦‰ì‹œ êº¼ì§)
     [SerializeField] private float deathRampDown = 1f;
-    // ¶ó¿îµå Á¾·á ÀÌº¥Æ®°¡ µ¤¾î¾²¹Ç·Î »ç½Ç»ó ¹«ÇÑ À¯Áö
+    // ë¼ìš´ë“œ ì¢…ë£Œ ì´ë²¤íŠ¸ê°€ ë®ì–´ì“°ë¯€ë¡œ ì‚¬ì‹¤ìƒ ë¬´í•œ ìœ ì§€
     [SerializeField] private float deathHold = 5f;
 
-    [Header("Round End Effect (¶ó¿îµå Á¾·á)")]
+    [Header("Round End Effect (ë¼ìš´ë“œ ì¢…ë£Œ)")]
     [SerializeField][Range(0f, 1f)] private float roundEndMaxIntensity = 1.0f;
     [SerializeField] private float roundEndRampUp = 0.5f;
     [SerializeField] private float roundEndHold = 2.5f;
     [SerializeField] private float roundEndRampDown = 1.5f;
 
-    // ¦¡¦¡ ³»ºÎ ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€ ë‚´ë¶€ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private static readonly int k_CRTIntensity = Shader.PropertyToID("_CRTIntensity");
     private float _current;
     private Coroutine _active;
 
-    // ¦¡¦¡ ÀÌº¥Æ® ¿¬°á ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€ ì´ë²¤íŠ¸ ì—°ê²° â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void OnEnable()
     {
         GameEvents.OnLocalPlayerDeath += HandleLocalDeath;
@@ -41,33 +41,33 @@ public class CRTController : MonoBehaviour
         GameEvents.OnRoundEnd -= HandleRoundEnd;
         GameEvents.OnRoundStart -= HandleRoundStart;
 
-        // ¶ó¿îµå Á¾·á½Ã¿¡ CRTÈ¿°ú Á¦°Å
+        // ë¼ìš´ë“œ ì¢…ë£Œì‹œì— CRTíš¨ê³¼ ì œê±°
         if (_active != null) StopCoroutine(_active);
         SetIntensity(0f);
     }
 
-    // ¦¡¦¡ ÇÚµé·¯ ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€ í•¸ë“¤ëŸ¬ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void HandleLocalDeath()
     {
-        // »ç¸Á ÈÄ °­µµ À¯Áö, ¶ó¿îµå Á¾·á ÀÌº¥Æ®°¡ Override
-        // [CH ¼öÁ¤] 0f(Áï½Ã Á¾·á) ¡æ deathRampDown(ÀÎ½ºÆåÅÍ Á¶Àı °¡´É)
+        // ì‚¬ë§ í›„ ê°•ë„ ìœ ì§€, ë¼ìš´ë“œ ì¢…ë£Œ ì´ë²¤íŠ¸ê°€ Override
+        // [CH ìˆ˜ì •] 0f(ì¦‰ì‹œ ì¢…ë£Œ) â†’ deathRampDown(ì¸ìŠ¤í™í„° ì¡°ì ˆ ê°€ëŠ¥)
         Trigger(deathMaxIntensity, deathRampUp, deathHold, deathRampDown);
     }
 
     private void HandleRoundEnd(int winTeam)
     {
-        // ¶ó¿îµå Á¾·á: ´õ °­ÇÏ°Ô ¿Ã·È´Ù°¡ ¼­¼­È÷ º¹±¸
+        // ë¼ìš´ë“œ ì¢…ë£Œ: ë” ê°•í•˜ê²Œ ì˜¬ë ¸ë‹¤ê°€ ì„œì„œíˆ ë³µêµ¬
         Trigger(roundEndMaxIntensity, roundEndRampUp, roundEndHold, roundEndRampDown);
     }
 
     private void HandleRoundStart()
     {
-        // »õ ¶ó¿îµå ½ÃÀÛ ½Ã Áï½Ã ÃÊ±âÈ­
+        // ìƒˆ ë¼ìš´ë“œ ì‹œì‘ ì‹œ ì¦‰ì‹œ ì´ˆê¸°í™”
         if (_active != null) StopCoroutine(_active);
         SetIntensity(0f);
     }
 
-    // ¦¡¦¡ ÄÚ·çÆ¾ ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€ ì½”ë£¨í‹´ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void Trigger(float maxVal, float rampUp, float hold, float rampDown)
     {
         if (_active != null) StopCoroutine(_active);
@@ -90,7 +90,7 @@ public class CRTController : MonoBehaviour
         // Hold
         yield return new WaitForSecondsRealtime(hold);
 
-        // Ramp Down (0ÀÌ¸é ½ºÅµ)
+        // Ramp Down (0ì´ë©´ ìŠ¤í‚µ)
         if (rampDown > 0.001f)
         {
             t = 0f;

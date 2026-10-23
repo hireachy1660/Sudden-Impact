@@ -1,4 +1,4 @@
-using Photon.Pun;
+ï»¿using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,8 +6,8 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// µğ¹ö±×¿ë °æ±â Èå¸§ °ü¸®
-/// ½ÇÁ¦ GameManager·Î ÀçÈ°¿ë ¿¹Á¤
+/// ë””ë²„ê·¸ìš© ê²½ê¸° íë¦„ ê´€ë¦¬
+/// ì‹¤ì œ GameManagerë¡œ ì¬í™œìš© ì˜ˆì •
 /// </summary>
 public class RoundManager : MonoBehaviourPunCallbacks
 {
@@ -16,15 +16,15 @@ public class RoundManager : MonoBehaviourPunCallbacks
     [Header("Registry")]
     [SerializeField] private PlayerRegistry playerRegistry;
 
-    [Header("°æ±â ¼³Á¤")]
-    [SerializeField] private int winScore = 5;          // 5¼±½Â
+    [Header("ê²½ê¸° ì„¤ì •")]
+    [SerializeField] private int winScore = 5;          // 5ì„ ìŠ¹
     [SerializeField] private float roundStartDelay = 3f;
     public float RoundStartDelay
     {
         get { return roundStartDelay; }
     }
 
-    [Header("½ºÆù ¼³Á¤")]
+    [Header("ìŠ¤í° ì„¤ì •")]
     [SerializeField] private Transform[] teamASpawnPoints;
     [SerializeField] private Transform[] teamBSpawnPoints;
 
@@ -64,10 +64,10 @@ public class RoundManager : MonoBehaviourPunCallbacks
         playerRegistry.Clear();
     }
 
-    #region ¿ÜºÎ È£Ãâ
+    #region ì™¸ë¶€ í˜¸ì¶œ
 
     // -----------------------------------------------
-    // ¿ÜºÎ È£Ãâ - ÇÃ·¹ÀÌ¾î »ç¸Á ½Ã PlayerController¿¡¼­ È£Ãâ
+    // ì™¸ë¶€ í˜¸ì¶œ - í”Œë ˆì´ì–´ ì‚¬ë§ ì‹œ PlayerControllerì—ì„œ í˜¸ì¶œ
     // -----------------------------------------------
 
     public void OnPlayerDied(PlayerController player, int _attackerNum)
@@ -80,9 +80,9 @@ public class RoundManager : MonoBehaviourPunCallbacks
         if (_attackerNum == PhotonNetwork.LocalPlayer.ActorNumber)
             GameEvents.KillFloat(player.transform.position);
 
-        if (!PhotonNetwork.IsMasterClient) return; // ¸¶½ºÅÍ Å¬¶óÀÌ¾ğÆ®¸¸ ½ÂÆĞ ÆÇ´Ü
+        if (!PhotonNetwork.IsMasterClient) return; // ë§ˆìŠ¤í„° í´ë¼ì´ì–¸íŠ¸ë§Œ ìŠ¹íŒ¨ íŒë‹¨
 
-        // Á×Àº ÇÃ·¹ÀÌ¾î°¡ Àû ±ê¹ßÀ» µé°í ÀÖ´Ù¸é?
+        // ì£½ì€ í”Œë ˆì´ì–´ê°€ ì  ê¹ƒë°œì„ ë“¤ê³  ìˆë‹¤ë©´?
         if (player.HasEnemyFlag)
         {
             int droppedFlagIndex = -1;
@@ -95,7 +95,7 @@ public class RoundManager : MonoBehaviourPunCallbacks
                 }
             }
 
-            // ¸ğµç Å¬¶óÀÌ¾ğÆ®¿¡°Ô ±ê¹ßÀ» ÀÌ À§Ä¡¿¡ ¶³¾î¶ß¸®¶ó°í ¸í·É!
+            // ëª¨ë“  í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ê¹ƒë°œì„ ì´ ìœ„ì¹˜ì— ë–¨ì–´ëœ¨ë¦¬ë¼ê³  ëª…ë ¹!
             if (droppedFlagIndex != -1)
                 photonView.RPC(nameof(DropFlagRPC), RpcTarget.All, droppedFlagIndex, player.transform.position);
 
@@ -123,18 +123,18 @@ public class RoundManager : MonoBehaviourPunCallbacks
 
     #endregion
 
-    #region ¶ó¿îµå Ã¼Å©
+    #region ë¼ìš´ë“œ ì²´í¬
 
     // -----------------------------------------------
-    // ¶ó¿îµå Ã¼Å©
+    // ë¼ìš´ë“œ ì²´í¬
     // -----------------------------------------------
 
 
-    // »óÈ² A: ºó¼ÕÀ¸·Î Àû ±ê¹ßÀ» ¸¸Áü -> È¹µæ!
-    // ¿©±â¼­ ¸¶½ºÅÍ Å¬¶óÀÌ¾ğÆ®¿¡°Ô "³ª ÀÌ°Å ¸Ô¾ú¾î!" ¶ó°í RPC¸¦ ½÷¼­ µ¿±âÈ­
+    // ìƒí™© A: ë¹ˆì†ìœ¼ë¡œ ì  ê¹ƒë°œì„ ë§Œì§ -> íšë“!
+    // ì—¬ê¸°ì„œ ë§ˆìŠ¤í„° í´ë¼ì´ì–¸íŠ¸ì—ê²Œ "ë‚˜ ì´ê±° ë¨¹ì—ˆì–´!" ë¼ê³  RPCë¥¼ ì´ì„œ ë™ê¸°í™”
     public void OnLocalPlayerTouchedFlag(int enemyflagTeam)
     {
-        // 1. ·¹Áö½ºÆ®¸®¿¡¼­ '³ª'¸¦ Ã£´Â´Ù. 
+        // 1. ë ˆì§€ìŠ¤íŠ¸ë¦¬ì—ì„œ 'ë‚˜'ë¥¼ ì°¾ëŠ”ë‹¤. 
         int myActorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
 
         if (!playerRegistry.TryGetPlayerByActorNumber(myActorNumber, out PlayerController myPlayer)) return;
@@ -147,8 +147,8 @@ public class RoundManager : MonoBehaviourPunCallbacks
         }
     }
 
-    // »óÈ² B: Àû ±ê¹ßÀ» µé°í ¿ì¸® ÆÀ ±ê¹ß(º£ÀÌ½º)À» ¸¸Áü -> µæÁ¡!
-    // µæÁ¡ RPC È£Ãâ (¼¶¸êÀü ¶§ Â®´ø OnRoundEndRPC ÀçÈ°¿ë)
+    // ìƒí™© B: ì  ê¹ƒë°œì„ ë“¤ê³  ìš°ë¦¬ íŒ€ ê¹ƒë°œ(ë² ì´ìŠ¤)ì„ ë§Œì§ -> ë“ì !
+    // ë“ì  RPC í˜¸ì¶œ (ì„¬ë©¸ì „ ë•Œ ì§°ë˜ OnRoundEndRPC ì¬í™œìš©)
     public void OnLocalPlayerReachedGoal(int goalTeam)
     {
         int myActorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
@@ -179,12 +179,12 @@ public class RoundManager : MonoBehaviourPunCallbacks
             }
         }
         if (stolenFlag == null) return;
-        if (stolenFlag.myTeam == playerRegistry.MyTeam) // ¾Æ±º ±ê¹ßÀ» ÁıÀ¸¸é ±ê¹ß°ú ±ê¹ß Áå »ç¶÷ÀÌ Ç¥½ÃµÇ¾î¾ß ÇÔ
+        if (stolenFlag.myTeam == playerRegistry.MyTeam) // ì•„êµ° ê¹ƒë°œì„ ì§‘ìœ¼ë©´ ê¹ƒë°œê³¼ ê¹ƒë°œ ì¥” ì‚¬ëŒì´ í‘œì‹œë˜ì–´ì•¼ í•¨
         {
             flagPointer.UpdateAllyObject(myPlayer.gameObject);
             flagPointer.HasAllyFlag = true;
         }
-        else  // Àû ±ê¹ßÀ» ÁıÀ¸¸é ±ê¹ß°ú ±ê¹ß Áå »ç¶÷ÀÌ Ç¥½ÃµÇ¾î¾ß ÇÔ
+        else  // ì  ê¹ƒë°œì„ ì§‘ìœ¼ë©´ ê¹ƒë°œê³¼ ê¹ƒë°œ ì¥” ì‚¬ëŒì´ í‘œì‹œë˜ì–´ì•¼ í•¨
         {
             flagPointer.UpdateEnemyObject(myPlayer.gameObject);
             flagPointer.HasEnemyFlag = true;
@@ -208,12 +208,12 @@ public class RoundManager : MonoBehaviourPunCallbacks
 
         if (!teamAAlive)
         {
-            // BÆÀ ½Â¸®
+            // BíŒ€ ìŠ¹ë¦¬
             photonView.RPC(nameof(OnRoundEndRPC), RpcTarget.All, 2);
         }
         else if (!teamBAlive)
         {
-            // AÆÀ ½Â¸®
+            // AíŒ€ ìŠ¹ë¦¬
             photonView.RPC(nameof(OnRoundEndRPC), RpcTarget.All, 1);
         }
     }
@@ -224,17 +224,17 @@ public class RoundManager : MonoBehaviourPunCallbacks
 
         foreach (var player in team)
         {
-            // 1´Ü°è: ¸Ş¸ğ¸® »ó¿¡ °´Ã¼°¡ Á¸ÀçÇÏ´ÂÁö (MissingReference ¹æÁö)
+            // 1ë‹¨ê³„: ë©”ëª¨ë¦¬ ìƒì— ê°ì²´ê°€ ì¡´ì¬í•˜ëŠ”ì§€ (MissingReference ë°©ì§€)
             if (player == null) continue;
 
-            // 2´Ü°è: À¯´ÏÆ¼ °´Ã¼·Î¼­ À¯È¿ÇÑÁö È®ÀÎ
+            // 2ë‹¨ê³„: ìœ ë‹ˆí‹° ê°ì²´ë¡œì„œ ìœ íš¨í•œì§€ í™•ì¸
             if (!player.gameObject) continue;
 
-            // 3´Ü°è: »ç¸Á È®ÀÎ
-            // ³»ºÎ »óÅÂ °ªÀ» °Ë»ç
+            // 3ë‹¨ê³„: ì‚¬ë§ í™•ì¸
+            // ë‚´ë¶€ ìƒíƒœ ê°’ì„ ê²€ì‚¬
             if (player.GetPlayerState != PlayerController.PlayerState.Dead)
             {
-                return true; // ÇÑ ¸íÀÌ¶óµµ ÄÑÁ® ÀÖÀ¸¸é ÆÀÀº »ì¾ÆÀÖÀ½
+                return true; // í•œ ëª…ì´ë¼ë„ ì¼œì ¸ ìˆìœ¼ë©´ íŒ€ì€ ì‚´ì•„ìˆìŒ
             }
         }
         return false;
@@ -242,10 +242,10 @@ public class RoundManager : MonoBehaviourPunCallbacks
 
     #endregion
 
-    #region ¶ó¿îµå Á¾·á
+    #region ë¼ìš´ë“œ ì¢…ë£Œ
 
     // -----------------------------------------------
-    // ¶ó¿îµå Á¾·á
+    // ë¼ìš´ë“œ ì¢…ë£Œ
     // -----------------------------------------------
 
     [PunRPC]
@@ -254,7 +254,7 @@ public class RoundManager : MonoBehaviourPunCallbacks
         if (winTeam == 1) teamAScore++;
         else teamBScore++;
 
-        Debug.Log($"[GameManager] ¶ó¿îµå Á¾·á | AÆÀ: {teamAScore} / BÆÀ: {teamBScore}");
+        Debug.Log($"[GameManager] ë¼ìš´ë“œ ì¢…ë£Œ | AíŒ€: {teamAScore} / BíŒ€: {teamBScore}");
 
         if (teamAScore >= winScore || teamBScore >= winScore)
         {
@@ -278,7 +278,7 @@ public class RoundManager : MonoBehaviourPunCallbacks
             player.OnRoundEndReset();
         }
 
-        Debug.Log($"[GameManager] {roundStartDelay}ÃÊ ÈÄ ´ÙÀ½ ¶ó¿îµå ½ÃÀÛ");
+        Debug.Log($"[GameManager] {roundStartDelay}ì´ˆ í›„ ë‹¤ìŒ ë¼ìš´ë“œ ì‹œì‘");
         yield return new WaitForSeconds(roundStartDelay);
         FogOfWar.Instance.ResetFogOfWar();
         StartRound();
@@ -288,10 +288,10 @@ public class RoundManager : MonoBehaviourPunCallbacks
 
     #endregion
 
-    #region ¶ó¿îµå ½ÃÀÛ
+    #region ë¼ìš´ë“œ ì‹œì‘
 
     // -----------------------------------------------
-    // ¶ó¿îµå ½ÃÀÛ
+    // ë¼ìš´ë“œ ì‹œì‘
     // -----------------------------------------------
 
     public void StartRound()
@@ -312,7 +312,7 @@ public class RoundManager : MonoBehaviourPunCallbacks
             mapFlags[i].RespawnFlag();
         }
 
-        for (int i = 0; i < mapFlags.Length; i++)   // ³ªÁß¿¡ ¸®ÆåÅä¸µ
+        for (int i = 0; i < mapFlags.Length; i++)   // ë‚˜ì¤‘ì— ë¦¬í™í† ë§
         {
             if (mapFlags[i].myTeam != playerRegistry.MyTeam)
             {
@@ -322,7 +322,7 @@ public class RoundManager : MonoBehaviourPunCallbacks
             }
             else
             {
-                // °°Àº ÆÀ ÇÃ·¡±× ³Ö´Â ¸Ş¼Òµå È£Ãâ
+                // ê°™ì€ íŒ€ í”Œë˜ê·¸ ë„£ëŠ” ë©”ì†Œë“œ í˜¸ì¶œ
                 flagPointer.UpdateAllyObject(null);
                 flagPointer.HasAllyFlag = false;
             }
@@ -330,7 +330,7 @@ public class RoundManager : MonoBehaviourPunCallbacks
 
         RespawnTeam(playerRegistry.TeamA, teamASpawnPoints);
         RespawnTeam(playerRegistry.TeamB, teamBSpawnPoints);
-        Debug.Log("[GameManager] ¶ó¿îµå ½ÃÀÛ");
+        Debug.Log("[GameManager] ë¼ìš´ë“œ ì‹œì‘");
     }
 
     private void RespawnTeam(List<PlayerController> team, Transform[] spawnPoints)
@@ -344,7 +344,7 @@ public class RoundManager : MonoBehaviourPunCallbacks
             //team[i].gameObject.SetActive(true);
             team[i].Respawn(spawnPos);
 
-            // ¸Å´ÏÀú°¡ ÇÃ·¹ÀÌ¾î¸¦ ½ºÆù½ÃÅ°¸é¼­ UI ¸Å´ÏÀú¿¡°Ô ½½·Ô µî·Ï/°»½Å Áö½Ã!
+            // ë§¤ë‹ˆì €ê°€ í”Œë ˆì´ì–´ë¥¼ ìŠ¤í°ì‹œí‚¤ë©´ì„œ UI ë§¤ë‹ˆì €ì—ê²Œ ìŠ¬ë¡¯ ë“±ë¡/ê°±ì‹  ì§€ì‹œ!
             int actorNum = team[i].photonView.Owner.ActorNumber;
             string nickName = team[i].photonView.Owner.NickName;
             int teamNum = team[i].MyTeam;
@@ -355,19 +355,19 @@ public class RoundManager : MonoBehaviourPunCallbacks
 
     #endregion
 
-    #region ¸ÅÄ¡ Á¾·á
+    #region ë§¤ì¹˜ ì¢…ë£Œ
 
     // -----------------------------------------------
-    // ¸ÅÄ¡ Á¾·á
+    // ë§¤ì¹˜ ì¢…ë£Œ
     // -----------------------------------------------
     private void OnMatchEnd(int winTeam)
     {
-        Debug.Log($"[GameManager] ¸ÅÄ¡ Á¾·á | ½Â¸®ÆÀ: {(winTeam == 1 ? "AÆÀ" : "BÆÀ")}");
+        Debug.Log($"[GameManager] ë§¤ì¹˜ ì¢…ë£Œ | ìŠ¹ë¦¬íŒ€: {(winTeam == 1 ? "AíŒ€" : "BíŒ€")}");
 
-        // ÀÌº¥Æ® ¹ö½º¸¦ ÅëÇØ UI ¸Å´ÏÀú µî¿¡°Ô ¾Ë¸²
+        // ì´ë²¤íŠ¸ ë²„ìŠ¤ë¥¼ í†µí•´ UI ë§¤ë‹ˆì € ë“±ì—ê²Œ ì•Œë¦¼
         GameEvents.MatchEnd(winTeam);
 
-        // ±âÁ¸ÀÇ ·Îºñ º¹±Í ÄÚ·çÆ¾Àº ±×´ë·Î À¯Áö
+        // ê¸°ì¡´ì˜ ë¡œë¹„ ë³µê·€ ì½”ë£¨í‹´ì€ ê·¸ëŒ€ë¡œ ìœ ì§€
         StartCoroutine(ReturnToLobbyCoroutine());
     }
 
@@ -376,7 +376,7 @@ public class RoundManager : MonoBehaviourPunCallbacks
         yield return new WaitForSeconds(5f);
         if (PhotonNetwork.IsMasterClient)
         {
-            PhotonNetwork.LoadLevel(lobbySceneName); // ½ÇÁ¦ ·Îºñ ¾À ÀÌ¸§À¸·Î º¯°æ
+            PhotonNetwork.LoadLevel(lobbySceneName); // ì‹¤ì œ ë¡œë¹„ ì”¬ ì´ë¦„ìœ¼ë¡œ ë³€ê²½
         }
     }
 
@@ -389,28 +389,28 @@ public class RoundManager : MonoBehaviourPunCallbacks
         StartRound();
     }
 
-    #region °ÔÀÓ ³ª°¡±â
+    #region ê²Œì„ ë‚˜ê°€ê¸°
 
-    // UIManager¿¡¼­ ¹öÆ°À» ´©¸£¸é È£ÃâµÊ
+    // UIManagerì—ì„œ ë²„íŠ¼ì„ ëˆ„ë¥´ë©´ í˜¸ì¶œë¨
     public void LeaveGame()
     {
-        Debug.Log("[GameManager] ÇÃ·¹ÀÌ¾î°¡ ¹æ ³ª°¡±â¸¦ ¿äÃ»Çß½À´Ï´Ù.");
+        Debug.Log("[GameManager] í”Œë ˆì´ì–´ê°€ ë°© ë‚˜ê°€ê¸°ë¥¼ ìš”ì²­í–ˆìŠµë‹ˆë‹¤.");
 
-        // Æ÷Åæ ·ë¿¡¼­ ÅğÀå ¿äÃ»
+        // í¬í†¤ ë£¸ì—ì„œ í‡´ì¥ ìš”ì²­
         PhotonNetwork.LeaveRoom();
     }
 
-    // Æ÷Åæ ¼­¹ö°¡ "¹æ ÅğÀå ¿Ï·á"¸¦ È®Á¤ Áö¾îÁÖ¸é ÀÚµ¿À¸·Î ½ÇÇàµÇ´Â Äİ¹é
+    // í¬í†¤ ì„œë²„ê°€ "ë°© í‡´ì¥ ì™„ë£Œ"ë¥¼ í™•ì • ì§€ì–´ì£¼ë©´ ìë™ìœ¼ë¡œ ì‹¤í–‰ë˜ëŠ” ì½œë°±
     public override void OnLeftRoom()
     {
         base.OnLeftRoom();
-        Debug.Log("[GameManager] ¹æ ÅğÀå ¿Ï·á. ·Îºñ ¾ÀÀ¸·Î ÀÌµ¿ÇÕ´Ï´Ù.");
+        Debug.Log("[GameManager] ë°© í‡´ì¥ ì™„ë£Œ. ë¡œë¹„ ì”¬ìœ¼ë¡œ ì´ë™í•©ë‹ˆë‹¤.");
 
-        // ¹æÀ» ¿ÏÀüÈ÷ ³ª°¬À¸¹Ç·Î ¾ÀÀ» ·ÎµåÇÔ
+        // ë°©ì„ ì™„ì „íˆ ë‚˜ê°”ìœ¼ë¯€ë¡œ ì”¬ì„ ë¡œë“œí•¨
         SceneManager.LoadScene(lobbySceneName);
     }
 
-    // »ó´ë¹æÀÌ Áß°£¿¡ ³ª°¬À» ‹š - ·¹Áö½ºÆ®¸® Á¤¸®, ¶ó¿îµå Á¾·á Ã¼Å©
+    // ìƒëŒ€ë°©ì´ ì¤‘ê°„ì— ë‚˜ê°”ì„ ë–„ - ë ˆì§€ìŠ¤íŠ¸ë¦¬ ì •ë¦¬, ë¼ìš´ë“œ ì¢…ë£Œ ì²´í¬
     public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
     {
         base.OnPlayerLeftRoom(otherPlayer);

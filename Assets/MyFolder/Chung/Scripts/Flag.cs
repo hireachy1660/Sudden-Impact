@@ -1,9 +1,9 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class Flag : MonoBehaviour
 {
-    public int myTeam; // 1: AÆÀ, 2: BÆÀ
-    public int flagIndex; // ¸Ê¿¡ ¿©·¯ °³ÀÏ °æ¿ì¸¦ ´ëºñÇÑ °íÀ¯ ¹øÈ£
+    public int myTeam; // 1: AíŒ€, 2: BíŒ€
+    public int flagIndex; // ë§µì— ì—¬ëŸ¬ ê°œì¼ ê²½ìš°ë¥¼ ëŒ€ë¹„í•œ ê³ ìœ  ë²ˆí˜¸
 
     [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private Collider triggerCollider;
@@ -17,26 +17,26 @@ public class Flag : MonoBehaviour
         triggerCollider.enabled = true;
     }
 
-    // ¸Å´ÏÀúÀÇ Áö½Ã¸¦ ¹Ş¾Æ ½º½º·Î¸¦ ¼û±â´Â ÇÔ¼ö
+    // ë§¤ë‹ˆì €ì˜ ì§€ì‹œë¥¼ ë°›ì•„ ìŠ¤ìŠ¤ë¡œë¥¼ ìˆ¨ê¸°ëŠ” í•¨ìˆ˜
     public void HideFlag()
     {
         meshRenderer.enabled = false;
         triggerCollider.enabled = false;
     }
 
-    // ÇÃ·¹ÀÌ¾î°¡ Á×¾úÀ» ¶§, ¸Å´ÏÀúÀÇ Áö½Ã¸¦ ¹Ş¾Æ ¹Ù´Ú¿¡ ´Ù½Ã ¶³¾îÁö´Â ÇÔ¼ö
+    // í”Œë ˆì´ì–´ê°€ ì£½ì—ˆì„ ë•Œ, ë§¤ë‹ˆì €ì˜ ì§€ì‹œë¥¼ ë°›ì•„ ë°”ë‹¥ì— ë‹¤ì‹œ ë–¨ì–´ì§€ëŠ” í•¨ìˆ˜
     public void DropFlag(Vector3 dropPosition)
     {
-        transform.position = dropPosition; // Á×Àº »ç¶÷ À§Ä¡·Î ÀÌµ¿
+        transform.position = dropPosition; // ì£½ì€ ì‚¬ëŒ ìœ„ì¹˜ë¡œ ì´ë™
         meshRenderer.enabled = true;
         triggerCollider.enabled = true;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        //ÁÖÀÇ: ¿ÀÁ÷ LocalPlayer ·¹ÀÌ¾îÇÏ°í¸¸ Ãæµ¹ÇÏ°Ô ¼¼ÆÃµÇ¾î ÀÖ¾î¾ß ÇÔ!
+        //ì£¼ì˜: ì˜¤ì§ LocalPlayer ë ˆì´ì–´í•˜ê³ ë§Œ ì¶©ëŒí•˜ê²Œ ì„¸íŒ…ë˜ì–´ ìˆì–´ì•¼ í•¨!
 
-        // GetComponent ¾øÀÌ Áï½Ã ¸Å´ÏÀú¿¡°Ô "³ª(·ÎÄÃ) ÅÍÄ¡ÇÔ" º¸°í
+        // GetComponent ì—†ì´ ì¦‰ì‹œ ë§¤ë‹ˆì €ì—ê²Œ "ë‚˜(ë¡œì»¬) í„°ì¹˜í•¨" ë³´ê³ 
         RoundManager.Instance.OnLocalPlayerTouchedFlag(myTeam);
     }
 }

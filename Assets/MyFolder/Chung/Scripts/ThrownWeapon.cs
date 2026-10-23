@@ -1,12 +1,12 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class ThrownWeapon : Projectile
 {
     [Header("Throw Visual Settings")]
-    [Tooltip("È¸ÀüÇÒ ÃÑ±â ¸ğµ¨¸µ (ÀÚ½Ä ¿ÀºêÁ§Æ®)")]
+    [Tooltip("íšŒì „í•  ì´ê¸° ëª¨ë¸ë§ (ìì‹ ì˜¤ë¸Œì íŠ¸)")]
     [SerializeField] private Transform visualMesh;
 
-    [Tooltip("È¸Àü ¼Óµµ (±âº»°ª: 1ÃÊ¿¡ ¾à 3¹ÙÄû)")]
+    [Tooltip("íšŒì „ ì†ë„ (ê¸°ë³¸ê°’: 1ì´ˆì— ì•½ 3ë°”í€´)")]
     [SerializeField] private float rotateSpeed = 1080f;
 
     protected override void Awake()
@@ -17,17 +17,17 @@ public class ThrownWeapon : Projectile
 
     protected override void Update()
     {
-        // 1. ºÎ¸ğ(Projectile)ÀÇ ÀÌµ¿ ·ÎÁ÷À» ±×´ë·Î ½ÇÇà (ÃÑ¾ËÃ³·³ ¾ÕÀ¸·Î ³¯¾Æ°¨)
+        // 1. ë¶€ëª¨(Projectile)ì˜ ì´ë™ ë¡œì§ì„ ê·¸ëŒ€ë¡œ ì‹¤í–‰ (ì´ì•Œì²˜ëŸ¼ ì•ìœ¼ë¡œ ë‚ ì•„ê°)
         base.Update();
 
-        // 2. ³¯¾Æ°¡´Â µ¿¾È ÀÚ½Ä ¸Ş½¬¸¦ ºù±Ûºù±Û È¸Àü½ÃÅ´
+        // 2. ë‚ ì•„ê°€ëŠ” ë™ì•ˆ ìì‹ ë©”ì‰¬ë¥¼ ë¹™ê¸€ë¹™ê¸€ íšŒì „ì‹œí‚´
         if (visualMesh != null)
         {
-            // ¸ğµ¨¸µÀÇ ±âÁØ Ãà¿¡ µû¶ó Vector3.up / right / forward Áß ÇÏ³ª·Î ¸ÂÃß½Ã¸é µË´Ï´Ù.
+            // ëª¨ë¸ë§ì˜ ê¸°ì¤€ ì¶•ì— ë”°ë¼ Vector3.up / right / forward ì¤‘ í•˜ë‚˜ë¡œ ë§ì¶”ì‹œë©´ ë©ë‹ˆë‹¤.
             visualMesh.Rotate(Vector3.up * rotateSpeed * Time.deltaTime);
         }
     }
 
-    // OnTriggerEnter³ª OnPhotonInstantiate µî Ãæµ¹/µ¿±âÈ­ ·ÎÁ÷Àº 
-    // ºÎ¸ğ(Projectile)¿¡ ÀÖ´Â ÄÚµå¸¦ 100% ±×´ë·Î ¹°·Á¹Ş¾Æ »ç¿ëÇÕ´Ï´Ù. (ÄÚµå Áßº¹ 0%)
+    // OnTriggerEnterë‚˜ OnPhotonInstantiate ë“± ì¶©ëŒ/ë™ê¸°í™” ë¡œì§ì€ 
+    // ë¶€ëª¨(Projectile)ì— ìˆëŠ” ì½”ë“œë¥¼ 100% ê·¸ëŒ€ë¡œ ë¬¼ë ¤ë°›ì•„ ì‚¬ìš©í•©ë‹ˆë‹¤. (ì½”ë“œ ì¤‘ë³µ 0%)
 }

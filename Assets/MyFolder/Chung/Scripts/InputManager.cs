@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -9,9 +9,9 @@ public class InputManager : MonoBehaviour
     [SerializeField] private PlayerRegistry myPlayerRegistry;
 
     [Header("Cinemachine Aim Settings")]
-    [Tooltip("¾¾³×¸Ó½Å Å¸°Ù¿ë ¿ÀºêÁ§Æ®")]
+    [Tooltip("ì”¨ë„¤ë¨¸ì‹  íƒ€ê²Ÿìš© ì˜¤ë¸Œì íŠ¸")]
     [SerializeField] private Transform mouseAimTarget; 
-    [Tooltip("¾¾³×¸Ó½Å Å¸°Ù ±×·ìÀÇ °¡ÁßÄ¡")]
+    [Tooltip("ì”¨ë„¤ë¨¸ì‹  íƒ€ê²Ÿ ê·¸ë£¹ì˜ ê°€ì¤‘ì¹˜")]
     [SerializeField] private float aimExpansionWeight = 0.5f;
     [SerializeField] private CinemachineTargetGroup targetGroup;
 
@@ -96,10 +96,10 @@ public class InputManager : MonoBehaviour
     {
         if (player != null && player.photonView.Owner.ActorNumber == deadActorNumber)
         {
-            // 1. Ä³¸¯ÅÍ Á¶ÀÛ ²ô±â
+            // 1. ìºë¦­í„° ì¡°ì‘ ë„ê¸°
             SetConnectActionMap(false);
 
-            Debug.Log("[InputManager] ·ÎÄÃ ÇÃ·¹ÀÌ¾î »ç¸Á: Á¶ÀÛ Â÷´Ü");
+            Debug.Log("[InputManager] ë¡œì»¬ í”Œë ˆì´ì–´ ì‚¬ë§: ì¡°ì‘ ì°¨ë‹¨");
         }
     }
 
@@ -107,10 +107,10 @@ public class InputManager : MonoBehaviour
     {
         if (player != null)
         {
-            // 1. Ä³¸¯ÅÍ Á¶ÀÛ ÄÑ±â
+            // 1. ìºë¦­í„° ì¡°ì‘ ì¼œê¸°
             SetConnectActionMap(true);
 
-            Debug.Log("[InputManager] ·ÎÄÃ ÇÃ·¹ÀÌ¾î ¸®½ºÆù: Á¶ÀÛ Â÷´Ü ÇØÁ¦");
+            Debug.Log("[InputManager] ë¡œì»¬ í”Œë ˆì´ì–´ ë¦¬ìŠ¤í°: ì¡°ì‘ ì°¨ë‹¨ í•´ì œ");
         }
     }
 
@@ -123,7 +123,7 @@ public class InputManager : MonoBehaviour
         else
         {
             playerMap.Disable(); 
-            onMenuAction.Enable(); // ¸Ş´º ²ô±â ¹öÆ°(ESC)¸¸ ´Ù½Ã »ì¸®±â
+            onMenuAction.Enable(); // ë©”ë‰´ ë„ê¸° ë²„íŠ¼(ESC)ë§Œ ë‹¤ì‹œ ì‚´ë¦¬ê¸°
         }
     }
 
@@ -140,7 +140,7 @@ public class InputManager : MonoBehaviour
             player.RotatePlayer(worldAimPosition);
 
             isAiming = onZoomAction.IsPressed();
-            // ¿ìÅ¬¸¯(Á¶ÁØ) ¹öÆ°À» ´©¸£°í ÀÖ´Ù¸é °¡ÁßÄ¡¸¦ ¿Ã¸²
+            // ìš°í´ë¦­(ì¡°ì¤€) ë²„íŠ¼ì„ ëˆ„ë¥´ê³  ìˆë‹¤ë©´ ê°€ì¤‘ì¹˜ë¥¼ ì˜¬ë¦¼
             UpdateTargetGroupWeight(isAiming);
 
 
@@ -183,10 +183,10 @@ public class InputManager : MonoBehaviour
 
         var target = targetGroup.Targets[1];
 
-        // ºÎµå·´°Ô º¸°£(Lerp)ÇÏ¸ç °¡ÁßÄ¡ º¯°æ
+        // ë¶€ë“œëŸ½ê²Œ ë³´ê°„(Lerp)í•˜ë©° ê°€ì¤‘ì¹˜ ë³€ê²½
         target.Weight = Mathf.Lerp(target.Weight, targetWeight, Time.fixedDeltaTime * 5f);
 
-        // ¼öÁ¤µÈ ±¸Á¶Ã¼¸¦ ´Ù½Ã ¸®½ºÆ®¿¡ ÇÒ´ç (µ¤¾î¾²±â)
+        // ìˆ˜ì •ëœ êµ¬ì¡°ì²´ë¥¼ ë‹¤ì‹œ ë¦¬ìŠ¤íŠ¸ì— í• ë‹¹ (ë®ì–´ì“°ê¸°)
         targetGroup.Targets[1] = target;
     }
 
@@ -205,10 +205,10 @@ public class InputManager : MonoBehaviour
     {
         isOnMenu = !isOnMenu;
 
-        // Ä³¸¯ÅÍ Á¶ÀÛ ²ô±â/ÄÑ±â
+        // ìºë¦­í„° ì¡°ì‘ ë„ê¸°/ì¼œê¸°
         SetConnectActionMap(!isOnMenu);
 
-        // ¸¶¿ì½º Ä¿¼­ »óÅÂ º¯°æ
+        // ë§ˆìš°ìŠ¤ ì»¤ì„œ ìƒíƒœ ë³€ê²½
         if (isOnMenu)
         {
             Cursor.visible = true;
@@ -220,7 +220,7 @@ public class InputManager : MonoBehaviour
             Cursor.lockState = CursorLockMode.Confined;
         }
 
-        // UI ¸Å´ÏÀú·Î ÀÌº¥Æ® ¹ß¼Û
+        // UI ë§¤ë‹ˆì €ë¡œ ì´ë²¤íŠ¸ ë°œì†¡
         GameEvents.MenuUIUpdate(isOnMenu);
     }
 
