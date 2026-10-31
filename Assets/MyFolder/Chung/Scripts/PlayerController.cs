@@ -22,7 +22,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     }
     [Header("PlayerReference")]
     [SerializeField] private Rigidbody myRigidbody;
-    [SerializeField] private PhotonTransformView myTransformView;
     [SerializeField] private Transform weaponAttachPoint;
     [SerializeField] private Weapon myKnife;
     [SerializeField] private PlayerRegistry registry;
@@ -36,7 +35,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     [SerializeField] private float sprintSpeed = 1.4f;
     [SerializeField] private float rollDistance = 2.0f;
     [SerializeField] private float rollDuration = 0.2f;
-    [SerializeField] private float pickUpDistance = 1f;
     [SerializeField] private float stunDuration = 1.5f;
     [SerializeField] private float rollCooldown = 4f;
     [SerializeField] private float deathAnimDuration = 2.0f;
@@ -192,8 +190,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     // 라운드 종료 시 즉각적인 초기화 및 조작 차단
     public void OnRoundEndReset()
     {
-        Debug.Log($"[OnRoundEndReset] called, myEquippedGun = {myEquippedGun?.name ?? "null"}");
-
         // 상태를 NotReady로 바꿔서 모든 조작(이동, 사격)을 막음
         if (GetPlayerState != PlayerState.Dead)
             SetPlayerState(PlayerState.NotReady);
@@ -271,7 +267,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     {
         if (Time.time < lastRollTime + rollCooldown)
         {
-            Debug.Log("[PlayerController] Rolling is Cooling Down");
             return;
         }
 
@@ -396,15 +391,12 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         isSprinting = true;
         playerState = PlayerState.Sprint;
         // 필요하다면 여기서 playerState = PlayerState.Sprint; 로 변경해도 좋습니다.
-        Debug.Log("[PlayerController] Im Start Sprinting");
     }
 
     public void SprintEnd(InputAction.CallbackContext ctx)
     {
         isSprinting = false;
         playerState = PlayerState.Idle;
-
-        Debug.Log("[PlayerController] Im end Sprinting");
     }
     #endregion
 
@@ -519,7 +511,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
                 if (prevClosest != null)
                 {
                     GameEvents.PickupUIUpdate(false, Vector3.zero);
-                    Debug.Log("[Player] PickUpUIOff");
                 }
                 if (tempClosest != null)
                 {
@@ -535,7 +526,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         if (closestNode != null) 
         {
             GameEvents.PickupUIUpdate(false, Vector3.zero);
-            Debug.Log("[Player] PickUpUIOff");
         }
         closestNode = null;
         curCheckClosestNodeCoroutine = null;
@@ -565,7 +555,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     [PunRPC]
     public void RPC_ForceEquipWeapon(int typeInt, int ammo)
     {
-        Debug.Log($"[PlayerController] ForceEquipWeapon Called type : {typeInt}, Ammo : {ammo}");
         Weapon.EWeaponType type = (Weapon.EWeaponType)typeInt;
 
         if (myEquippedGun != null) DropWeapon();
@@ -621,38 +610,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     #endregion
 
-    #region 던지기
-
-    [PunRPC]
-    private void TryThrow(int _viewID)
-    {
-        // 내 손에 총이 없거나, 던지라는 총의 ID가 내 손의 총과 다르면 무시
-        if (myEquippedGun == null || myEquippedGun.photonView.ViewID != _viewID) return;
-
-        // 무기가 Gun일 때만 던지기(ThrowWeapon) 실행
-        if (myEquippedGun is Gun myGun)
-        {
-            myGun.ThrowWeapon();
-            OnThrowEvent?.Invoke();
-        }
-        else
-        {
-            // 만약 칼(MeleeKnife)도 나중에 던지는 기능이 생긴다면
-            Debug.Log("이 무기는 던질 수 없는 무기입니다 (Gun이 아님).");
-        }
-
-        if (photonView.IsMine)
-        {
-            PhotonNetwork.Destroy(myEquippedGun.gameObject);
-        }
-
-        myEquippedGun = null;
-        useGun = false;
-        SwapWeapon(false);
-    }
-
-    #endregion
-
     #endregion
 
     public void TryInteract(InputAction.CallbackContext ctx)
@@ -678,7 +635,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     #region OnImpact
     public void OnReceiveImpact(ImpactData _data)
     {
-        Debug.Log($"[PlayerController] On Impact actor: {_data.attackerActorNumber}, ATKteam : {_data.attackerTeam}, myTeam{myTeam} , Data : {_data.type}");
         // 상태 검사
         if (
             curHp <= 0
@@ -700,7 +656,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         if (_data.attackerActorNumber != photonView.Owner.ActorNumber)
         {
             photonView.RPC(nameof(TakeDamage), RpcTarget.All, _data.damage, _data.hitNormal, _data.attackerActorNumber);
-            Debug.Log($"[PlayerController] Received");
         }
 
     }
@@ -710,7 +665,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     {
         curHp -= _damage;
         OnHitEvent?.Invoke();
-        Debug.Log($"[PlayerController] <color=red> Hit </color> {photonView.Owner.ActorNumber}'s Hp Is : {curHp}");
 
         // 피격 카메라 쉐이크
         if (photonView.IsMine && damageImpulseSource != null)
@@ -783,8 +737,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     private IEnumerator StunCoroutine()
     {
-        Debug.Log($"[PlayerController] {photonView.Owner.ActorNumber} is Stuned");
-
         if (photonView.IsMine)
         {
             playerState = PlayerState.Stunned;
