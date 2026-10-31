@@ -15,11 +15,8 @@ public class ThrownWeapon : Projectile
         damageType = DamageType.Throw;
     }
 
-    protected override void Update()
+    private void Update()
     {
-        // 1. 부모(Projectile)의 이동 로직을 그대로 실행 (총알처럼 앞으로 날아감)
-        base.Update();
-
         // 2. 날아가는 동안 자식 메쉬를 빙글빙글 회전시킴
         if (visualMesh != null)
         {
