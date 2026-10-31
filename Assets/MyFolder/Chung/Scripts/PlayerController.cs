@@ -340,9 +340,9 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     {
         OnRollEvent?.Invoke();
 
-        playerState = PlayerState.Rolling;
+        SetPlayerState(PlayerState.Rolling);
         yield return new WaitForSeconds(rollDuration);
-        playerState = PlayerState.Idle;
+        SetPlayerState(PlayerState.Idle);
     }
 
     #endregion
@@ -389,14 +389,13 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         if (playerState == PlayerState.NotReady || playerState == PlayerState.Stunned || playerState == PlayerState.Dead) return;
 
         isSprinting = true;
-        playerState = PlayerState.Sprint;
-        // 필요하다면 여기서 playerState = PlayerState.Sprint; 로 변경해도 좋습니다.
+        SetPlayerState(PlayerState.Sprint);
     }
 
     public void SprintEnd(InputAction.CallbackContext ctx)
     {
         isSprinting = false;
-        playerState = PlayerState.Idle;
+        SetPlayerState(PlayerState.Idle);
     }
     #endregion
 
@@ -694,7 +693,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     private void DiePlayer(int _attackerNum)
     {
         DropWeapon();
-        playerState = PlayerState.Dead;
+        SetPlayerState(PlayerState.Dead);
         // 인풋 메니저에게 콜백 필요
         RoundManager.Instance?.OnPlayerDied(this, _attackerNum);
 
@@ -739,17 +738,17 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     {
         if (photonView.IsMine)
         {
-            playerState = PlayerState.Stunned;
+            SetPlayerState(PlayerState.Stunned);
             stunCallback?.Invoke(false);
             yield return new WaitForSeconds(stunDuration);
-            playerState = PlayerState.Idle;
+            SetPlayerState(PlayerState.Idle);
             stunCallback?.Invoke(true);
         }
         else
         {
-            playerState = PlayerState.Stunned;
+            SetPlayerState(PlayerState.Stunned);
             yield return new WaitForSeconds(stunDuration);
-            playerState = PlayerState.Idle;
+            SetPlayerState(PlayerState.Idle);
         }
     }
 
