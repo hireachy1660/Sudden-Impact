@@ -82,6 +82,8 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     private float _pickupCooldownEnd = 0f;
     private float _meleeCooldownEnd = 0f;
     Collider col;
+    // 같은 오브젝트에 붙은 부품들. Core가 리스폰·라운드 종료를 받아 순회하며 알린다.
+    private IPlayerPart[] parts;
 
     public int MyTeam { get { return myTeam; } }
     public bool HasEnemyFlag { get { return hasEnemyFlag; } }
@@ -103,6 +105,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         }
 
         col = GetComponent<Collider>();
+        parts = GetComponents<IPlayerPart>();
     }
 
     private void OnEnable()
@@ -176,6 +179,8 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         GameEvents.HpChanged(curHp);
         SetTeamColor(myTeam);
         col.enabled = true;
+
+        foreach (var p in parts) p.OnRespawn();
     }
 
     // 라운드 종료 시 즉각적인 초기화 및 조작 차단
@@ -194,6 +199,8 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
         //구르기나 기절 코루틴이 돌고 있다면 정지
         StopAllCoroutines();
+
+        foreach (var p in parts) p.OnRoundEndReset();
     }
 
     private void SetPlayerState(PlayerState _state)
