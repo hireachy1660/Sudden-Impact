@@ -245,8 +245,6 @@ public class InputManager : MonoBehaviour
         player = _player;
         SetPlayerAction();
 
-        player.StunCallback = SetConnectActionMap;
-
         aimPlane = new Plane(Vector3.up, new Vector3(0, player.transform.position.y, 0));
 
         StartCoroutine(GetInputValue());

@@ -10,12 +10,6 @@ using static Photon.Pun.UtilityScripts.PunTeams;
 
 public class PlayerController : MonoBehaviourPun, IAttackReceiver
 {
-    public delegate void StunDelegate(bool _isInStun);
-
-    private StunDelegate stunCallback;
-
-    public StunDelegate StunCallback { set { stunCallback = value; } }
-
     public enum PlayerState
     {
         NotReady, Idle, Sprint, Rolling, Stunned, Dead
@@ -94,6 +88,12 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     public PlayerState GetPlayerState { get { return playerState; } }
     public Weapon MyEquippedGun { get { return myEquippedGun; } }
 
+    // 입력 진입점 공통 가드. 기절·사망·준비 전에는 어떤 조작도 받지 않는다.
+    // 기절 중 입력 잠금을 InputManager의 액션맵 토글 대신 이 가드 하나로 처리한다.
+    public bool CanAct => playerState != PlayerState.Stunned
+                       && playerState != PlayerState.Dead
+                       && playerState != PlayerState.NotReady;
+
     private void Awake()
     {
         myKnife.SetOwner(photonView.Owner.ActorNumber, registry.MyTeam);
@@ -114,15 +114,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
         if(PhotonNetwork.IsMasterClient)
         { WeaponSpawnManager.Instance.RegisterGunCatalog(allGuns); }
-    }
-
-    private void OnDisable()
-    {
-        // 죽거나 꺼질 때, 만약 내가 기절 상태였다면 입력을 강제로 복구하고 나감
-        if (photonView.IsMine)
-        {
-            stunCallback?.Invoke(true);
-        }
     }
 
     private void FixedUpdate()
@@ -240,9 +231,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     public void RotatePlayer(Vector3 _aimPos)
     {
-        if (playerState == PlayerState.Rolling
-            || playerState == PlayerState.Dead
-            || playerState == PlayerState.NotReady) return;
+        if (!CanAct || playerState == PlayerState.Rolling) return;
 
         Vector3 lookPos = _aimPos - transform.position;
         lookPos.y = 0;
@@ -265,6 +254,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     #region 구르기 로직
     public void TryRoll(InputAction.CallbackContext ctx)
     {
+        if (!CanAct) return;
         if (Time.time < lastRollTime + rollCooldown)
         {
             return;
@@ -350,6 +340,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     #region 무기 전환
     public void TrySwapWeapon(InputAction.CallbackContext ctx)
     {
+        if (!CanAct) return;
         if (myEquippedGun != null)
         {
             useGun = useGun ? false : true;
@@ -385,8 +376,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     #region 달리기
     public void SprintStart(InputAction.CallbackContext ctx)
     {
-        // 기절, 사망 등 조작 불능 상태면 달리기 무시
-        if (playerState == PlayerState.NotReady || playerState == PlayerState.Stunned || playerState == PlayerState.Dead) return;
+        if (!CanAct) return;
 
         isSprinting = true;
         SetPlayerState(PlayerState.Sprint);
@@ -395,13 +385,15 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     public void SprintEnd(InputAction.CallbackContext ctx)
     {
         isSprinting = false;
-        SetPlayerState(PlayerState.Idle);
+        // 기절·사망 중에 Shift를 떼도 그 상태를 Idle로 덮어쓰지 않는다
+        if (playerState == PlayerState.Sprint) SetPlayerState(PlayerState.Idle);
     }
     #endregion
 
     public void TryAttack(Vector3 _aimPos, bool _isHeld = false)
     {
-        if (playerState != PlayerState.Idle) return;
+        // 달리기·구르기 중 공격 금지는 기존 규칙 그대로
+        if (!CanAct || playerState == PlayerState.Sprint || playerState == PlayerState.Rolling) return;
         
 
         if (useGun)
@@ -423,6 +415,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     public void PickUpAndDrop(InputAction.CallbackContext ctx)
     {
+        if (!CanAct) return;
         if (!photonView.IsMine || !ctx.performed) return;
         if (Time.time < _pickupCooldownEnd) return;
 
@@ -613,6 +606,8 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     public void TryInteract(InputAction.CallbackContext ctx)
     {
+        if (!CanAct) return;
+
         // 1. 내 주변 2m 안의 가구/오브젝트 검색
         Collider[] hits = Physics.OverlapSphere(transform.position, interactRadius, interactableLayer);
 
@@ -736,20 +731,9 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     private IEnumerator StunCoroutine()
     {
-        if (photonView.IsMine)
-        {
-            SetPlayerState(PlayerState.Stunned);
-            stunCallback?.Invoke(false);
-            yield return new WaitForSeconds(stunDuration);
-            SetPlayerState(PlayerState.Idle);
-            stunCallback?.Invoke(true);
-        }
-        else
-        {
-            SetPlayerState(PlayerState.Stunned);
-            yield return new WaitForSeconds(stunDuration);
-            SetPlayerState(PlayerState.Idle);
-        }
+        SetPlayerState(PlayerState.Stunned);
+        yield return new WaitForSeconds(stunDuration);
+        SetPlayerState(PlayerState.Idle);
     }
 
     #endregion
