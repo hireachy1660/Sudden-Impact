@@ -3,10 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Cinemachine;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static Photon.Pun.UtilityScripts.PunTeams;
 
 public class PlayerController : MonoBehaviourPun, IAttackReceiver
 {
@@ -21,7 +19,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     [SerializeField] private PlayerRegistry registry;
     [SerializeField] private GameObject dummyFlagMesh;
     [Tooltip("혈흔 프리팹")]
-    [SerializeField] private GameObject neonBloodPrefab; 
+    [SerializeField] private GameObject neonBloodPrefab;
 
     [Header("Parameters")]
     [SerializeField] private float maxHp = 100f;
@@ -46,7 +44,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     [SerializeField] private float damageShakeForce = 1.5f;
 
     [Header("Animator Bridge Data")]
-    // 애니메이터가 읽어갈 퍼블릭 게터 (이동 속도 게터는 PlayerMovement로 옮김)
+    // 애니메이터가 읽어갈 퍼블릭 게터
     public bool UseGun => useGun;
 
     // 애니메이터에게 행동을 알리는 이벤트
@@ -66,7 +64,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     [SerializeField] private int myTeam;
     [SerializeField] private PlayerState playerState;
 
-    private Coroutine curCheckClosestNodeCoroutine; 
+    private Coroutine curCheckClosestNodeCoroutine;
     private List<WeaponPickupNode> nearbyNodes = new List<WeaponPickupNode>();
     private float _pickupCooldownEnd = 0f;
     private float _meleeCooldownEnd = 0f;
@@ -149,10 +147,9 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         hasEnemyFlag = false;
         dummyFlagMesh.SetActive(false);
 
-        
         CleanupWeapon();
 
-        //구르기나 기절 코루틴이 돌고 있다면 정지
+        // 구르기 상태·기절 코루틴이 돌고 있다면 정지 (구르기 이동 코루틴은 PlayerMovement가 멈춤)
         StopAllCoroutines();
 
         foreach (var p in parts) p.OnRoundEndReset();
@@ -195,7 +192,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     // 구르기 이동은 PlayerMovement가 소유자에서 처리하고, 무적 상태(Rolling)와 애니 이벤트는 Core가 모든 클라이언트에서 건다.
     // 지속시간은 보낸 쪽 값을 받아 쓴다(프리팹 수치가 Movement로 옮겨가 Core에 없음).
     [PunRPC]
-    public void StartRollCRP(float duration)
+    public void StartRollRPC(float duration)
     {
         StartCoroutine(RollingStateCoroutine(duration));
     }
@@ -232,11 +229,11 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     [PunRPC]
     private void SwapWeapon(bool _useGun)
     {
-        
+
         if (myEquippedGun != null)
         {
             myEquippedGun.gameObject.SetActive(_useGun);
-            
+
         }
         myKnife.gameObject.SetActive(!_useGun);
 
@@ -252,7 +249,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     {
         // 달리기·구르기 중 공격 금지는 기존 규칙 그대로
         if (!CanAct || playerState == PlayerState.Sprint || playerState == PlayerState.Rolling) return;
-        
 
         if (useGun)
         {
@@ -373,7 +369,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         }
 
         // 주위에 더이상 노드가 없을 떄
-        if (closestNode != null) 
+        if (closestNode != null)
         {
             GameEvents.PickupUIUpdate(false, Vector3.zero);
         }
@@ -440,7 +436,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         SwapWeapon(false);
     }
 
-
     private void CleanupWeapon()
     {
         if (myEquippedGun == null) return;
@@ -448,7 +443,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         myEquippedGun = null;
         useGun = false;
     }
-
 
     private Gun FindGunByType(Weapon.EWeaponType type)
     {
@@ -496,8 +490,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
             || _data.attackerTeam == myTeam
             ) { return; }
 
-        
-
         if (_data.type == DamageType.Throw)
         {
             StunPlayer();
@@ -538,7 +530,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         {
             DiePlayer(_attackerNum);
 
-            if(photonView.IsMine) 
+            if(photonView.IsMine)
             GameEvents.LocalPlayerDeath();
         }
     }
@@ -547,7 +539,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     {
         DropWeapon();
         SetPlayerState(PlayerState.Dead);
-        // 인풋 메니저에게 콜백 필요
         RoundManager.Instance?.OnPlayerDied(this, _attackerNum);
 
         if (hasEnemyFlag)
@@ -566,12 +557,9 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     private IEnumerator DeathRoutine()
     {
         yield return new WaitForSeconds(deathAnimDuration);
-        // this.gameObject.SetActive(false);
         gameObject.SetActive(false);
-        
+
     }
-
-
 
     private void StunPlayer()
     {

@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// 이동·회전·달리기 부품. 소유자(IsMine)에서만 켜지고, 상태 읽기·쓰기는 Core(PlayerController)를 거친다.
+// 이동·회전·달리기·구르기 부품. 소유자(IsMine)에서만 켜지고, 상태 읽기·쓰기는 Core(PlayerController)를 거친다.
 public class PlayerMovement : MonoBehaviourPun, IPlayerPart
 {
     [Header("Parameters")]
@@ -129,7 +129,7 @@ public class PlayerMovement : MonoBehaviourPun, IPlayerPart
         GameEvents.RollStarted(rollCooldown);
 
         // 무적 RPC. 상태(Rolling)와 애니 이벤트는 Core가 모든 클라이언트에서 걸고, 지속시간은 여기 값을 보낸다
-        photonView.RPC(nameof(PlayerController.StartRollCRP), RpcTarget.All, rollDuration);
+        photonView.RPC(nameof(PlayerController.StartRollRPC), RpcTarget.All, rollDuration);
         lastRollTime = Time.time;
     }
 
