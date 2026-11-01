@@ -25,8 +25,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     [Header("Parameters")]
     [SerializeField] private float maxHp = 100f;
-    [SerializeField] private float moveSpeed = 10f;
-    [SerializeField] private float sprintSpeed = 1.4f;
     [SerializeField] private float rollDistance = 2.0f;
     [SerializeField] private float rollDuration = 0.2f;
     [SerializeField] private float stunDuration = 1.5f;
@@ -51,10 +49,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     [SerializeField] private float damageShakeForce = 1.5f;
 
     [Header("Animator Bridge Data")]
-    // 애니메이터가 읽어갈 퍼블릭 게터
-    public Vector3 CurrentVelocity => myRigidbody.linearVelocity;
-    public float MoveSpeed => moveSpeed;
-    public float NormalizedSpeed => CurrentVelocity.magnitude / moveSpeed;
+    // 애니메이터가 읽어갈 퍼블릭 게터 (이동 속도 게터는 PlayerMovement로 옮김)
     public bool UseGun => useGun;
 
     // 애니메이터에게 행동을 알리는 이벤트
@@ -75,20 +70,20 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     [SerializeField] private PlayerState playerState;
 
     private Coroutine curCheckClosestNodeCoroutine; 
-    private List<WeaponPickupNode> nearbyNodes = new List<WeaponPickupNode>(); private Vector3 curMoveInput;
-    private Vector3 lastMoveDir;
-    private bool isSprinting;
+    private List<WeaponPickupNode> nearbyNodes = new List<WeaponPickupNode>();
     private float lastRollTime;
     private float _pickupCooldownEnd = 0f;
     private float _meleeCooldownEnd = 0f;
     Collider col;
     // 같은 오브젝트에 붙은 부품들. Core가 리스폰·라운드 종료를 받아 순회하며 알린다.
     private IPlayerPart[] parts;
+    private PlayerMovement movement;
 
     public int MyTeam { get { return myTeam; } }
     public bool HasEnemyFlag { get { return hasEnemyFlag; } }
     public PlayerState GetPlayerState { get { return playerState; } }
     public Weapon MyEquippedGun { get { return myEquippedGun; } }
+    public Transform WeaponAttachPoint => weaponAttachPoint;
 
     // 입력 진입점 공통 가드. 기절·사망·준비 전에는 어떤 조작도 받지 않는다.
     // 기절 중 입력 잠금을 InputManager의 액션맵 토글 대신 이 가드 하나로 처리한다.
@@ -106,6 +101,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
         col = GetComponent<Collider>();
         parts = GetComponents<IPlayerPart>();
+        movement = GetComponent<PlayerMovement>();
     }
 
     private void OnEnable()
@@ -117,43 +113,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
         if(PhotonNetwork.IsMasterClient)
         { WeaponSpawnManager.Instance.RegisterGunCatalog(allGuns); }
-    }
-
-    private void FixedUpdate()
-    {
-        if (!photonView.IsMine) return;
-
-        // 구르기 중에는 구르기 코루틴이 처리.
-        if (playerState == PlayerState.Rolling) return;
-
-        // 상태 이상일 때는 강제로 속도를 0으로 만들고 기절
-        if (playerState == PlayerState.Stunned || playerState == PlayerState.Dead || playerState == PlayerState.NotReady)
-        {
-            myRigidbody.linearVelocity = Vector3.zero;
-            myRigidbody.angularVelocity = Vector3.zero;
-            return;
-        }
-
-        // MovePosition을 버리고 linearVelocity(물리 속도)를 직접 제어합니다.
-        if (curMoveInput.sqrMagnitude > 0.01f)
-        {
-            float currentSpeed = isSprinting ? (moveSpeed * sprintSpeed) : moveSpeed;
-
-            // 입력 방향으로 목표 속도를 계산합니다.
-            Vector3 targetVelocity = curMoveInput.normalized * currentSpeed;
-
-            // 물리 엔진의 속도(Velocity)에 직접 값을 넣습니다. 
-            // 엔진이 스스로 충돌을 계산하므로 아무리 얇은 벽이라도 절대 뚫지 못합니다.
-            myRigidbody.linearVelocity = targetVelocity;
-        }
-        else
-        {
-            // 입력이 없을 때는 즉시 속도를 0으로 만들어 빙판길 미끄러짐을 방지.
-            myRigidbody.linearVelocity = Vector3.zero;
-        }
-
-        // 회전력은 매 프레임 죽여서 넘어지는 것을 방지
-        myRigidbody.angularVelocity = Vector3.zero;
     }
 
     // 스폰 메니저가 스폰시 초기 데이터 주입용
@@ -203,7 +162,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         foreach (var p in parts) p.OnRoundEndReset();
     }
 
-    private void SetPlayerState(PlayerState _state)
+    public void SetPlayerState(PlayerState _state)
     {
         playerState = _state;
     }
@@ -229,34 +188,11 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     #region 조작 로직
 
-    #region 이동 및 방향 전환
-    public void MovePlayer(Vector3 _moveAxis)
-    {
-        lastMoveDir = _moveAxis.normalized;
-        curMoveInput = _moveAxis;
-    }
-
-    public void RotatePlayer(Vector3 _aimPos)
-    {
-        if (!CanAct || playerState == PlayerState.Rolling) return;
-
-        Vector3 lookPos = _aimPos - transform.position;
-        lookPos.y = 0;
-
-        float distance = lookPos.magnitude;
-
-        if (distance > 0.001f)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(lookPos);
-            myRigidbody.MoveRotation(targetRotation);
-
-            if (myEquippedGun != null && weaponAttachPoint != null)
-            {
-                 myEquippedGun.AttackPoint.LookAt(_aimPos);
-            }
-        }
-    }
-    #endregion
+    // 밖(InputManager)에서 오는 이동 호출은 Core가 같은 이름으로 한 줄 중계한다. 논리는 PlayerMovement에.
+    public void MovePlayer(Vector3 _moveAxis) => movement.MovePlayer(_moveAxis);
+    public void RotatePlayer(Vector3 _aimPos) => movement.RotatePlayer(_aimPos);
+    public void SprintStart(InputAction.CallbackContext ctx) => movement.SprintStart(ctx);
+    public void SprintEnd(InputAction.CallbackContext ctx) => movement.SprintEnd(ctx);
 
     #region 구르기 로직
     public void TryRoll(InputAction.CallbackContext ctx)
@@ -296,9 +232,9 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
 
         Vector3 rollDirection;
-        if (Vector3.SqrMagnitude(lastMoveDir) > 0.2f)
+        if (Vector3.SqrMagnitude(movement.LastMoveDir) > 0.2f)
         {
-            rollDirection = lastMoveDir;
+            rollDirection = movement.LastMoveDir;
         }
         else
         {
@@ -377,23 +313,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
             string curWeaponName = useGun ? myEquippedGun.WeaponType.ToString() : myKnife.WeaponType.ToString();
             GameEvents.WeaponChanged(curWeaponName, _useGun);
         }
-    }
-    #endregion
-
-    #region 달리기
-    public void SprintStart(InputAction.CallbackContext ctx)
-    {
-        if (!CanAct) return;
-
-        isSprinting = true;
-        SetPlayerState(PlayerState.Sprint);
-    }
-
-    public void SprintEnd(InputAction.CallbackContext ctx)
-    {
-        isSprinting = false;
-        // 기절·사망 중에 Shift를 떼도 그 상태를 Idle로 덮어쓰지 않는다
-        if (playerState == PlayerState.Sprint) SetPlayerState(PlayerState.Idle);
     }
     #endregion
 

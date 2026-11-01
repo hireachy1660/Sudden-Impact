@@ -7,6 +7,7 @@ public class PlayerAnimator : MonoBehaviourPun
 {
     [SerializeField] private Animator animator;
     [SerializeField] private PlayerController playerController;
+    private PlayerMovement movement;
 
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
@@ -65,6 +66,8 @@ public class PlayerAnimator : MonoBehaviourPun
     {
         if (animator == null) animator = GetComponent<Animator>();
         if (playerController == null) playerController = GetComponent<PlayerController>();
+        // 이 컴포넌트는 모델(자식) 오브젝트에 붙어 있어 컨트롤러가 있는 오브젝트에서 가져온다
+        movement = playerController.GetComponent<PlayerMovement>();
 
         _mpb = new MaterialPropertyBlock();
         if (bodyRenderers == null || bodyRenderers.Length == 0)
@@ -155,13 +158,13 @@ public class PlayerAnimator : MonoBehaviourPun
     private void UpdateMovementAnimations()
     {
         //  플레이어 벨로시티(방향) 기준으로 로컬 속도 변환
-        Vector3 localVelocity = transform.InverseTransformDirection(playerController.CurrentVelocity)
-                                / playerController.MoveSpeed;
+        Vector3 localVelocity = transform.InverseTransformDirection(movement.CurrentVelocity)
+                                / movement.MoveSpeed;
 
         // Blend Tree
         animator.SetFloat(hashVelocityX, localVelocity.x);
         animator.SetFloat(hashVelocityZ, localVelocity.z);
-        animator.SetFloat(hashSpeed, playerController.NormalizedSpeed);
+        animator.SetFloat(hashSpeed, movement.NormalizedSpeed);
     }
 
     private void UpdateWeaponState()
@@ -207,7 +210,7 @@ public class PlayerAnimator : MonoBehaviourPun
         AudioClip[] clips;
         float vol;
 
-        float speed = playerController.NormalizedSpeed;
+        float speed = movement.NormalizedSpeed;
         if (speed >= runThreshold && runFootstepClips != null && runFootstepClips.Length > 0)
         {
             clips = runFootstepClips;
