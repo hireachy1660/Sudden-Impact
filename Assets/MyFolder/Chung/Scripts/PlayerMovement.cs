@@ -1,4 +1,5 @@
 ﻿using Photon.Pun;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,6 +10,9 @@ public class PlayerMovement : MonoBehaviourPun, IPlayerPart
     // 기본값은 P_Player2 프리팹에 저장된 수치(2026-11-01 기준)와 맞춤
     [SerializeField] private float moveSpeed = 4f;
     [SerializeField] private float sprintSpeed = 1.4f;
+    [SerializeField] private float rollDistance = 5f;
+    [SerializeField] private float rollDuration = 0.4f;
+    [SerializeField] private float rollCooldown = 4f;
 
     private PlayerController core;
     private Rigidbody rb;
@@ -16,14 +20,12 @@ public class PlayerMovement : MonoBehaviourPun, IPlayerPart
     private Vector3 curMoveInput;
     private Vector3 lastMoveDir;
     private bool isSprinting;
+    private float lastRollTime;
 
     // 애니메이터가 읽어갈 퍼블릭 게터
     public Vector3 CurrentVelocity => rb.linearVelocity;
     public float MoveSpeed => moveSpeed;
     public float NormalizedSpeed => CurrentVelocity.magnitude / moveSpeed;
-
-    // 임시 다리: Core에 남은 RollCoroutine이 c3 전까지 읽는다. c3에서 RollCoroutine이 옮겨오면 삭제.
-    public Vector3 LastMoveDir => lastMoveDir;
 
     private void Awake()
     {
@@ -109,6 +111,68 @@ public class PlayerMovement : MonoBehaviourPun, IPlayerPart
         isSprinting = false;
         // 기절·사망 중에 Shift를 떼도 그 상태를 Idle로 덮어쓰지 않는다
         if (core.GetPlayerState == PlayerController.PlayerState.Sprint) core.SetPlayerState(PlayerController.PlayerState.Idle);
+    }
+
+    public void TryRoll(InputAction.CallbackContext ctx)
+    {
+        if (!core.CanAct) return;
+        if (Time.time < lastRollTime + rollCooldown)
+        {
+            return;
+        }
+
+        // 이동 코루틴
+        StartCoroutine(RollCoroutine());
+
+        // 구르기 쿨다운 시작 이벤트 → PlayerWorldUI의 쿨다운 링 애니메이션 트리거
+        // TryRoll은 로컬 플레이어 입력에서만 호출되므로 IsMine 보장됨
+        GameEvents.RollStarted(rollCooldown);
+
+        // 무적 RPC. 상태(Rolling)와 애니 이벤트는 Core가 모든 클라이언트에서 걸고, 지속시간은 여기 값을 보낸다
+        photonView.RPC(nameof(PlayerController.StartRollCRP), RpcTarget.All, rollDuration);
+        lastRollTime = Time.time;
+    }
+
+    private IEnumerator RollCoroutine()
+    {
+        if (core.GetPlayerState == PlayerController.PlayerState.Rolling
+            || core.GetPlayerState == PlayerController.PlayerState.Stunned
+            || core.GetPlayerState == PlayerController.PlayerState.Dead)
+            yield break;
+
+        Vector3 rollDirection;
+        if (Vector3.SqrMagnitude(lastMoveDir) > 0.2f)
+        {
+            rollDirection = lastMoveDir;
+        }
+        else
+        {
+            rollDirection = transform.forward;
+        }
+
+        rb.MoveRotation(Quaternion.LookRotation(rollDirection));
+
+        float startSpeed = (rollDistance / rollDuration) * 2f;
+
+        float elapsed = 0f;
+
+        while (elapsed < rollDuration)
+        {
+            // 물리 프레임 시간 누적
+            elapsed += Time.fixedDeltaTime;
+            float t = elapsed / rollDuration;
+
+            // 속도를 선형적으로 줄임(EaseOut)
+            float currentSpeed = Mathf.Lerp(startSpeed, 0f, t);
+
+            // 오직 벨로시티(Velocity)만으로 구르기
+            rb.linearVelocity = rollDirection * currentSpeed;
+
+            yield return new WaitForFixedUpdate();
+        }
+
+        // 구르기가 끝난 후 잔여 속도를 소멸시켜 미끄러짐 방지
+        rb.linearVelocity = Vector3.zero;
     }
 
     public void OnRespawn() { }

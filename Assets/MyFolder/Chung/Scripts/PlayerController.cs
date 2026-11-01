@@ -25,10 +25,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     [Header("Parameters")]
     [SerializeField] private float maxHp = 100f;
-    [SerializeField] private float rollDistance = 2.0f;
-    [SerializeField] private float rollDuration = 0.2f;
     [SerializeField] private float stunDuration = 1.5f;
-    [SerializeField] private float rollCooldown = 4f;
     [SerializeField] private float deathAnimDuration = 2.0f;
     [SerializeField] private float meleeAttackCooldown = 0.5f;
 
@@ -71,7 +68,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     private Coroutine curCheckClosestNodeCoroutine; 
     private List<WeaponPickupNode> nearbyNodes = new List<WeaponPickupNode>();
-    private float lastRollTime;
     private float _pickupCooldownEnd = 0f;
     private float _meleeCooldownEnd = 0f;
     Collider col;
@@ -193,88 +189,24 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     public void RotatePlayer(Vector3 _aimPos) => movement.RotatePlayer(_aimPos);
     public void SprintStart(InputAction.CallbackContext ctx) => movement.SprintStart(ctx);
     public void SprintEnd(InputAction.CallbackContext ctx) => movement.SprintEnd(ctx);
+    public void TryRoll(InputAction.CallbackContext ctx) => movement.TryRoll(ctx);
 
     #region 구르기 로직
-    public void TryRoll(InputAction.CallbackContext ctx)
-    {
-        if (!CanAct) return;
-        if (Time.time < lastRollTime + rollCooldown)
-        {
-            return;
-        }
-
-        // 이동 코루틴
-        StartCoroutine(RollCoroutine());
-
-        // 구르기 쿨다운 시작 이벤트 → PlayerWorldUI의 쿨다운 링 애니메이션 트리거
-        // TryRoll은 로컬 플레이어 입력에서만 호출되므로 IsMine 보장됨
-        GameEvents.RollStarted(rollCooldown);
-
-        // 무적 RPC
-        photonView.RPC(nameof(StartRollCRP), RpcTarget.All);
-        lastRollTime = Time.time;
-
-    }
-
+    // 구르기 이동은 PlayerMovement가 소유자에서 처리하고, 무적 상태(Rolling)와 애니 이벤트는 Core가 모든 클라이언트에서 건다.
+    // 지속시간은 보낸 쪽 값을 받아 쓴다(프리팹 수치가 Movement로 옮겨가 Core에 없음).
     [PunRPC]
-    public void StartRollCRP()
+    public void StartRollCRP(float duration)
     {
-        StartCoroutine(RollingStateCoroutine());
-    }
-
-    private IEnumerator RollCoroutine()
-    {
-        if (playerState == PlayerState.Rolling
-            || playerState == PlayerState.Stunned
-            || playerState == PlayerState.Dead)
-            yield break;
-
-
-
-        Vector3 rollDirection;
-        if (Vector3.SqrMagnitude(movement.LastMoveDir) > 0.2f)
-        {
-            rollDirection = movement.LastMoveDir;
-        }
-        else
-        {
-            rollDirection = transform.forward;
-        }
-
-        myRigidbody.MoveRotation(Quaternion.LookRotation(rollDirection));
-
-        float startSpeed = (rollDistance / rollDuration) * 2f;
-
-        float elapsed = 0f;
-
-
-        while (elapsed < rollDuration)
-        {
-            // 물리 프레임 시간 누적
-            elapsed += Time.fixedDeltaTime;
-            float t = elapsed / rollDuration;
-
-            // 속도를 선형적으로 줄임(EaseOut)
-            float currentSpeed = Mathf.Lerp(startSpeed, 0f, t);
-
-            // 오직 벨로시티(Velocity)만으로 구르기
-            myRigidbody.linearVelocity = rollDirection * currentSpeed;
-
-            yield return new WaitForFixedUpdate();
-        }
-
-        // 구르기가 끝난 후 잔여 속도를 소멸시켜 미끄러짐 방지
-        myRigidbody.linearVelocity = Vector3.zero;
-
+        StartCoroutine(RollingStateCoroutine(duration));
     }
 
     // 상태 설정용
-    private IEnumerator RollingStateCoroutine()
+    private IEnumerator RollingStateCoroutine(float duration)
     {
         OnRollEvent?.Invoke();
 
         SetPlayerState(PlayerState.Rolling);
-        yield return new WaitForSeconds(rollDuration);
+        yield return new WaitForSeconds(duration);
         SetPlayerState(PlayerState.Idle);
     }
 
