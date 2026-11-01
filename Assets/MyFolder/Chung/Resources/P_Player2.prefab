@@ -48,6 +48,7 @@ GameObject:
   - component: {fileID: 6250438029055740684}
   - component: {fileID: 8887055471966068752}
   - component: {fileID: 6355518173395185663}
+  - component: {fileID: 694259344993658809}
   - component: {fileID: 4920232383521831332}
   - component: {fileID: 788179651339884033}
   - component: {fileID: 6390642938741679145}
@@ -120,7 +121,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   myRigidbody: {fileID: 6390642938741679145}
-  myTransformView: {fileID: 788179651339884033}
   weaponAttachPoint: {fileID: 107669909597435356}
   myKnife: {fileID: 298153680274639072}
   registry: {fileID: 11400000, guid: 59eed9396b7e5a0419003df23a221d5b, type: 2}
@@ -131,7 +131,6 @@ MonoBehaviour:
   sprintSpeed: 1.4
   rollDistance: 5
   rollDuration: 0.4
-  pickUpDistance: 1
   stunDuration: 1.5
   rollCooldown: 4
   deathAnimDuration: 2
@@ -157,6 +156,18 @@ MonoBehaviour:
   hasEnemyFlag: 0
   myTeam: 0
   playerState: 0
+--- !u!114 &694259344993658809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2143100945692910762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b9ed3bf0e9c9cf44b8ed772991346bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
 --- !u!114 &4920232383521831332
 MonoBehaviour:
   m_ObjectHideFlags: 0
