@@ -1,10 +1,10 @@
 ﻿using Photon.Pun;
 using System;
-using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine;
 
 // 체력·피격·기절 부품. 모든 클라이언트에서 돌며 TakeDamage·StunRPC의 입구다.
+// 기절은 코루틴 없이 종료 시각(PhotonNetwork.Time)으로 관리한다.
 // 사망의 "때"(hp가 0)만 알고 OnDied로 알린다. 후속 조치는 이를 구독한 Core가 순서를 가진다.
 public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
 {
@@ -23,6 +23,8 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
     [SerializeField] private float curHp;
 
     private PlayerController core;
+    // 기절 종료 시각(PhotonNetwork.Time 기준). 보낸 쪽이 계산해 RPC로 실어 보내므로 모든 클라이언트가 같은 순간에 풀린다.
+    private double stunEndTime;
 
     // 애니메이터에게 피격·기절을 알리는 이벤트
     public event Action OnHitEvent;
@@ -44,12 +46,13 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
     {
         curHp = maxHp;
         GameEvents.HpChanged(curHp);
+        stunEndTime = 0;
     }
 
     public void OnRoundEndReset()
     {
-        // 라운드 종료 순간 기절 중이었다면 코루틴이 다음 라운드로 넘어가지 않게 멈춘다
-        StopAllCoroutines();
+        // Core가 상태를 NotReady로 덮어 만료 검사는 걸리지 않지만, 종료 시각도 비워 다음 라운드로 넘기지 않는다
+        stunEndTime = 0;
     }
 
     public void OnReceiveImpact(ImpactData _data)
@@ -106,21 +109,25 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
 
     private void StunPlayer()
     {
-        photonView.RPC(nameof(StunRPC), RpcTarget.All);
+        // 보내는 쪽이 종료 시각을 계산해 실어 보낸다 — 도착 시차와 무관하게 모두 같은 순간에 풀린다
+        photonView.RPC(nameof(StunRPC), RpcTarget.All, PhotonNetwork.Time + stunDuration);
     }
 
     [PunRPC]
-    private void StunRPC()
+    private void StunRPC(double _endTime)
     {
         if (!gameObject.activeSelf) return;
-        StartCoroutine(StunCoroutine());
+        stunEndTime = _endTime;
+        core.SetPlayerState(PlayerController.PlayerState.Stunned);
         OnStunnedEvent?.Invoke();
     }
 
-    private IEnumerator StunCoroutine()
+    private void Update()
     {
-        core.SetPlayerState(PlayerController.PlayerState.Stunned);
-        yield return new WaitForSeconds(stunDuration);
-        core.SetPlayerState(PlayerController.PlayerState.Idle);
+        // 기절 상태일 때만 만료를 검사한다. 기절 중 사망하면 상태가 Dead라 여기서 Idle로 덮어쓰지 않는다(코루틴 방식에서 생기던 버그).
+        if (core.GetPlayerState == PlayerController.PlayerState.Stunned && PhotonNetwork.Time >= stunEndTime)
+        {
+            core.SetPlayerState(PlayerController.PlayerState.Idle);
+        }
     }
 }
