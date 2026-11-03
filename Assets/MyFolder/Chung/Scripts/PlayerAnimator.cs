@@ -105,7 +105,7 @@ public class PlayerAnimator : MonoBehaviourPun
         playerController.OnRollEvent += TriggerRoll;
         playerController.OnThrowEvent += TriggerThrow;
         playerController.OnInteractEvent += TriggerInteract;
-        playerController.OnStunnedEvent += TriggerStun;
+        health.OnStunnedEvent += TriggerStun;
         health.OnHitEvent += TriggerHitFlash;
 
         // 초기화
@@ -121,7 +121,7 @@ public class PlayerAnimator : MonoBehaviourPun
         playerController.OnRollEvent -= TriggerRoll;
         playerController.OnThrowEvent -= TriggerThrow;
         playerController.OnInteractEvent -= TriggerInteract;
-        playerController.OnStunnedEvent -= TriggerStun;
+        health.OnStunnedEvent -= TriggerStun;
         health.OnHitEvent -= TriggerHitFlash;
         GameEvents.OnWeaponChanged -= HandleWeaponChanged;
         GameEvents.OnRoundStart -= HandleRoundStart;

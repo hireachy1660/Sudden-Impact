@@ -19,7 +19,6 @@ public class PlayerController : MonoBehaviourPun
     [SerializeField] private GameObject dummyFlagMesh;
 
     [Header("Parameters")]
-    [SerializeField] private float stunDuration = 1.5f;
     [SerializeField] private float deathAnimDuration = 2.0f;
     [SerializeField] private float meleeAttackCooldown = 0.5f;
 
@@ -44,7 +43,6 @@ public class PlayerController : MonoBehaviourPun
     public event Action OnRollEvent;
     public event Action OnThrowEvent;
     public event Action OnInteractEvent;
-    public event Action OnStunnedEvent;
 
     [Header("ForDebug")]
     [SerializeField] private WeaponPickupNode closestNode; // 최단거리 노드
@@ -140,7 +138,7 @@ public class PlayerController : MonoBehaviourPun
 
         CleanupWeapon();
 
-        // 구르기 상태·기절 코루틴이 돌고 있다면 정지 (구르기 이동 코루틴은 PlayerMovement가 멈춤)
+        // 구르기 상태 코루틴이 돌고 있다면 정지 (구르기 이동은 PlayerMovement, 기절은 PlayerHealth가 각자 멈춤)
         StopAllCoroutines();
 
         foreach (var p in parts) p.OnRoundEndReset();
@@ -469,7 +467,7 @@ public class PlayerController : MonoBehaviourPun
 
     #endregion
 
-    #region OnImpact
+    #region 사망
     // 피격·체력은 PlayerHealth가 맡고, hp가 0이 되면 Health의 OnDied가 이것을 부른다(Awake에서 구독).
     // 죽음의 후속 조치(상태·무기·깃발·몸·라운드 알림)는 생명주기라 Core가 순서를 가지고, 밖에서 죽음을 명령할 길은 없다.
     private void Die(int _attackerNum)
@@ -506,28 +504,6 @@ public class PlayerController : MonoBehaviourPun
         yield return new WaitForSeconds(deathAnimDuration);
         gameObject.SetActive(false);
 
-    }
-
-    // c2에서 PlayerHealth로 옮기기 전까지 Health의 OnReceiveImpact가 부르는 임시 public
-    public void StunPlayer()
-    {
-        photonView.RPC(nameof(StunRPC), RpcTarget.All);
-
-    }
-
-    [PunRPC]
-    private void StunRPC()
-    {
-        if (!gameObject.activeSelf) return;
-        StartCoroutine(StunCoroutine());
-        OnStunnedEvent?.Invoke();
-    }
-
-    private IEnumerator StunCoroutine()
-    {
-        SetPlayerState(PlayerState.Stunned);
-        yield return new WaitForSeconds(stunDuration);
-        SetPlayerState(PlayerState.Idle);
     }
 
     #endregion

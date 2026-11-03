@@ -48,12 +48,12 @@ GameObject:
   - component: {fileID: 6250438029055740684}
   - component: {fileID: 6355518173395185663}
   - component: {fileID: 694259344993658809}
+  - component: {fileID: -270096623455273730}
   - component: {fileID: 4920232383521831332}
   - component: {fileID: 788179651339884033}
   - component: {fileID: 8887055471966068752}
   - component: {fileID: 6390642938741679145}
   - component: {fileID: 787180183226477860}
-  - component: {fileID: -270096623455273730}
   m_Layer: 20
   m_Name: P_Player2
   m_TagString: Untagged
@@ -103,7 +103,6 @@ MonoBehaviour:
   myKnife: {fileID: 298153680274639072}
   registry: {fileID: 11400000, guid: 59eed9396b7e5a0419003df23a221d5b, type: 2}
   dummyFlagMesh: {fileID: 6935043748650806786}
-  stunDuration: 1.5
   deathAnimDuration: 2
   meleeAttackCooldown: 0.5
   armBandRenderer: {fileID: 7338258209646112000}
@@ -141,6 +140,24 @@ MonoBehaviour:
   rollDistance: 5
   rollDuration: 0.4
   rollCooldown: 4
+--- !u!114 &-270096623455273730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2143100945692910762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1a6e374bad1eca44a260e7daedd4fe8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  neonBloodPrefab: {fileID: 8404887664629711722, guid: 3634eb7210c2e5d4fa9883a5c59efa85, type: 3}
+  maxHp: 100
+  stunDuration: 1.5
+  damageImpulseSource: {fileID: 787180183226477860}
+  damageShakeForce: 1.5
+  curHp: 0
 --- !u!114 &4920232383521831332
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -284,23 +301,6 @@ MonoBehaviour:
     DissipationDistance: 100
     PropagationSpeed: 343
   DefaultVelocity: {x: 0, y: -1, z: 0}
---- !u!114 &-270096623455273730
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2143100945692910762}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c1a6e374bad1eca44a260e7daedd4fe8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  neonBloodPrefab: {fileID: 8404887664629711722, guid: 3634eb7210c2e5d4fa9883a5c59efa85, type: 3}
-  maxHp: 100
-  damageImpulseSource: {fileID: 787180183226477860}
-  damageShakeForce: 1.5
-  curHp: 0
 --- !u!1 &3672927608951699919
 GameObject:
   m_ObjectHideFlags: 0

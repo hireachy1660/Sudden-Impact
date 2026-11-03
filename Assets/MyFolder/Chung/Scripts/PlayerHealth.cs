@@ -1,9 +1,10 @@
 ﻿using Photon.Pun;
 using System;
+using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine;
 
-// 체력·피격 부품. 모든 클라이언트에서 돌며 TakeDamage RPC의 입구다.
+// 체력·피격·기절 부품. 모든 클라이언트에서 돌며 TakeDamage·StunRPC의 입구다.
 // 사망의 "때"(hp가 0)만 알고 OnDied로 알린다. 후속 조치는 이를 구독한 Core가 순서를 가진다.
 public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
 {
@@ -12,6 +13,7 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
 
     [Header("Parameters")]
     [SerializeField] private float maxHp = 100f;
+    [SerializeField] private float stunDuration = 1.5f;
 
     [Header("Camera Shake (Damage)")]
     [SerializeField] private CinemachineImpulseSource damageImpulseSource;
@@ -22,8 +24,9 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
 
     private PlayerController core;
 
-    // 애니메이터에게 피격을 알리는 이벤트
+    // 애니메이터에게 피격·기절을 알리는 이벤트
     public event Action OnHitEvent;
+    public event Action OnStunnedEvent;
     // hp가 0이 된 순간을 알린다(인자 = 공격자 ActorNumber). 발화는 이 부품만, 밖에서는 듣기만.
     public event Action<int> OnDied;
 
@@ -43,7 +46,11 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
         GameEvents.HpChanged(curHp);
     }
 
-    public void OnRoundEndReset() { }
+    public void OnRoundEndReset()
+    {
+        // 라운드 종료 순간 기절 중이었다면 코루틴이 다음 라운드로 넘어가지 않게 멈춘다
+        StopAllCoroutines();
+    }
 
     public void OnReceiveImpact(ImpactData _data)
     {
@@ -58,8 +65,7 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
 
         if (_data.type == DamageType.Throw)
         {
-            // 기절은 c2에서 이 부품으로 온다. 그때까지는 Core의 StunPlayer를 거친다.
-            core.StunPlayer();
+            StunPlayer();
             return;
         }
 
@@ -96,5 +102,25 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
         {
             OnDied?.Invoke(_attackerNum);
         }
+    }
+
+    private void StunPlayer()
+    {
+        photonView.RPC(nameof(StunRPC), RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void StunRPC()
+    {
+        if (!gameObject.activeSelf) return;
+        StartCoroutine(StunCoroutine());
+        OnStunnedEvent?.Invoke();
+    }
+
+    private IEnumerator StunCoroutine()
+    {
+        core.SetPlayerState(PlayerController.PlayerState.Stunned);
+        yield return new WaitForSeconds(stunDuration);
+        core.SetPlayerState(PlayerController.PlayerState.Idle);
     }
 }
