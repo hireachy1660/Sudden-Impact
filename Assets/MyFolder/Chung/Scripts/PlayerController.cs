@@ -2,11 +2,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerController : MonoBehaviourPun, IAttackReceiver
+public class PlayerController : MonoBehaviourPun
 {
     public enum PlayerState
     {
@@ -18,11 +17,8 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     [SerializeField] private Weapon myKnife;
     [SerializeField] private PlayerRegistry registry;
     [SerializeField] private GameObject dummyFlagMesh;
-    [Tooltip("혈흔 프리팹")]
-    [SerializeField] private GameObject neonBloodPrefab;
 
     [Header("Parameters")]
-    [SerializeField] private float maxHp = 100f;
     [SerializeField] private float stunDuration = 1.5f;
     [SerializeField] private float deathAnimDuration = 2.0f;
     [SerializeField] private float meleeAttackCooldown = 0.5f;
@@ -39,10 +35,6 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     [Tooltip("미리 모든 종류의 총을 등록")]
     [SerializeField] private Gun[] allGuns;
 
-    [Header("Camera Shake (Damage)")]
-    [SerializeField] private CinemachineImpulseSource damageImpulseSource;
-    [SerializeField] private float damageShakeForce = 1.5f;
-
     [Header("Animator Bridge Data")]
     // 애니메이터가 읽어갈 퍼블릭 게터
     public bool UseGun => useGun;
@@ -53,10 +45,8 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     public event Action OnThrowEvent;
     public event Action OnInteractEvent;
     public event Action OnStunnedEvent;
-    public event Action OnHitEvent;
 
     [Header("ForDebug")]
-    [SerializeField] private float curHp;
     [SerializeField] private WeaponPickupNode closestNode; // 최단거리 노드
     [SerializeField] private Weapon myEquippedGun;
     [SerializeField] private bool useGun;
@@ -72,6 +62,7 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     // 같은 오브젝트에 붙은 부품들. Core가 리스폰·라운드 종료를 받아 순회하며 알린다.
     private IPlayerPart[] parts;
     private PlayerMovement movement;
+    private PlayerHealth health;
 
     public int MyTeam { get { return myTeam; } }
     public bool HasEnemyFlag { get { return hasEnemyFlag; } }
@@ -96,11 +87,13 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
         col = GetComponent<Collider>();
         parts = GetComponents<IPlayerPart>();
         movement = GetComponent<PlayerMovement>();
+        health = GetComponent<PlayerHealth>();
+        // 같은 오브젝트·같은 수명이라 해제는 필요 없다
+        health.OnDied += Die;
     }
 
     private void OnEnable()
     {
-        curHp = maxHp;
         SetPlayerState(PlayerState.Idle);
         GameEvents.WeaponChanged(myKnife.WeaponType.ToString(), false);
         col.enabled = true;
@@ -124,12 +117,10 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     // 라운드 시작시 초기화 목적으로 호출
     public void Respawn(Vector3 _spawnPos)
     {
-        curHp = maxHp;
         SetPlayerState(PlayerState.Idle);
         gameObject.SetActive(true);
         myRigidbody.position = _spawnPos;
         dummyFlagMesh.SetActive(false);
-        GameEvents.HpChanged(curHp);
         SetTeamColor(myTeam);
         col.enabled = true;
 
@@ -479,79 +470,35 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
     #endregion
 
     #region OnImpact
-    public void OnReceiveImpact(ImpactData _data)
-    {
-        // 상태 검사
-        if (
-            curHp <= 0
-            || playerState == PlayerState.NotReady
-            || playerState == PlayerState.Dead
-            || playerState == PlayerState.Rolling
-            || _data.attackerTeam == myTeam
-            ) { return; }
-
-        if (_data.type == DamageType.Throw)
-        {
-            StunPlayer();
-            return;
-        }
-
-        //내가 쏜 총알이 아니면 데미지 RPC호출
-        if (_data.attackerActorNumber != photonView.Owner.ActorNumber)
-        {
-            photonView.RPC(nameof(TakeDamage), RpcTarget.All, _data.damage, _data.hitNormal, _data.attackerActorNumber);
-        }
-
-    }
-
-    [PunRPC]
-    public void TakeDamage(float _damage, Vector3 _hitNormal, int _attackerNum)
-    {
-        curHp -= _damage;
-        OnHitEvent?.Invoke();
-
-        // 피격 카메라 쉐이크
-        if (photonView.IsMine && damageImpulseSource != null)
-        {
-            GameEvents.HpChanged(curHp);
-            if (damageImpulseSource != null)
-            {
-                Vector3 shakeDir = -_hitNormal;
-                shakeDir.y = 0f;
-                if (shakeDir.sqrMagnitude < 0.01f) shakeDir = Vector3.back;
-                { damageImpulseSource.GenerateImpulseWithVelocity(shakeDir.normalized * damageShakeForce); }
-            }
-        }
-
-        Vector3 bloodPos = new Vector3(transform.position.x, -1.35f, transform.position.z);
-        Instantiate(neonBloodPrefab, bloodPos, Quaternion.identity);
-
-        if (curHp <= 0)
-        {
-            DiePlayer(_attackerNum);
-
-            if(photonView.IsMine)
-            GameEvents.LocalPlayerDeath();
-        }
-    }
-
-    private void DiePlayer(int _attackerNum)
+    // 피격·체력은 PlayerHealth가 맡고, hp가 0이 되면 Health의 OnDied가 이것을 부른다(Awake에서 구독).
+    // 죽음의 후속 조치(상태·무기·깃발·몸·라운드 알림)는 생명주기라 Core가 순서를 가지고, 밖에서 죽음을 명령할 길은 없다.
+    private void Die(int _attackerNum)
     {
         DropWeapon();
         SetPlayerState(PlayerState.Dead);
         RoundManager.Instance?.OnPlayerDied(this, _attackerNum);
+        DropFlag();
+        DisableBody();
+        StartCoroutine(DeathRoutine());
 
+        if (photonView.IsMine)
+            GameEvents.LocalPlayerDeath();
+    }
+
+    private void DropFlag()
+    {
         if (hasEnemyFlag)
         {
             hasEnemyFlag = false;
             dummyFlagMesh.SetActive(false);
         }
+    }
+
+    // 시체가 살아있는 플레이어 이동을 막지 않도록 물리를 멈추고 콜라이더를 끈다
+    private void DisableBody()
+    {
         myRigidbody.Sleep();
-
-        // 시체가 살아있는 플레이어 이동을 막지 않도록 콜라이더 비활성화
         if (col != null) col.enabled = false;
-
-        StartCoroutine(DeathRoutine());
     }
 
     private IEnumerator DeathRoutine()
@@ -561,7 +508,8 @@ public class PlayerController : MonoBehaviourPun, IAttackReceiver
 
     }
 
-    private void StunPlayer()
+    // c2에서 PlayerHealth로 옮기기 전까지 Health의 OnReceiveImpact가 부르는 임시 public
+    public void StunPlayer()
     {
         photonView.RPC(nameof(StunRPC), RpcTarget.All);
 

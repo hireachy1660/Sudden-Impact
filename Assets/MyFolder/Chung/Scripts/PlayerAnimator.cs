@@ -8,6 +8,7 @@ public class PlayerAnimator : MonoBehaviourPun
     [SerializeField] private Animator animator;
     [SerializeField] private PlayerController playerController;
     private PlayerMovement movement;
+    private PlayerHealth health;
 
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
@@ -68,6 +69,7 @@ public class PlayerAnimator : MonoBehaviourPun
         if (playerController == null) playerController = GetComponent<PlayerController>();
         // 이 컴포넌트는 모델(자식) 오브젝트에 붙어 있어 컨트롤러가 있는 오브젝트에서 가져온다
         movement = playerController.GetComponent<PlayerMovement>();
+        health = playerController.GetComponent<PlayerHealth>();
 
         _mpb = new MaterialPropertyBlock();
         if (bodyRenderers == null || bodyRenderers.Length == 0)
@@ -104,7 +106,7 @@ public class PlayerAnimator : MonoBehaviourPun
         playerController.OnThrowEvent += TriggerThrow;
         playerController.OnInteractEvent += TriggerInteract;
         playerController.OnStunnedEvent += TriggerStun;
-        playerController.OnHitEvent += TriggerHitFlash;
+        health.OnHitEvent += TriggerHitFlash;
 
         // 초기화
         animator.SetLayerWeight(1, 1f);
@@ -120,7 +122,7 @@ public class PlayerAnimator : MonoBehaviourPun
         playerController.OnThrowEvent -= TriggerThrow;
         playerController.OnInteractEvent -= TriggerInteract;
         playerController.OnStunnedEvent -= TriggerStun;
-        playerController.OnHitEvent -= TriggerHitFlash;
+        health.OnHitEvent -= TriggerHitFlash;
         GameEvents.OnWeaponChanged -= HandleWeaponChanged;
         GameEvents.OnRoundStart -= HandleRoundStart;
     }

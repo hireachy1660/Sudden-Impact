@@ -46,13 +46,14 @@ GameObject:
   m_Component:
   - component: {fileID: 177222899007441007}
   - component: {fileID: 6250438029055740684}
-  - component: {fileID: 8887055471966068752}
   - component: {fileID: 6355518173395185663}
   - component: {fileID: 694259344993658809}
   - component: {fileID: 4920232383521831332}
   - component: {fileID: 788179651339884033}
+  - component: {fileID: 8887055471966068752}
   - component: {fileID: 6390642938741679145}
   - component: {fileID: 787180183226477860}
+  - component: {fileID: -270096623455273730}
   m_Layer: 20
   m_Name: P_Player2
   m_TagString: Untagged
@@ -85,29 +86,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2143100945692910762}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!136 &8887055471966068752
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2143100945692910762}
-  m_Material: {fileID: 13400000, guid: 09e17a2b031918e469a779c4ff0717c4, type: 2}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2.1987352
-  m_Direction: 1
-  m_Center: {x: 0, y: 0.09936762, z: 0}
 --- !u!114 &6355518173395185663
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -125,14 +103,7 @@ MonoBehaviour:
   myKnife: {fileID: 298153680274639072}
   registry: {fileID: 11400000, guid: 59eed9396b7e5a0419003df23a221d5b, type: 2}
   dummyFlagMesh: {fileID: 6935043748650806786}
-  neonBloodPrefab: {fileID: 8404887664629711722, guid: 3634eb7210c2e5d4fa9883a5c59efa85, type: 3}
-  maxHp: 100
-  moveSpeed: 4
-  sprintSpeed: 1.4
-  rollDistance: 5
-  rollDuration: 0.4
   stunDuration: 1.5
-  rollCooldown: 4
   deathAnimDuration: 2
   meleeAttackCooldown: 0.5
   armBandRenderer: {fileID: 7338258209646112000}
@@ -147,9 +118,6 @@ MonoBehaviour:
   - {fileID: 5859568415962895923}
   - {fileID: 955796400151174609}
   - {fileID: 7974992253602839818}
-  damageImpulseSource: {fileID: 787180183226477860}
-  damageShakeForce: 1.5
-  curHp: 0
   closestNode: {fileID: 0}
   myEquippedGun: {fileID: 0}
   useGun: 0
@@ -168,6 +136,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b9ed3bf0e9c9cf44b8ed772991346bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
+  moveSpeed: 4
+  sprintSpeed: 1.4
+  rollDistance: 5
+  rollDuration: 0.4
+  rollCooldown: 4
 --- !u!114 &4920232383521831332
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -208,6 +181,29 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 1
+--- !u!136 &8887055471966068752
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2143100945692910762}
+  m_Material: {fileID: 13400000, guid: 09e17a2b031918e469a779c4ff0717c4, type: 2}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2.1987352
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.09936762, z: 0}
 --- !u!54 &6390642938741679145
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -288,6 +284,23 @@ MonoBehaviour:
     DissipationDistance: 100
     PropagationSpeed: 343
   DefaultVelocity: {x: 0, y: -1, z: 0}
+--- !u!114 &-270096623455273730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2143100945692910762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1a6e374bad1eca44a260e7daedd4fe8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  neonBloodPrefab: {fileID: 8404887664629711722, guid: 3634eb7210c2e5d4fa9883a5c59efa85, type: 3}
+  maxHp: 100
+  damageImpulseSource: {fileID: 787180183226477860}
+  damageShakeForce: 1.5
+  curHp: 0
 --- !u!1 &3672927608951699919
 GameObject:
   m_ObjectHideFlags: 0
