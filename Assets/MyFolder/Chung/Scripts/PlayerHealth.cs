@@ -82,19 +82,24 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
     [PunRPC]
     private void TakeDamage(float _damage, Vector3 _hitNormal, int _attackerNum)
     {
+        // 보내는 쪽 검사(OnReceiveImpact)를 거의 동시에 통과한 두 공격이 모두 도착할 수 있다 — 이미 죽었으면 받는 쪽에서도 무시
+        if (curHp <= 0) return;
+
         curHp -= _damage;
         OnHitEvent?.Invoke();
 
-        // 피격 카메라 쉐이크
-        if (photonView.IsMine && damageImpulseSource != null)
+        if (photonView.IsMine)
         {
+            // HUD 체력 갱신은 임펄스 소스 참조와 무관하게 항상
             GameEvents.HpChanged(curHp);
+
+            // 피격 카메라 쉐이크
             if (damageImpulseSource != null)
             {
                 Vector3 shakeDir = -_hitNormal;
                 shakeDir.y = 0f;
                 if (shakeDir.sqrMagnitude < 0.01f) shakeDir = Vector3.back;
-                { damageImpulseSource.GenerateImpulseWithVelocity(shakeDir.normalized * damageShakeForce); }
+                damageImpulseSource.GenerateImpulseWithVelocity(shakeDir.normalized * damageShakeForce);
             }
         }
 
@@ -117,6 +122,9 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
     private void StunRPC(double _endTime)
     {
         if (!gameObject.activeSelf) return;
+        // 늦게 도착한 기절이 시체나 라운드 대기 상태를 Stunned로 덮지 않게 — 보내는 쪽 검사를 받는 쪽에서도 반복
+        if (core.GetPlayerState == PlayerController.PlayerState.Dead
+            || core.GetPlayerState == PlayerController.PlayerState.NotReady) return;
         stunEndTime = _endTime;
         core.SetPlayerState(PlayerController.PlayerState.Stunned);
         OnStunnedEvent?.Invoke();

@@ -487,6 +487,9 @@ public class PlayerController : MonoBehaviourPun
     // 죽음의 후속 조치(상태·무기·깃발·몸·라운드 알림)는 생명주기라 Core가 순서를 가지고, 밖에서 죽음을 명령할 길은 없다.
     private void Die(int _attackerNum)
     {
+        // 멱등 — OnDied가 두 번 와도 사망 처리(킬 집계 포함)는 한 번
+        if (playerState == PlayerState.Dead) return;
+
         DropWeapon();
         SetPlayerState(PlayerState.Dead);
         RoundManager.Instance?.OnPlayerDied(this, _attackerNum);
