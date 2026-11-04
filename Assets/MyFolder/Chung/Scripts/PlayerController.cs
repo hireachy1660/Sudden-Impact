@@ -248,10 +248,17 @@ public class PlayerController : MonoBehaviourPun
         {
             if (Time.time < _meleeCooldownEnd) return;
             myKnife.Attack(_isHeld);
-            OnAttackEvent?.Invoke();
+            // 근접 공격 애니는 원격에도 보여야 하므로 RPC 안에서 발화한다(총 연출은 Gun이 자체 RPC로 처리)
+            photonView.RPC(nameof(AttackAnimRPC), RpcTarget.All);
             _meleeCooldownEnd = Time.time + meleeAttackCooldown;
         }
 
+    }
+
+    [PunRPC]
+    private void AttackAnimRPC()
+    {
+        OnAttackEvent?.Invoke();
     }
 
     #region 던지기 , 줍기
