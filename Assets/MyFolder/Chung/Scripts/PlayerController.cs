@@ -459,10 +459,18 @@ public class PlayerController : MonoBehaviourPun
             {
                 // 3. 된다면 실행
                 target.Interact(this);
+                // 상호작용 애니는 모든 클라이언트에서 보여야 하므로 RPC 안에서 발화한다(구르기·던지기·기절과 같은 패턴)
+                photonView.RPC(nameof(InteractAnimRPC), RpcTarget.All);
 
                 break; // 한 번에 하나만 상호작용
             }
         }
+    }
+
+    [PunRPC]
+    private void InteractAnimRPC()
+    {
+        OnInteractEvent?.Invoke();
     }
 
     #endregion
