@@ -9086,7 +9086,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DebugGameManager
   playerRegistry: {fileID: 11400000, guid: 59eed9396b7e5a0419003df23a221d5b, type: 2}
   winScore: 5
-  roundStartDelay: 15
+  roundStartDelay: 5
   teamASpawnPoints:
   - {fileID: 52041245}
   - {fileID: 298013735}
