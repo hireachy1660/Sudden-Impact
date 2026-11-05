@@ -1,7 +1,6 @@
 ﻿using Photon.Pun;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -26,10 +25,6 @@ public class PlayerController : MonoBehaviourPun
     [SerializeField] private Color teamAColor = Color.blue;
     [SerializeField] private Color teamBColor = Color.red;
 
-    [Header("Interaction Settings")]
-    [SerializeField] private float interactRadius = 2.0f;
-    [SerializeField] private LayerMask interactableLayer;
-
     [Header("Pre-Allocated Weapons")]
     [Tooltip("미리 모든 종류의 총을 등록")]
     [SerializeField] private Gun[] allGuns;
@@ -43,24 +38,23 @@ public class PlayerController : MonoBehaviourPun
     public event Action OnRollEvent;
     public event Action OnThrowEvent;
     public event Action OnInteractEvent;
+    // 장착 직후 줍기 쿨다운을 PlayerInteraction이 걸도록 알리는 이벤트(소유자에서만 발화)
+    public event Action OnEquipped;
 
     [Header("ForDebug")]
-    [SerializeField] private WeaponPickupNode closestNode; // 최단거리 노드
     [SerializeField] private Weapon myEquippedGun;
     [SerializeField] private bool useGun;
     [SerializeField] private bool hasEnemyFlag;
     [SerializeField] private int myTeam;
     [SerializeField] private PlayerState playerState;
 
-    private Coroutine curCheckClosestNodeCoroutine;
-    private List<WeaponPickupNode> nearbyNodes = new List<WeaponPickupNode>();
-    private float _pickupCooldownEnd = 0f;
     private float _meleeCooldownEnd = 0f;
     Collider col;
     // 같은 오브젝트에 붙은 부품들. Core가 리스폰·라운드 종료를 받아 순회하며 알린다.
     private IPlayerPart[] parts;
     private PlayerMovement movement;
     private PlayerHealth health;
+    private PlayerInteraction interaction;
 
     public int MyTeam { get { return myTeam; } }
     public bool HasEnemyFlag { get { return hasEnemyFlag; } }
@@ -86,6 +80,7 @@ public class PlayerController : MonoBehaviourPun
         parts = GetComponents<IPlayerPart>();
         movement = GetComponent<PlayerMovement>();
         health = GetComponent<PlayerHealth>();
+        interaction = GetComponent<PlayerInteraction>();
         // 같은 오브젝트·같은 수명이라 해제는 필요 없다
         health.OnDied += Die;
     }
@@ -176,6 +171,8 @@ public class PlayerController : MonoBehaviourPun
     public void SprintStart(InputAction.CallbackContext ctx) => movement.SprintStart(ctx);
     public void SprintEnd(InputAction.CallbackContext ctx) => movement.SprintEnd(ctx);
     public void TryRoll(InputAction.CallbackContext ctx) => movement.TryRoll(ctx);
+    public void PickUpAndDrop(InputAction.CallbackContext ctx) => interaction.PickUpAndDrop(ctx);
+    public void TryInteract(InputAction.CallbackContext ctx) => interaction.TryInteract(ctx);
 
     #region 구르기 로직
     // 구르기 이동은 PlayerMovement가 소유자에서 처리하고, 무적 상태(Rolling)와 애니 이벤트는 Core가 모든 클라이언트에서 건다.
@@ -261,117 +258,7 @@ public class PlayerController : MonoBehaviourPun
         OnAttackEvent?.Invoke();
     }
 
-    #region 던지기 , 줍기
-
-    public void PickUpAndDrop(InputAction.CallbackContext ctx)
-    {
-        if (!CanAct) return;
-        if (!photonView.IsMine || !ctx.performed) return;
-        if (Time.time < _pickupCooldownEnd) return;
-
-        // 1. 주변에 노드가 있으면 (가용 여부 무관) 드롭 차단
-        if (closestNode != null)
-        {
-            if (closestNode.IsAvailable)
-            {
-                closestNode.RequestPickup(photonView.ViewID);
-                // RPC 왕복 지연 동안 Q 재입력으로 TryThrow 방지
-                _pickupCooldownEnd = Time.time + 0.5f;
-            }
-            closestNode = null;
-            return;
-        }
-        // 2. 노드가 완전히 없을 때만 던지기
-        if (myEquippedGun != null && useGun)
-        {
-            photonView.RPC(nameof(RPC_TryThrow), RpcTarget.All, (int)((Gun)myEquippedGun).WeaponType);
-        }
-    }
-
-    #region 줍기
-    private void OnTriggerEnter(Collider other)
-    {
-        if (!photonView.IsMine) return;
-
-        WeaponPickupNode node;
-        if (other.TryGetComponent<WeaponPickupNode>(out node))
-        {
-            if (!node.IsAvailable) return;
-            nearbyNodes.Add(node);
-
-            if (closestNode == null)
-            {
-                closestNode = node;
-                curCheckClosestNodeCoroutine = StartCoroutine(CheckClosestNode());
-            }
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (!photonView.IsMine) return;
-
-        WeaponPickupNode node;
-        if (other.TryGetComponent<WeaponPickupNode>(out node))
-        {
-            if (!nearbyNodes.Remove(node)) return;
-
-            if (node == closestNode) closestNode.HideLabel();
-        }
-    }
-
-    private IEnumerator CheckClosestNode()
-    {
-        WeaponPickupNode prevClosest = null;
-
-        while (nearbyNodes.Count > 0)
-        {
-            yield return new WaitForSeconds(5f / 60f); // ~5 frames
-
-            float minSqrDist = float.MaxValue;
-            WeaponPickupNode tempClosest = null;
-
-            for (int i = nearbyNodes.Count - 1; i >= 0; i--)
-            {
-                if (nearbyNodes[i] == null || !nearbyNodes[i].IsAvailable)
-                {
-                    nearbyNodes.RemoveAt(i);
-                    continue;
-                }
-
-                float sqrDist = (transform.position - nearbyNodes[i].transform.position).sqrMagnitude;
-                if (sqrDist < minSqrDist)
-                {
-                    minSqrDist = sqrDist;
-                    tempClosest = nearbyNodes[i];
-                }
-            }
-
-            // Toggle label: 이전 노드의 레이블을 끄고 새 노드의 레이블을 켠다
-            if (tempClosest != prevClosest)
-            {
-                if (prevClosest != null)
-                {
-                    GameEvents.PickupUIUpdate(false, Vector3.zero);
-                }
-                if (tempClosest != null)
-                {
-                    GameEvents.PickupUIUpdate(true, tempClosest.transform.position, $"{tempClosest.WeaponType} [Q]");
-                }
-                prevClosest = tempClosest;
-            }
-
-            closestNode = tempClosest;
-        }
-
-        // 주위에 더이상 노드가 없을 떄
-        if (closestNode != null)
-        {
-            GameEvents.PickupUIUpdate(false, Vector3.zero);
-        }
-        closestNode = null;
-        curCheckClosestNodeCoroutine = null;
-    }
+    #region 무기 장착·던지기
 
     private void DropWeapon()
     {
@@ -411,8 +298,8 @@ public class PlayerController : MonoBehaviourPun
             photonView.RPC(nameof(SwapWeapon), RpcTarget.All, true);
         }
 
-        // 장착 직후 Q 연타로 발 밑 노드를 즉시 줍는 루프 방지
-        if (photonView.IsMine) _pickupCooldownEnd = Time.time + 0.4f;
+        // 장착 직후 Q 연타로 발 밑 노드를 즉시 줍는 루프 방지 — 쿨다운은 PlayerInteraction이 이 알림을 받아 건다
+        if (photonView.IsMine) OnEquipped?.Invoke();
     }
 
     [PunRPC]
@@ -450,32 +337,9 @@ public class PlayerController : MonoBehaviourPun
 
     #endregion
 
-    #endregion
-
-    public void TryInteract(InputAction.CallbackContext ctx)
-    {
-        if (!CanAct) return;
-
-        // 1. 내 주변 2m 안의 가구/오브젝트 검색
-        Collider[] hits = Physics.OverlapSphere(transform.position, interactRadius, interactableLayer);
-
-        foreach (var hit in hits)
-        {
-            // 2. 인터페이스 추출 시도
-            if (hit.TryGetComponent<IInteractable>(out var target))
-            {
-                // 3. 된다면 실행
-                target.Interact(this);
-                // 상호작용 애니는 모든 클라이언트에서 보여야 하므로 RPC 안에서 발화한다(구르기·던지기·기절과 같은 패턴)
-                photonView.RPC(nameof(InteractAnimRPC), RpcTarget.All);
-
-                break; // 한 번에 하나만 상호작용
-            }
-        }
-    }
-
+    // 상호작용 애니 이벤트의 RPC 입구. 논리는 PlayerInteraction에 있지만 RPC 수신자는 모든 클라이언트에 있어야 하므로 Core에 둔다.
     [PunRPC]
-    private void InteractAnimRPC()
+    public void InteractAnimRPC()
     {
         OnInteractEvent?.Invoke();
     }

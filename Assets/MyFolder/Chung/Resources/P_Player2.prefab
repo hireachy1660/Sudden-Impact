@@ -49,6 +49,7 @@ GameObject:
   - component: {fileID: 6355518173395185663}
   - component: {fileID: 694259344993658809}
   - component: {fileID: -270096623455273730}
+  - component: {fileID: -7870498363490680451}
   - component: {fileID: 4920232383521831332}
   - component: {fileID: 788179651339884033}
   - component: {fileID: 8887055471966068752}
@@ -108,16 +109,11 @@ MonoBehaviour:
   armBandRenderer: {fileID: 7338258209646112000}
   teamAColor: {r: 1, g: 0, b: 1, a: 1}
   teamBColor: {r: 0, g: 1, b: 1, a: 1}
-  interactRadius: 2
-  interactableLayer:
-    serializedVersion: 2
-    m_Bits: 16384
   allGuns:
   - {fileID: 6872525959425915694}
   - {fileID: 5859568415962895923}
   - {fileID: 955796400151174609}
   - {fileID: 7974992253602839818}
-  closestNode: {fileID: 0}
   myEquippedGun: {fileID: 0}
   useGun: 0
   hasEnemyFlag: 0
@@ -158,6 +154,23 @@ MonoBehaviour:
   damageImpulseSource: {fileID: 787180183226477860}
   damageShakeForce: 1.5
   curHp: 0
+--- !u!114 &-7870498363490680451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2143100945692910762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1de9bc633669854cba97eb81ef7f435, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInteraction
+  interactRadius: 2
+  interactableLayer:
+    serializedVersion: 2
+    m_Bits: 16384
+  closestNode: {fileID: 0}
 --- !u!114 &4920232383521831332
 MonoBehaviour:
   m_ObjectHideFlags: 0
