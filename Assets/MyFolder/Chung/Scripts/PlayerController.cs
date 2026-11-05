@@ -30,8 +30,11 @@ public class PlayerController : MonoBehaviourPun
     [SerializeField] private Gun[] allGuns;
 
     [Header("Animator Bridge Data")]
-    // 애니메이터가 읽어갈 퍼블릭 게터
+    // 애니메이터가 읽어갈 퍼블릭 게터. 원격 복제본에서도 읽으므로 Core가 가진다(PlayerMovement는 원격에서 지워진다).
     public bool UseGun => useGun;
+    public Vector3 CurrentVelocity => myRigidbody.linearVelocity;
+    public float MoveSpeed { get; private set; }
+    public float NormalizedSpeed => CurrentVelocity.magnitude / MoveSpeed;
 
     // 애니메이터에게 행동을 알리는 이벤트
     public event Action OnAttackEvent;
@@ -77,12 +80,44 @@ public class PlayerController : MonoBehaviourPun
         }
 
         col = GetComponent<Collider>();
-        parts = GetComponents<IPlayerPart>();
         movement = GetComponent<PlayerMovement>();
         health = GetComponent<PlayerHealth>();
         interaction = GetComponent<PlayerInteraction>();
         // 같은 오브젝트·같은 수명이라 해제는 필요 없다
         health.OnDied += Die;
+
+        // 애니메이터가 원격에서도 읽는 값이라 부품을 지우기 전에 Core가 보관한다
+        MoveSpeed = movement.MoveSpeed;
+
+        CollectParts();
+    }
+
+    // 소유자 전용 부품(IOwnerOnlyPart)은 원격 복제본에 둘 이유가 없다 — 끄고 지운 뒤, 남는 부품만 순회 대상으로 삼는다.
+    // Destroy는 프레임 끝에 실행되므로 그 사이 콜백이 돌지 않게 먼저 끈다.
+    private void CollectParts()
+    {
+        IPlayerPart[] all = GetComponents<IPlayerPart>();
+
+        if (photonView.IsMine)
+        {
+            parts = all;
+            return;
+        }
+
+        foreach (IPlayerPart part in all)
+        {
+            if (part is IOwnerOnlyPart)
+            {
+                Behaviour behaviour = (Behaviour)part;
+                behaviour.enabled = false;
+                Destroy(behaviour);
+            }
+        }
+
+        parts = Array.FindAll(all, part => !(part is IOwnerOnlyPart));
+        // 원격에서는 중계가 불리지 않는다(InputManager는 로컬 플레이어만 바인딩) — 지운 부품의 참조를 들고 있지 않는다
+        movement = null;
+        interaction = null;
     }
 
     private void OnEnable()

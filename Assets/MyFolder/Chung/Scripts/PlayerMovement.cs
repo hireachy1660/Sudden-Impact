@@ -3,8 +3,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// 이동·회전·달리기·구르기 부품. 소유자(IsMine)에서만 켜지고, 상태 읽기·쓰기는 Core(PlayerController)를 거친다.
-public class PlayerMovement : MonoBehaviourPun, IPlayerPart
+// 이동·회전·달리기·구르기 부품. 소유자 전용(IOwnerOnlyPart) — 원격 복제본에서는 Core가 Awake에서 지운다.
+// 상태 읽기·쓰기는 Core(PlayerController)를 거친다.
+public class PlayerMovement : MonoBehaviourPun, IOwnerOnlyPart
 {
     [Header("Parameters")]
     // 기본값은 P_Player2 프리팹에 저장된 수치(2026-11-01 기준)와 맞춤
@@ -22,16 +23,13 @@ public class PlayerMovement : MonoBehaviourPun, IPlayerPart
     private bool isSprinting;
     private float lastRollTime;
 
-    // 애니메이터가 읽어갈 퍼블릭 게터
-    public Vector3 CurrentVelocity => rb.linearVelocity;
+    // Core가 Awake에서 한 번 읽어 보관한다(애니메이터는 Core의 게터를 읽는다)
     public float MoveSpeed => moveSpeed;
-    public float NormalizedSpeed => CurrentVelocity.magnitude / moveSpeed;
 
     private void Awake()
     {
         core = GetComponent<PlayerController>();
         rb = GetComponent<Rigidbody>();
-        enabled = photonView.IsMine;
     }
 
     private void FixedUpdate()

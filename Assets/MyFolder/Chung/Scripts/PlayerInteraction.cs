@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// 줍기·던지기 입력·문 상호작용 부품. 소유자(IsMine)에서만 켜지고, 상태 읽기와 무기 RPC는 Core(PlayerController)를 거친다.
-// RPC 수신자와 애니 이벤트는 두지 않는다 — 원격 복제본에서 지워도 되는 부품으로 유지한다.
-public class PlayerInteraction : MonoBehaviourPun, IPlayerPart
+// 줍기·던지기 입력·문 상호작용 부품. 소유자 전용(IOwnerOnlyPart) — 원격 복제본에서는 Core가 Awake에서 지운다.
+// 그래서 RPC 수신자와 애니 이벤트는 두지 않는다. 상태 읽기와 무기 RPC는 Core(PlayerController)를 거친다.
+public class PlayerInteraction : MonoBehaviourPun, IOwnerOnlyPart
 {
     [Header("Interaction Settings")]
     [SerializeField] private float interactRadius = 2.0f;
@@ -23,10 +23,9 @@ public class PlayerInteraction : MonoBehaviourPun, IPlayerPart
     private void Awake()
     {
         core = GetComponent<PlayerController>();
-        enabled = photonView.IsMine;
     }
 
-    // 원격 복제본은 Awake에서 꺼져 OnEnable이 돌지 않으므로 구독 자체가 생기지 않는다
+    // 원격 복제본에서는 Core가 이 부품을 끄고 지운다 — 그 전에 구독했더라도 OnDisable에서 해제된다
     private void OnEnable()
     {
         core.OnEquipped += HandleEquipped;
@@ -76,7 +75,7 @@ public class PlayerInteraction : MonoBehaviourPun, IPlayerPart
         }
     }
 
-    // 트리거 콜백은 컴포넌트가 꺼져 있어도 들어오므로 IsMine 검사를 그대로 둔다
+    // 원격에서 지워지기 전(첫 프레임)에도 트리거 콜백은 들어올 수 있어 IsMine 검사를 그대로 둔다
     private void OnTriggerEnter(Collider other)
     {
         if (!photonView.IsMine) return;
