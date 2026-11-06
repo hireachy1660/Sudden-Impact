@@ -234,34 +234,29 @@ public class PlayerController : MonoBehaviourPun
     public void TrySwapWeapon(InputAction.CallbackContext ctx)
     {
         if (!CanAct) return;
-        if (myEquippedGun != null)
-        {
-            useGun = useGun ? false : true;
 
-            photonView.RPC(nameof(SwapWeapon), RpcTarget.All, useGun);
-        }
-        else
-        {
-            useGun = false;
-            photonView.RPC(nameof(SwapWeapon), RpcTarget.All, useGun);
-        }
+        // useGun은 여기서 쓰지 않는다 — 보낼 값만 정하고, 실제 갱신은 모든 클라이언트의 SwapWeapon이 한다
+        bool nextUseGun = myEquippedGun != null && !useGun;
+        photonView.RPC(nameof(SwapWeapon), RpcTarget.All, nextUseGun);
     }
 
     [PunRPC]
     private void SwapWeapon(bool _useGun)
     {
+        // 전환 상태를 받는 쪽 모두가 갱신한다 — 원격의 애니메이터도 이 값으로 무기 자세를 정한다.
+        // 총이 없는데 true가 오면 칼로 둔다.
+        useGun = _useGun && myEquippedGun != null;
 
         if (myEquippedGun != null)
         {
-            myEquippedGun.gameObject.SetActive(_useGun);
-
+            myEquippedGun.gameObject.SetActive(useGun);
         }
-        myKnife.gameObject.SetActive(!_useGun);
+        myKnife.gameObject.SetActive(!useGun);
 
         if (photonView.IsMine)
         {
             string curWeaponName = useGun ? myEquippedGun.WeaponType.ToString() : myKnife.WeaponType.ToString();
-            GameEvents.WeaponChanged(curWeaponName, _useGun);
+            GameEvents.WeaponChanged(curWeaponName, useGun);
         }
     }
     #endregion
