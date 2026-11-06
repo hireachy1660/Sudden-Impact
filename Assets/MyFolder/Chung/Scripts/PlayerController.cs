@@ -290,10 +290,21 @@ public class PlayerController : MonoBehaviourPun
 
     #region 무기 장착·던지기
 
+    // 사망처럼 총을 잃고 끝나는 경로 — 총을 놓은 뒤 칼을 켠다
     private void DropWeapon()
     {
         if (myEquippedGun == null) return;
 
+        ReleaseGun();
+
+        // 장착한 총이 없으면 칼이 켜져 있어야 한다 — 총이 없어지는 경로는 모두 칼을 켠다
+        SwapWeapon(false);
+    }
+
+    // 장착한 총을 놓는다: 소유자가 드롭 노드를 요청하고 총 오브젝트를 끈다.
+    // 칼은 켜지 않는다 — 곧바로 다른 총을 장착하는 교체 경로에서 무기 변경 이벤트(HUD·전환음)가 두 번 나가지 않게 따로 뗐다.
+    private void ReleaseGun()
+    {
         if (photonView.IsMine && myEquippedGun is Gun droppedGun)
         {
             int type = (int)droppedGun.WeaponType;
@@ -316,7 +327,8 @@ public class PlayerController : MonoBehaviourPun
     {
         Weapon.EWeaponType type = (Weapon.EWeaponType)typeInt;
 
-        if (myEquippedGun != null) DropWeapon();
+        // 교체: 들고 있던 총만 놓는다. 칼은 켜지 않고 바로 새 총을 장착한다
+        if (myEquippedGun != null) ReleaseGun();
 
         Gun newGun = FindGunByType(type);
         if (newGun != null)
@@ -346,7 +358,6 @@ public class PlayerController : MonoBehaviourPun
         }
 
         CleanupWeapon();
-        SwapWeapon(false);
     }
 
     private void CleanupWeapon()
@@ -355,6 +366,9 @@ public class PlayerController : MonoBehaviourPun
         myEquippedGun.gameObject.SetActive(false);
         myEquippedGun = null;
         useGun = false;
+
+        // DropWeapon과 같은 이유 — 총을 치운 뒤에는 칼을 켠다
+        SwapWeapon(false);
     }
 
     private Gun FindGunByType(Weapon.EWeaponType type)
