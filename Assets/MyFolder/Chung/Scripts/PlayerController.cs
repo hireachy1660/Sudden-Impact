@@ -337,7 +337,8 @@ public class PlayerController : MonoBehaviourPun
             myEquippedGun.gameObject.SetActive(true);
             newGun.SetAmmo(ammo);
             useGun = true;
-            photonView.RPC(nameof(SwapWeapon), RpcTarget.All, true);
+            // 이 RPC는 이미 모든 클라이언트에서 실행 중이다 — 여기서 다시 방송하면 전환이 클라이언트 수만큼 반복된다
+            SwapWeapon(true);
         }
 
         // 장착 직후 Q 연타로 발 밑 노드를 즉시 줍는 루프 방지 — 쿨다운은 PlayerInteraction이 이 알림을 받아 건다
