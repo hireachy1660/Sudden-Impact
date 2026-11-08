@@ -60,18 +60,18 @@ public abstract class Gun : Weapon
             GameEvents.AmmoChanged(currentAmmo, maxAmmo);
     }
 
-    public override void Attack(Vector3 _aimPos, bool _isHeld = false)
+    public override bool Attack(Vector3 _aimPos, bool _isHeld = false)
     {
         // 단발 무기 && 마우스를 꾹 누르고 있는(Hold) 호출이면 무시
-        if (!isAutomatic && _isHeld) return;
+        if (!isAutomatic && _isHeld) return false;
 
         // 쿨다운 및 잔탄 확인 공통로직
-        if (Time.time < lastFireTime + fireRate) return;
+        if (Time.time < lastFireTime + fireRate) return false;
 
         if (currentAmmo <= 0)
         {
             Debug.Log("장탄수가 부족합니다! (재장전 필요)");
-            return;
+            return false;
         }
 
         // 검사 통과 시간 갱신 및 탄약 소모
@@ -98,6 +98,8 @@ public abstract class Gun : Weapon
                 impulseSource.GenerateImpulse(rotatedVelocity);
             }
         }
+
+        return true;
     }
 
     // 3. 자식 클래스들이 반드시 구현해야 하는 '순수 발사 로직'. 기본 회전은 Gun이 계산해 넘기고 파생은 탄퍼짐만 더한다

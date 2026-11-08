@@ -18,10 +18,10 @@ public class MeleeKnife : Weapon
     [SerializeField] private bool isDebugMode;
     
     // 조준점은 쓰지 않는다 — 판정 상자는 손에 붙은 attackPoint의 위치·회전을 따른다
-    public override void Attack(Vector3 _aimPos, bool _isHeld = true)
+    public override bool Attack(Vector3 _aimPos, bool _isHeld = true)
     {
-        if (_isHeld) { return; }
-        if (Time.time < _cooldownEnd) return;
+        if (_isHeld) { return false; }
+        if (Time.time < _cooldownEnd) return false;
         _cooldownEnd = Time.time + attackCooldown;
 
         // 1. 판정 중심점 계산 (에임 방향으로 attackOffset만큼 떨어진 곳)
@@ -69,6 +69,9 @@ public class MeleeKnife : Weapon
                 Debug.Log($"[Knife] <color=yellow>Hit!</color> Target: {hit.name} / Damage: {damage}");
             }
         }
+
+        // 맞은 대상이 없어도 휘두른 것은 공격이다 — 호출자(PlayerWeapon)가 이 값으로 애니를 보낸다
+        return true;
     }
 
     // 에디터에서 공격 범위를 시각적으로 확인하기 위함

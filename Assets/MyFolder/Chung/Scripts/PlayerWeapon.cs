@@ -11,9 +11,6 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
     [Header("Weapon Reference")]
     [SerializeField] private Weapon myKnife;
 
-    [Header("Parameters")]
-    [SerializeField] private float meleeAttackCooldown = 0.5f;
-
     [Header("Pre-Allocated Weapons")]
     [Tooltip("미리 모든 종류의 총을 등록")]
     [SerializeField] private Gun[] allGuns;
@@ -23,7 +20,6 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
     [SerializeField] private bool useGun;
 
     private PlayerController core;
-    private float _meleeCooldownEnd = 0f;
 
     public bool UseGun => useGun;
     public Weapon MyEquippedGun { get { return myEquippedGun; } }
@@ -116,11 +112,12 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
 
         else
         {
-            if (Time.time < _meleeCooldownEnd) return;
-            myKnife.Attack(_aimPos, _isHeld);
+            // 쿨다운은 칼이 가진다(총의 fireRate처럼). 실제로 휘둘렀을 때만 애니를 보낸다 —
             // 근접 공격 애니는 원격에도 보여야 하므로 RPC 안에서 발화한다(총 연출은 Gun이 자체 RPC로 처리)
-            photonView.RPC(nameof(AttackAnimRPC), RpcTarget.All);
-            _meleeCooldownEnd = Time.time + meleeAttackCooldown;
+            if (myKnife.Attack(_aimPos, _isHeld))
+            {
+                photonView.RPC(nameof(AttackAnimRPC), RpcTarget.All);
+            }
         }
 
     }
