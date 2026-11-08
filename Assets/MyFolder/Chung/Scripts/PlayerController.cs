@@ -4,6 +4,15 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// 플레이어 Core — 상태·팀·깃발·생명주기와 입력 중계. 부품(IPlayerPart)을 Awake에서 수집하고, 원격 복제본에서는 소유자 전용 부품을 끄고 지운다.
+/// <para>부품 규칙</para>
+/// <para>① 부품이 동작을 정의하고, 어떤 부품을 어떤 순서로 쓰는가(입력 중계·Die의 순서·Q 키의 줍기 우선)는 Core가 정한다.</para>
+/// <para>② 상태 쓰기는 SetPlayerState 하나. 부품은 Core를 읽기만 한다.</para>
+/// <para>③ 알림은 사실의 주인이 자기 이벤트로 — Health = 피격·기절, Weapon = 공격·던지기·장착, Core = 구르기·상호작용. 연출(PlayerAnimator)은 듣기만 한다.</para>
+/// <para>④ 네트워크: RPC 수신자는 모든 클라이언트의 같은 오브젝트에 있어야 하므로 부품이 둘로 나뉜다 — 모든 클라이언트 부품(Health·Weapon: RPC와 원격이 읽는 값을 가짐)과
+/// 소유자 전용 부품(Movement·Interaction: IOwnerOnlyPart, RPC와 원격이 읽는 값이 없음). 원격 애니메이터가 읽는 값(속도·상태·무기)은 Core 또는 모든 클라이언트 부품에 둔다.</para>
+/// </summary>
 public class PlayerController : MonoBehaviourPun
 {
     public enum PlayerState
@@ -22,7 +31,6 @@ public class PlayerController : MonoBehaviourPun
     [SerializeField] private Color teamAColor = Color.blue;
     [SerializeField] private Color teamBColor = Color.red;
 
-    [Header("Animator Bridge Data")]
     // 애니메이터가 읽어갈 퍼블릭 게터. 원격 복제본에서도 읽으므로 Core가 가진다(PlayerMovement는 원격에서 지워진다).
     public Vector3 CurrentVelocity => myRigidbody.linearVelocity;
     public float MoveSpeed { get; private set; }
@@ -37,7 +45,7 @@ public class PlayerController : MonoBehaviourPun
     [SerializeField] private int myTeam;
     [SerializeField] private PlayerState playerState;
 
-    Collider col;
+    private Collider col;
     // 같은 오브젝트에 붙은 부품들. Core가 리스폰·라운드 종료를 받아 순회하며 알린다.
     private IPlayerPart[] parts;
     private PlayerMovement movement;
@@ -96,23 +104,28 @@ public class PlayerController : MonoBehaviourPun
         if (photonView.IsMine)
         {
             parts = all;
-            return;
         }
-
-        foreach (IPlayerPart part in all)
+        else
         {
-            if (part is IOwnerOnlyPart)
+            foreach (IPlayerPart part in all)
             {
-                Behaviour behaviour = (Behaviour)part;
-                behaviour.enabled = false;
-                Destroy(behaviour);
+                if (part is IOwnerOnlyPart)
+                {
+                    Behaviour behaviour = (Behaviour)part;
+                    behaviour.enabled = false;
+                    Destroy(behaviour);
+                }
             }
+
+            parts = Array.FindAll(all, part => !(part is IOwnerOnlyPart));
+            // 원격에서는 중계가 불리지 않는다(InputManager는 로컬 플레이어만 바인딩) — 지운 부품의 참조를 들고 있지 않는다
+            movement = null;
+            interaction = null;
         }
 
-        parts = Array.FindAll(all, part => !(part is IOwnerOnlyPart));
-        // 원격에서는 중계가 불리지 않는다(InputManager는 로컬 플레이어만 바인딩) — 지운 부품의 참조를 들고 있지 않는다
-        movement = null;
-        interaction = null;
+        // 부품 수집이 Core의 일이라 Core 참조도 Core가 넣어 준다 — 부품마다 GetComponent로 Core를 찾지 않는다.
+        // 지워질 부품에는 넣지 않는다(지워지기 전 창에 들어오는 콜백은 물리 콜백뿐이고, 그쪽은 IsMine 검사가 먼저다).
+        foreach (IPlayerPart part in parts) part.Bind(this);
     }
 
     private void OnEnable()
@@ -121,7 +134,8 @@ public class PlayerController : MonoBehaviourPun
         col.enabled = true;
     }
 
-    // 스폰 메니저가 스폰시 초기 데이터 주입용
+    /// <summary>스폰 매니저가 스폰 시 초기 데이터 주입용</summary>
+    /// <param name="_myTeam">팀 번호(1 = A, 그 외 = B). 총 4자루의 소유자 정보에도 넣는다</param>
     public void Init(int _myTeam)
     {
         myTeam = _myTeam;
@@ -129,7 +143,8 @@ public class PlayerController : MonoBehaviourPun
         weapon.SetGunsOwner(photonView.Owner.ActorNumber, myTeam);
     }
 
-    // 라운드 시작시 초기화 목적으로 호출
+    /// <summary>라운드 시작 시 초기화 목적으로 호출</summary>
+    /// <param name="_spawnPos">리스폰 위치(월드 좌표) — Rigidbody.position으로 바로 옮긴다</param>
     public void Respawn(Vector3 _spawnPos)
     {
         SetPlayerState(PlayerState.Idle);
@@ -164,12 +179,13 @@ public class PlayerController : MonoBehaviourPun
         playerState = _state;
     }
 
+    /// <param name="team">1이면 teamAColor, 그 외는 teamBColor</param>
     public void SetTeamColor(int team)
     {
-        Color col = team == 1 ? teamAColor : teamBColor;
+        Color teamColor = team == 1 ? teamAColor : teamBColor;
         MaterialPropertyBlock mpb = new MaterialPropertyBlock();
         armBandRenderer.GetPropertyBlock(mpb);
-        mpb.SetColor("_Color", col);
+        mpb.SetColor("_Color", teamColor);
         armBandRenderer.SetPropertyBlock(mpb);
     }
 
@@ -225,6 +241,7 @@ public class PlayerController : MonoBehaviourPun
     #region 구르기 로직
     // 구르기 이동은 PlayerMovement가 소유자에서 처리하고, 무적 상태(Rolling)와 애니 이벤트는 Core가 모든 클라이언트에서 건다.
     // 지속시간은 보낸 쪽 값을 받아 쓴다(프리팹 수치가 Movement로 옮겨가 Core에 없음).
+    /// <param name="duration">구르기 지속 시간(초) — 보낸 쪽 PlayerMovement의 rollDuration</param>
     [PunRPC]
     public void StartRollRPC(float duration)
     {
@@ -291,7 +308,6 @@ public class PlayerController : MonoBehaviourPun
     {
         yield return new WaitForSeconds(deathAnimDuration);
         gameObject.SetActive(false);
-
     }
 
     #endregion

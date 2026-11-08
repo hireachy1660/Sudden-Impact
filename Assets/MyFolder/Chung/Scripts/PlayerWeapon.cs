@@ -3,9 +3,12 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// 무기 부품: 장착한 총과 칼의 상태, 장착·전환·공격·던지기.
-// 모든 클라이언트에 남는다(IOwnerOnlyPart가 아니다) — 무기 RPC를 받는 쪽이고, 원격의 애니메이터도 UseGun·MyEquippedGun을 읽는다.
-// 플레이어 상태(CanAct 등)는 Core(PlayerController)에서 읽는다.
+/// <summary>
+/// 무기 부품: 장착한 총과 칼의 상태, 장착·전환·공격·던지기.
+/// 모든 클라이언트에 남는다(IOwnerOnlyPart가 아니다) — 무기 RPC를 받는 쪽이고, 원격의 애니메이터도 UseGun·MyEquippedGun을 읽는다.
+/// 플레이어 상태(CanAct 등)는 Core(PlayerController)에서 읽는다.
+/// </summary>
+[RequireComponent(typeof(PlayerController))]
 public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
 {
     [Header("Weapon Reference")]
@@ -16,40 +19,43 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
     [SerializeField] private Gun[] allGuns;
 
     [Header("ForDebug")]
-    [SerializeField] private Weapon myEquippedGun;
+    [SerializeField] private Gun myEquippedGun;
     [SerializeField] private bool useGun;
 
     private PlayerController core;
 
     public bool UseGun => useGun;
-    public Weapon MyEquippedGun { get { return myEquippedGun; } }
+    public Gun MyEquippedGun { get { return myEquippedGun; } }
 
     // 애니메이터에게 행동을 알리는 이벤트
     public event Action OnAttackEvent;
     public event Action OnThrowEvent;
-    // 장착 직후 줍기 쿨다운을 PlayerInteraction이 걸도록 알리는 이벤트(소유자에서만 발화)
+    // 장착이 도착한 직후 Q 잠금을 Core가 걸도록 알리는 이벤트(소유자에서만 발화)
     public event Action OnEquipped;
 
-    private void Awake()
-    {
-        core = GetComponent<PlayerController>();
-    }
+    public void Bind(PlayerController _core) => core = _core;
 
     // Core.OnEnable에 있던 무기 초기화. 직렬화된 참조만 읽어서 Core와 실행 순서가 달라도 된다.
     private void OnEnable()
     {
         GameEvents.WeaponChanged(myKnife.WeaponType.ToString(), false);
 
-        if(PhotonNetwork.IsMasterClient)
-        { WeaponSpawnManager.Instance.RegisterGunCatalog(allGuns); }
+        if (PhotonNetwork.IsMasterClient)
+        {
+            WeaponSpawnManager.Instance.RegisterGunCatalog(allGuns);
+        }
     }
 
     // 소유자 정보는 Core가 넣어 준다 — 팀 값을 아는 쪽이 Core다(칼은 Core.Awake에서, 총은 스폰 때 Core.Init에서)
+    /// <param name="_actorNumber">소유자의 Photon ActorNumber</param>
+    /// <param name="_team">팀 번호(1 = A, 그 외 = B)</param>
     public void SetKnifeOwner(int _actorNumber, int _team)
     {
         myKnife.SetOwner(_actorNumber, _team);
     }
 
+    /// <param name="_actorNumber">소유자의 Photon ActorNumber</param>
+    /// <param name="_team">팀 번호(1 = A, 그 외 = B)</param>
     public void SetGunsOwner(int _actorNumber, int _team)
     {
         if (allGuns != null)
@@ -145,10 +151,10 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
     // 칼은 켜지 않는다 — 곧바로 다른 총을 장착하는 교체 경로에서 무기 변경 이벤트(HUD·전환음)가 두 번 나가지 않게 따로 뗐다.
     private void ReleaseGun()
     {
-        if (photonView.IsMine && myEquippedGun is Gun droppedGun)
+        if (photonView.IsMine)
         {
-            int type = (int)droppedGun.WeaponType;
-            int ammo = droppedGun.CurrentAmmo;
+            int type = (int)myEquippedGun.WeaponType;
+            int ammo = myEquippedGun.CurrentAmmo;
             Vector3 dropPos = transform.position;
 
             WeaponSpawnManager.Instance?.photonView?.RPC(
@@ -162,6 +168,8 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
         useGun = false;
     }
 
+    /// <param name="typeInt">장착할 총의 Weapon.EWeaponType을 int로</param>
+    /// <param name="ammo">노드에 남아 있던 잔탄 — 총의 현재 탄약으로</param>
     [PunRPC]
     public void RPC_ForceEquipWeapon(int typeInt, int ammo)
     {
@@ -174,9 +182,8 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
         if (newGun != null)
         {
             myEquippedGun = newGun;
-            myEquippedGun.gameObject.SetActive(true);
             newGun.SetAmmo(ammo);
-            useGun = true;
+            // 켜기·useGun 갱신·HUD 이벤트는 SwapWeapon이 한다.
             // 이 RPC는 이미 모든 클라이언트에서 실행 중이다 — 여기서 다시 방송하면 전환이 클라이언트 수만큼 반복된다
             SwapWeapon(true);
         }
@@ -199,13 +206,11 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
     {
         if (myEquippedGun == null) return;
 
-        if (myEquippedGun is Gun myGun)
+        if (photonView.IsMine)
         {
-            if(photonView.IsMine)
-            myGun.ThrowWeapon(core.AimPosition);
-
-            OnThrowEvent?.Invoke();
+            myEquippedGun.ThrowWeapon(core.AimPosition);
         }
+        OnThrowEvent?.Invoke();
 
         CleanupWeapon();
     }

@@ -3,9 +3,12 @@ using System;
 using Unity.Cinemachine;
 using UnityEngine;
 
-// 체력·피격·기절 부품. 모든 클라이언트에서 돌며 TakeDamage·StunRPC의 입구다.
-// 기절은 코루틴 없이 종료 시각(PhotonNetwork.Time)으로 관리한다.
-// 사망의 "때"(hp가 0)만 알고 OnDied로 알린다. 후속 조치는 이를 구독한 Core가 순서를 가진다.
+/// <summary>
+/// 체력·피격·기절 부품. 모든 클라이언트에서 돌며 TakeDamage·StunRPC의 입구다.
+/// 기절은 코루틴 없이 종료 시각(PhotonNetwork.Time)으로 관리한다.
+/// 사망의 "때"(hp가 0)만 알고 OnDied로 알린다. 후속 조치는 이를 구독한 Core가 순서를 가진다.
+/// </summary>
+[RequireComponent(typeof(PlayerController))]
 public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
 {
     [Tooltip("혈흔 프리팹")]
@@ -32,10 +35,7 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
     // hp가 0이 된 순간을 알린다(인자 = 공격자 ActorNumber). 발화는 이 부품만, 밖에서는 듣기만.
     public event Action<int> OnDied;
 
-    private void Awake()
-    {
-        core = GetComponent<PlayerController>();
-    }
+    public void Bind(PlayerController _core) => core = _core;
 
     private void OnEnable()
     {

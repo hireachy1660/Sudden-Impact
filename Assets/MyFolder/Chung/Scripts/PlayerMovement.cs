@@ -3,8 +3,11 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// 이동·회전·달리기·구르기 부품. 소유자 전용(IOwnerOnlyPart) — 원격 복제본에서는 Core가 Awake에서 지운다.
-// 상태 읽기·쓰기는 Core(PlayerController)를 거친다.
+/// <summary>
+/// 이동·회전·달리기·구르기 부품. 소유자 전용(IOwnerOnlyPart) — 원격 복제본에서는 Core가 Awake에서 지운다.
+/// 상태 읽기·쓰기는 Core(PlayerController)를 거친다.
+/// </summary>
+[RequireComponent(typeof(PlayerController))]
 public class PlayerMovement : MonoBehaviourPun, IOwnerOnlyPart
 {
     [Header("Parameters")]
@@ -28,9 +31,10 @@ public class PlayerMovement : MonoBehaviourPun, IOwnerOnlyPart
 
     private void Awake()
     {
-        core = GetComponent<PlayerController>();
         rb = GetComponent<Rigidbody>();
     }
+
+    public void Bind(PlayerController _core) => core = _core;
 
     private void FixedUpdate()
     {

@@ -4,9 +4,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// 줍기·던지기 입력·문 상호작용 부품. 소유자 전용(IOwnerOnlyPart) — 원격 복제본에서는 Core가 Awake에서 지운다.
-// 그래서 RPC 수신자와 애니 이벤트는 두지 않는다. 플레이어 상태는 Core(PlayerController)에서 읽는다.
-// 무기(PlayerWeapon)와의 연결은 없다 — 던지기와 Q 잠금(줍기 쿨다운)은 Core가 TryPickUp의 결과를 보고 처리한다.
+/// <summary>
+/// 줍기 노드·문 상호작용 부품. 소유자 전용(IOwnerOnlyPart) — 원격 복제본에서는 Core가 Awake에서 지운다.
+/// 그래서 RPC 수신자와 애니 이벤트는 두지 않는다. 플레이어 상태는 Core(PlayerController)에서 읽는다.
+/// 무기(PlayerWeapon)와의 연결은 없다 — 던지기와 Q 잠금(줍기 쿨다운)은 Core가 TryPickUp의 결과를 보고 처리한다.
+/// </summary>
+[RequireComponent(typeof(PlayerController))]
 public class PlayerInteraction : MonoBehaviourPun, IOwnerOnlyPart
 {
     [Header("Interaction Settings")]
@@ -20,10 +23,7 @@ public class PlayerInteraction : MonoBehaviourPun, IOwnerOnlyPart
     private Coroutine curCheckClosestNodeCoroutine;
     private List<WeaponPickupNode> nearbyNodes = new List<WeaponPickupNode>();
 
-    private void Awake()
-    {
-        core = GetComponent<PlayerController>();
-    }
+    public void Bind(PlayerController _core) => core = _core;
 
     public void OnRespawn() { }
 
