@@ -20,7 +20,6 @@ public class PlayerInteraction : MonoBehaviourPun, IOwnerOnlyPart
     [SerializeField] private WeaponPickupNode closestNode; // 최단거리 노드
 
     private PlayerController core;
-    private Coroutine curCheckClosestNodeCoroutine;
     private List<WeaponPickupNode> nearbyNodes = new List<WeaponPickupNode>();
 
     public void Bind(PlayerController _core) => core = _core;
@@ -65,7 +64,7 @@ public class PlayerInteraction : MonoBehaviourPun, IOwnerOnlyPart
             if (closestNode == null)
             {
                 closestNode = node;
-                curCheckClosestNodeCoroutine = StartCoroutine(CheckClosestNode());
+                StartCoroutine(CheckClosestNode());
             }
         }
     }
@@ -127,13 +126,12 @@ public class PlayerInteraction : MonoBehaviourPun, IOwnerOnlyPart
             closestNode = tempClosest;
         }
 
-        // 주위에 더이상 노드가 없을 떄
+        // 주위에 더 이상 노드가 없을 때
         if (closestNode != null)
         {
             GameEvents.PickupUIUpdate(false, Vector3.zero);
         }
         closestNode = null;
-        curCheckClosestNodeCoroutine = null;
     }
 
     public void TryInteract(InputAction.CallbackContext ctx)

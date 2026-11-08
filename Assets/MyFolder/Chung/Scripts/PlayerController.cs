@@ -83,16 +83,18 @@ public class PlayerController : MonoBehaviourPun
         health = GetComponent<PlayerHealth>();
         interaction = GetComponent<PlayerInteraction>();
         weapon = GetComponent<PlayerWeapon>();
+
+        // 애니메이터가 원격에서도 읽는 값이라 부품을 지우기 전에 Core가 보관한다
+        MoveSpeed = movement.MoveSpeed;
+
+        // 부품을 먼저 묶고(Bind) 그 뒤에 부품을 부른다
+        CollectParts();
+
         // 같은 오브젝트·같은 수명이라 해제는 필요 없다(OnEquipped는 소유자에서만 발화한다)
         health.OnDied += Die;
         weapon.OnEquipped += LockPickupAfterEquip;
         // 칼의 소유자 정보 — 팀 값의 출처(registry)를 Core가 가지고 있어 Core가 넣어 준다
         weapon.SetKnifeOwner(photonView.Owner.ActorNumber, registry.MyTeam);
-
-        // 애니메이터가 원격에서도 읽는 값이라 부품을 지우기 전에 Core가 보관한다
-        MoveSpeed = movement.MoveSpeed;
-
-        CollectParts();
     }
 
     // 소유자 전용 부품(IOwnerOnlyPart)은 원격 복제본에 둘 이유가 없다 — 끄고 지운 뒤, 남는 부품만 순회 대상으로 삼는다.
@@ -202,7 +204,7 @@ public class PlayerController : MonoBehaviourPun
     #region 조작 로직
 
     // 밖(InputManager)에서 오는 호출은 Core가 같은 이름으로 중계한다. 논리는 각 부품(이동·상호작용·무기)에.
-    // 블록인 둘(RotatePlayer·PickUpAndDrop)만 Core의 일(조준점 보관·Q 키의 순서)이 한 줄 섞여 있다.
+    // 블록인 둘(RotatePlayer·PickUpAndDrop)에만 Core의 일(조준점 보관·Q 키의 순서와 잠금)이 섞여 있다.
     public void MovePlayer(Vector3 _moveAxis) => movement.MovePlayer(_moveAxis);
     public void RotatePlayer(Vector3 _aimPos)
     {
@@ -229,14 +231,15 @@ public class PlayerController : MonoBehaviourPun
         weapon.TryThrow();
     }
 
+    public void TryInteract(InputAction.CallbackContext ctx) => interaction.TryInteract(ctx);
+    public void TryAttack(Vector3 _aimPos, bool _isHeld = false) => weapon.TryAttack(_aimPos, _isHeld);
+    public void TrySwapWeapon(InputAction.CallbackContext ctx) => weapon.TrySwapWeapon(ctx);
+
     // 장착이 도착한 직후 Q 연타로 발밑 노드(교체로 떨어진 총)를 즉시 되줍는 루프 방지
     private void LockPickupAfterEquip()
     {
         _pickupLockEnd = Time.time + PickupLockAfterEquip;
     }
-    public void TryInteract(InputAction.CallbackContext ctx) => interaction.TryInteract(ctx);
-    public void TryAttack(Vector3 _aimPos, bool _isHeld = false) => weapon.TryAttack(_aimPos, _isHeld);
-    public void TrySwapWeapon(InputAction.CallbackContext ctx) => weapon.TrySwapWeapon(ctx);
 
     #region 구르기 로직
     // 구르기 이동은 PlayerMovement가 소유자에서 처리하고, 무적 상태(Rolling)와 애니 이벤트는 Core가 모든 클라이언트에서 건다.

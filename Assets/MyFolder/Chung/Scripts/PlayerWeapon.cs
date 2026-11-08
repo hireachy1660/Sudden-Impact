@@ -115,7 +115,6 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
         {
             myEquippedGun.Attack(_aimPos, _isHeld);
         }
-
         else
         {
             // 쿨다운은 칼이 가진다(총의 fireRate처럼). 실제로 휘둘렀을 때만 애니를 보낸다 —
@@ -125,7 +124,6 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
                 photonView.RPC(nameof(AttackAnimRPC), RpcTarget.All);
             }
         }
-
     }
 
     [PunRPC]
@@ -188,7 +186,7 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
             SwapWeapon(true);
         }
 
-        // 장착 직후 Q 연타로 발 밑 노드를 즉시 줍는 루프 방지 — 쿨다운은 PlayerInteraction이 이 알림을 받아 건다
+        // 장착 직후 Q 연타로 발밑 노드를 즉시 줍는 루프 방지 — Q 잠금은 Core가 이 알림을 받아 건다
         if (photonView.IsMine) OnEquipped?.Invoke();
     }
 
