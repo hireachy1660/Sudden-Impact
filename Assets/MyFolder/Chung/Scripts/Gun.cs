@@ -60,10 +60,10 @@ public abstract class Gun : Weapon
             GameEvents.AmmoChanged(currentAmmo, maxAmmo);
     }
 
-    public override void Attack(bool isHeld = false)
+    public override void Attack(Vector3 _aimPos, bool _isHeld = false)
     {
         // 단발 무기 && 마우스를 꾹 누르고 있는(Hold) 호출이면 무시
-        if (!isAutomatic && isHeld) return;
+        if (!isAutomatic && _isHeld) return;
 
         // 쿨다운 및 잔탄 확인 공통로직
         if (Time.time < lastFireTime + fireRate) return;
@@ -83,8 +83,8 @@ public abstract class Gun : Weapon
             GameEvents.AmmoChanged(currentAmmo, maxAmmo);
         }
 
-        // 실제 탄환 생성 로직
-        FireProjectile();
+        // 실제 탄환 생성 로직 — 방향은 쏘는 순간의 총구 위치와 조준점으로 여기서 정해 넘긴다
+        FireProjectile(GetAimRotation(_aimPos));
         photonView.RPC(nameof(RPC_MuzzleFlash), RpcTarget.All);
         
 
@@ -100,11 +100,11 @@ public abstract class Gun : Weapon
         }
     }
 
-    // 3. 자식 클래스들이 반드시 구현해야 하는 '순수 발사 로직'
-    protected abstract void FireProjectile();
+    // 3. 자식 클래스들이 반드시 구현해야 하는 '순수 발사 로직'. 기본 회전은 Gun이 계산해 넘기고 파생은 탄퍼짐만 더한다
+    protected abstract void FireProjectile(Quaternion _aimRotation);
 
-    // PlayerController에서 호출하는 무기 던지기 기능
-    public virtual void ThrowWeapon()
+    // PlayerWeapon에서 호출하는 무기 던지기 기능. _aimPos = 던지는 순간의 조준점(월드 좌표)
+    public virtual void ThrowWeapon(Vector3 _aimPos)
     {
         if (thrownWeaponPrefab == null) return;
 
@@ -114,14 +114,8 @@ public abstract class Gun : Weapon
             ownerActorNumber, ownerTeam, 0f
         };
 
-        // 기존: transform.position / rotation(총 몸체 기준) → 방향 오류
-        // 총알과 동일하게 attackPoint 기준으로 발사 (PistolGun.FireProjectile 참고)
-        // 기존: PhotonNetwork.Instantiate(..., transform.position, transform.rotation, ...)
-        Vector3 throwDir = attackPoint.forward;
-        throwDir.y = 0f;
-        Quaternion throwRotation = throwDir.sqrMagnitude > 0.001f
-            ? Quaternion.LookRotation(throwDir)
-            : transform.rotation;
+        // 총알과 같은 규칙 — 던지는 순간의 총구 위치에서 조준점을 향한 회전
+        Quaternion throwRotation = GetAimRotation(_aimPos);
 
         PhotonNetwork.Instantiate(
             thrownWeaponPrefab.name,
@@ -130,6 +124,28 @@ public abstract class Gun : Weapon
             0,
             info
         );
+    }
+
+    // 조준점이 총구 바로 옆·뒤이거나 이 거리 안이면 몸 정면으로 쏜다(총구 → 조준점 벡터가 뒤집히는 것 방지)
+    private const float MinAimDistance = 0.5f;
+
+    // 발사 순간의 총구 위치에서 조준점을 향한 수평 회전.
+    // 총구 Transform을 미리 돌려 두는 대신(전에는 PlayerMovement의 LookAt — 애니메이션이 손을 움직이면 틀어짐) 쏘는 순간의 데이터로 계산한다.
+    private Quaternion GetAimRotation(Vector3 _aimPos)
+    {
+        // 플레이어 루트의 정면 — 총은 플레이어 프리팹의 자식이라 root가 플레이어다(MeleeKnife도 transform.root로 자기 몸을 가린다)
+        Vector3 bodyForward = transform.root.forward;
+        bodyForward.y = 0f;
+
+        Vector3 dir = _aimPos - attackPoint.position;
+        dir.y = 0f;
+
+        if (dir.sqrMagnitude < MinAimDistance * MinAimDistance || Vector3.Dot(dir, bodyForward) <= 0f)
+        {
+            dir = bodyForward;
+        }
+
+        return Quaternion.LookRotation(dir);
     }
 
     [PunRPC]

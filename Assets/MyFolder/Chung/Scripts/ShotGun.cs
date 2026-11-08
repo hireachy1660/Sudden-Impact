@@ -16,17 +16,9 @@ public class Shotgun : Gun
     [Tooltip("자연스러움을 위한 랜덤 노이즈 범위")]
     [SerializeField] private float randomNoise = 2f;
 
-    protected override void FireProjectile()
+    protected override void FireProjectile(Quaternion _aimRotation)
     {
-        Vector3 direction = attackPoint.forward;
-        direction.y = 0;
-
-        Quaternion baseRotation = attackPoint.rotation;
-        if (direction.sqrMagnitude > 0.001f)
-        {
-            baseRotation = Quaternion.LookRotation(direction);
-        }
-
+        // 기본 방향은 Gun이 조준점으로 계산해 넘긴 회전 — 아래에서 펠릿마다 각도만 더한다
         // 산탄 공식 
         for (int i = 0; i < pelletCount; i++)
         {
@@ -34,7 +26,7 @@ public class Shotgun : Gun
             float currentAngle = startAngle + (angleStep * i) + Random.Range(-randomNoise, randomNoise);
 
             // 베이스 회전값에 계산된 각도를 Y축을(좌우) 기준으로
-            Quaternion pelletRotation = baseRotation * Quaternion.Euler(0f, currentAngle, 0f);
+            Quaternion pelletRotation = _aimRotation * Quaternion.Euler(0f, currentAngle, 0f);
 
             // 데이터 포장
             object[] bulletData = new object[] { ownerActorNumber, ownerTeam, damage };

@@ -48,6 +48,8 @@ public class PlayerController : MonoBehaviourPun
     public int MyTeam { get { return myTeam; } }
     public bool HasEnemyFlag { get { return hasEnemyFlag; } }
     public PlayerState GetPlayerState { get { return playerState; } }
+    // 조준점(월드 좌표)은 입력 상태라 Core가 보관한다 — 던지기처럼 조준점 인자가 없는 경로가 읽는다. 소유자에서만 갱신된다.
+    public Vector3 AimPosition { get; private set; }
 
     // 입력 진입점 공통 가드. 기절·사망·준비 전에는 어떤 조작도 받지 않는다.
     // 기절 중 입력 잠금을 InputManager의 액션맵 토글 대신 이 가드 하나로 처리한다.
@@ -178,7 +180,11 @@ public class PlayerController : MonoBehaviourPun
 
     // 밖(InputManager)에서 오는 호출은 Core가 같은 이름으로 한 줄 중계한다. 논리는 각 부품(이동·상호작용·무기)에.
     public void MovePlayer(Vector3 _moveAxis) => movement.MovePlayer(_moveAxis);
-    public void RotatePlayer(Vector3 _aimPos) => movement.RotatePlayer(_aimPos);
+    public void RotatePlayer(Vector3 _aimPos)
+    {
+        AimPosition = _aimPos;
+        movement.RotatePlayer(_aimPos);
+    }
     public void SprintStart(InputAction.CallbackContext ctx) => movement.SprintStart(ctx);
     public void SprintEnd(InputAction.CallbackContext ctx) => movement.SprintEnd(ctx);
     public void TryRoll(InputAction.CallbackContext ctx) => movement.TryRoll(ctx);

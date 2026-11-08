@@ -35,21 +35,11 @@ public class AutomaticGun : Gun
         }
     }
 
-    protected override void FireProjectile()
+    protected override void FireProjectile(Quaternion _aimRotation)
     {
-        // 1. 기본 방향 계산
-        Vector3 direction = attackPoint.forward;
-        direction.y = 0;
-
-        Quaternion baseRotation = attackPoint.rotation;
-        if (direction.sqrMagnitude > 0.001f)
-        {
-            baseRotation = Quaternion.LookRotation(direction);
-        }
-
-        // 누적된 탄퍼짐(currentSpread) 적용
+        // 누적된 탄퍼짐(currentSpread) 적용 — 기본 방향은 Gun이 조준점으로 계산해 넘긴 회전
         float randomSpread = Random.Range(-currentSpread, currentSpread);
-        Quaternion finalSpreadRotation = baseRotation * Quaternion.Euler(0f, randomSpread, 0f);
+        Quaternion finalSpreadRotation = _aimRotation * Quaternion.Euler(0f, randomSpread, 0f);
 
         // 탄퍼짐 누적시킴 (최대치까지만)
         currentSpread = Mathf.Min(currentSpread + spreadIncreasePerShot, maxSpread);

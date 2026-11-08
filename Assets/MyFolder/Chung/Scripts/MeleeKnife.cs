@@ -17,7 +17,8 @@ public class MeleeKnife : Weapon
     [Header("ForDebug")]
     [SerializeField] private bool isDebugMode;
     
-    public override void Attack(bool _isHeld = true)
+    // 조준점은 쓰지 않는다 — 판정 상자는 손에 붙은 attackPoint의 위치·회전을 따른다
+    public override void Attack(Vector3 _aimPos, bool _isHeld = true)
     {
         if (_isHeld) { return; }
         if (Time.time < _cooldownEnd) return;

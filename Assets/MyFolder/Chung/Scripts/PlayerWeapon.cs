@@ -9,7 +9,6 @@ using UnityEngine.InputSystem;
 public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
 {
     [Header("Weapon Reference")]
-    [SerializeField] private Transform weaponAttachPoint;
     [SerializeField] private Weapon myKnife;
 
     [Header("Parameters")]
@@ -28,7 +27,6 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
 
     public bool UseGun => useGun;
     public Weapon MyEquippedGun { get { return myEquippedGun; } }
-    public Transform WeaponAttachPoint => weaponAttachPoint;
 
     // 애니메이터에게 행동을 알리는 이벤트
     public event Action OnAttackEvent;
@@ -113,13 +111,13 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
 
         if (useGun)
         {
-            myEquippedGun.Attack(_isHeld);
+            myEquippedGun.Attack(_aimPos, _isHeld);
         }
 
         else
         {
             if (Time.time < _meleeCooldownEnd) return;
-            myKnife.Attack(_isHeld);
+            myKnife.Attack(_aimPos, _isHeld);
             // 근접 공격 애니는 원격에도 보여야 하므로 RPC 안에서 발화한다(총 연출은 Gun이 자체 RPC로 처리)
             photonView.RPC(nameof(AttackAnimRPC), RpcTarget.All);
             _meleeCooldownEnd = Time.time + meleeAttackCooldown;
@@ -198,7 +196,7 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
         if (myEquippedGun is Gun myGun)
         {
             if(photonView.IsMine)
-            myGun.ThrowWeapon();
+            myGun.ThrowWeapon(core.AimPosition);
 
             OnThrowEvent?.Invoke();
         }

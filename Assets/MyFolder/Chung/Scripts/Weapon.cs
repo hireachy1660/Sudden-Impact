@@ -31,13 +31,13 @@ public abstract class Weapon : MonoBehaviourPun
     public EWeaponType WeaponType => weaponType;
 
 
-    // Initialize (PlayerController의 SetOwner와 연결됨)
+    // Initialize (PlayerWeapon의 SetKnifeOwner·SetGunsOwner가 부른다)
     public virtual void SetOwner(int _actorNumber, int _team)
     {
         ownerActorNumber = _actorNumber;
         ownerTeam = _team;
     }
 
-    // PlayerController에서 호출하는 공격 명령 (추상 메서드로 강제)
-    public abstract void Attack(bool isHeld = false);
+    // PlayerWeapon에서 호출하는 공격 명령 (추상 메서드로 강제). _aimPos = 발사 순간의 조준점(월드 좌표)
+    public abstract void Attack(Vector3 _aimPos, bool _isHeld = false);
 }
