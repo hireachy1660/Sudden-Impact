@@ -8,6 +8,7 @@ public class PlayerAnimator : MonoBehaviourPun
     [SerializeField] private Animator animator;
     [SerializeField] private PlayerController playerController;
     private PlayerHealth health;
+    private PlayerWeapon weapon;
 
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
@@ -68,6 +69,7 @@ public class PlayerAnimator : MonoBehaviourPun
         if (playerController == null) playerController = GetComponent<PlayerController>();
         // 이 컴포넌트는 모델(자식) 오브젝트에 붙어 있어 컨트롤러가 있는 오브젝트에서 가져온다
         health = playerController.GetComponent<PlayerHealth>();
+        weapon = playerController.GetComponent<PlayerWeapon>();
 
         _mpb = new MaterialPropertyBlock();
         if (bodyRenderers == null || bodyRenderers.Length == 0)
@@ -99,9 +101,9 @@ public class PlayerAnimator : MonoBehaviourPun
     private void OnEnable()
     {
         // 이벤트 구독 (컨트롤러에서 행동이 발생하면 자동으로 트리거 함수 호출)
-        playerController.OnAttackEvent += TriggerAction;
+        weapon.OnAttackEvent += TriggerAction;
         playerController.OnRollEvent += TriggerRoll;
-        playerController.OnThrowEvent += TriggerThrow;
+        weapon.OnThrowEvent += TriggerThrow;
         playerController.OnInteractEvent += TriggerInteract;
         health.OnStunnedEvent += TriggerStun;
         health.OnHitEvent += TriggerHitFlash;
@@ -115,9 +117,9 @@ public class PlayerAnimator : MonoBehaviourPun
     private void OnDisable()
     {
         // 메모리 누수 방지 및 이벤트 구독 해제
-        playerController.OnAttackEvent -= TriggerAction;
+        weapon.OnAttackEvent -= TriggerAction;
         playerController.OnRollEvent -= TriggerRoll;
-        playerController.OnThrowEvent -= TriggerThrow;
+        weapon.OnThrowEvent -= TriggerThrow;
         playerController.OnInteractEvent -= TriggerInteract;
         health.OnStunnedEvent -= TriggerStun;
         health.OnHitEvent -= TriggerHitFlash;
@@ -173,10 +175,10 @@ public class PlayerAnimator : MonoBehaviourPun
         int currentWeaponType = 0;
 
         // 총을 들고 있고, 장착된 무기 오브젝트가 확실히 존재한다면
-        if (playerController.UseGun && playerController.MyEquippedGun != null)
+        if (weapon.UseGun && weapon.MyEquippedGun != null)
         {
             // 무기 Enum 타입을 int로 형변환
-            currentWeaponType = (int)playerController.MyEquippedGun.WeaponType;
+            currentWeaponType = (int)weapon.MyEquippedGun.WeaponType;
         }
 
         // 애니메이터로 파라미터 전송 (0, 1, 2, 3, 4가 자동으로 들어감)

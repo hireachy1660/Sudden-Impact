@@ -9,7 +9,7 @@ using UnityEngine;
 ///   - (EWeaponType + ammo) 데이터만 보유
 ///   - 라운드 시작 시 WeaponSpawnManager가 SetupAndActivate()로 데이터를 주입.
 ///   - 플레이어가 버린 총도 이 노드 형태로 필드에 남겨짐 (RPC_CreateDropNode 경로).
-///   - 플레이어가 Q키를 누르면: PlayerController → RequestPickup() → RPC_RequestPickup(MasterClient) → RPC_ForceEquipWeapon(All).
+///   - 플레이어가 Q키를 누르면: PlayerInteraction → RequestPickup() → RPC_RequestPickup(MasterClient) → PlayerWeapon.RPC_ForceEquipWeapon(All).
 ///
 /// 씬 설정:
 ///   1. PhotonView 컴포넌트 필수 (씬 배치 오브젝트).
@@ -141,8 +141,8 @@ public class WeaponPickupNode : MonoBehaviourPun
         PhotonView pv = PhotonView.Find(_playerViewID);
         if (pv == null) return;
 
-        // All 클라이언트의 PlayerController에서 무기를 활성화
-        pv.RPC(nameof(PlayerController.RPC_ForceEquipWeapon),
+        // All 클라이언트의 PlayerWeapon에서 무기를 활성화
+        pv.RPC(nameof(PlayerWeapon.RPC_ForceEquipWeapon),
             RpcTarget.All, _typeInt, _ammo);
 
         // 드롭 풀 노드라면 추적 목록에서 제거 (스폰 노드는 no-op)

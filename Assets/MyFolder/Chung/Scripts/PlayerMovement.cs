@@ -16,6 +16,7 @@ public class PlayerMovement : MonoBehaviourPun, IOwnerOnlyPart
     [SerializeField] private float rollCooldown = 4f;
 
     private PlayerController core;
+    private PlayerWeapon weapon;
     private Rigidbody rb;
 
     private Vector3 curMoveInput;
@@ -29,6 +30,7 @@ public class PlayerMovement : MonoBehaviourPun, IOwnerOnlyPart
     private void Awake()
     {
         core = GetComponent<PlayerController>();
+        weapon = GetComponent<PlayerWeapon>();
         rb = GetComponent<Rigidbody>();
     }
 
@@ -89,9 +91,9 @@ public class PlayerMovement : MonoBehaviourPun, IOwnerOnlyPart
             Quaternion targetRotation = Quaternion.LookRotation(lookPos);
             rb.MoveRotation(targetRotation);
 
-            if (core.MyEquippedGun != null && core.WeaponAttachPoint != null)
+            if (weapon.MyEquippedGun != null && weapon.WeaponAttachPoint != null)
             {
-                core.MyEquippedGun.AttackPoint.LookAt(_aimPos);
+                weapon.MyEquippedGun.AttackPoint.LookAt(_aimPos);
             }
         }
     }
