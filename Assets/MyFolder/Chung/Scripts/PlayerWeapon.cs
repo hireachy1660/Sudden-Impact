@@ -185,8 +185,17 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
         if (photonView.IsMine) OnEquipped?.Invoke();
     }
 
+    // Q 키의 던지기 입구(소유자). 노드 줍기가 먼저인지는 Core가 가린 뒤 여기로 온다.
+    public void TryThrow()
+    {
+        if (!photonView.IsMine) return;
+        if (myEquippedGun == null || !useGun) return;
+
+        photonView.RPC(nameof(RPC_TryThrow), RpcTarget.All);
+    }
+
     [PunRPC]
-    public void RPC_TryThrow(int weaponTypeInt)
+    public void RPC_TryThrow()
     {
         if (myEquippedGun == null) return;
 

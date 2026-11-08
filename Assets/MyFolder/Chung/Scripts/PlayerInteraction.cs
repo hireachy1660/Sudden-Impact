@@ -5,7 +5,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // 줍기·던지기 입력·문 상호작용 부품. 소유자 전용(IOwnerOnlyPart) — 원격 복제본에서는 Core가 Awake에서 지운다.
-// 그래서 RPC 수신자와 애니 이벤트는 두지 않는다. 플레이어 상태는 Core(PlayerController)에서, 무기 상태와 무기 RPC는 PlayerWeapon에서 읽고 부른다.
+// 그래서 RPC 수신자와 애니 이벤트는 두지 않는다. 플레이어 상태는 Core(PlayerController)에서 읽는다.
+// 무기(PlayerWeapon)와의 연결은 없다 — 던지기와 Q 잠금(줍기 쿨다운)은 Core가 TryPickUp의 결과를 보고 처리한다.
 public class PlayerInteraction : MonoBehaviourPun, IOwnerOnlyPart
 {
     [Header("Interaction Settings")]
@@ -16,32 +17,12 @@ public class PlayerInteraction : MonoBehaviourPun, IOwnerOnlyPart
     [SerializeField] private WeaponPickupNode closestNode; // 최단거리 노드
 
     private PlayerController core;
-    private PlayerWeapon weapon;
     private Coroutine curCheckClosestNodeCoroutine;
     private List<WeaponPickupNode> nearbyNodes = new List<WeaponPickupNode>();
-    private float _pickupCooldownEnd = 0f;
 
     private void Awake()
     {
         core = GetComponent<PlayerController>();
-        weapon = GetComponent<PlayerWeapon>();
-    }
-
-    // 원격 복제본에서는 Core가 이 부품을 끄고 지운다 — 그 전에 구독했더라도 OnDisable에서 해제된다
-    private void OnEnable()
-    {
-        weapon.OnEquipped += HandleEquipped;
-    }
-
-    private void OnDisable()
-    {
-        weapon.OnEquipped -= HandleEquipped;
-    }
-
-    // 장착 직후 Q 연타로 발 밑 노드를 즉시 줍는 루프 방지
-    private void HandleEquipped()
-    {
-        _pickupCooldownEnd = Time.time + 0.4f;
     }
 
     public void OnRespawn() { }
@@ -52,29 +33,22 @@ public class PlayerInteraction : MonoBehaviourPun, IOwnerOnlyPart
         StopAllCoroutines();
     }
 
-    public void PickUpAndDrop(InputAction.CallbackContext ctx)
-    {
-        if (!core.CanAct) return;
-        if (!photonView.IsMine || !ctx.performed) return;
-        if (Time.time < _pickupCooldownEnd) return;
+    // Q 입력의 결과. None = 노드 없음(Core가 던지기로 넘긴다) · Blocked = 가용 아닌 노드가 옆에 있어 드롭 차단 · Requested = 줍기 요청을 보냄(Core가 Q를 잠근다)
+    public enum PickUpResult { None, Blocked, Requested }
 
-        // 1. 주변에 노드가 있으면 (가용 여부 무관) 드롭 차단
-        if (closestNode != null)
+    // 노드가 있으면 줍기를 시도하고 결과만 돌려준다. 공통 가드(CanAct·performed)와 Q 잠금은 Core의 중계가 한다.
+    public PickUpResult TryPickUp()
+    {
+        // 주변에 노드가 있으면 (가용 여부 무관) 드롭 차단
+        if (closestNode == null) return PickUpResult.None;
+
+        bool requested = closestNode.IsAvailable;
+        if (requested)
         {
-            if (closestNode.IsAvailable)
-            {
-                closestNode.RequestPickup(photonView.ViewID);
-                // RPC 왕복 지연 동안 Q 재입력으로 TryThrow 방지
-                _pickupCooldownEnd = Time.time + 0.5f;
-            }
-            closestNode = null;
-            return;
+            closestNode.RequestPickup(photonView.ViewID);
         }
-        // 2. 노드가 완전히 없을 때만 던지기
-        if (weapon.MyEquippedGun != null && weapon.UseGun)
-        {
-            photonView.RPC(nameof(PlayerWeapon.RPC_TryThrow), RpcTarget.All, (int)((Gun)weapon.MyEquippedGun).WeaponType);
-        }
+        closestNode = null;
+        return requested ? PickUpResult.Requested : PickUpResult.Blocked;
     }
 
     // 원격에서 지워지기 전(첫 프레임)에도 트리거 콜백은 들어올 수 있어 IsMine 검사를 그대로 둔다

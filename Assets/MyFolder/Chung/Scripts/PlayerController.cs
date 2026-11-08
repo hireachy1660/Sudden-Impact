@@ -45,6 +45,12 @@ public class PlayerController : MonoBehaviourPun
     private PlayerInteraction interaction;
     private PlayerWeapon weapon;
 
+    // Q 키 잠금 종료 시각. 줍기 요청 뒤(RPC 왕복 동안 재입력이 던지기로 새지 않게)와 장착 직후(발밑에 생긴 드롭 노드를 바로 되줍지 않게) 건다.
+    // 줍기와 던지기를 함께 막는 잠금이라 Q를 가르는 Core가 가진다.
+    private float _pickupLockEnd;
+    private const float PickupLockAfterRequest = 0.5f;
+    private const float PickupLockAfterEquip = 0.4f;
+
     public int MyTeam { get { return myTeam; } }
     public bool HasEnemyFlag { get { return hasEnemyFlag; } }
     public PlayerState GetPlayerState { get { return playerState; } }
@@ -69,8 +75,9 @@ public class PlayerController : MonoBehaviourPun
         health = GetComponent<PlayerHealth>();
         interaction = GetComponent<PlayerInteraction>();
         weapon = GetComponent<PlayerWeapon>();
-        // 같은 오브젝트·같은 수명이라 해제는 필요 없다
+        // 같은 오브젝트·같은 수명이라 해제는 필요 없다(OnEquipped는 소유자에서만 발화한다)
         health.OnDied += Die;
+        weapon.OnEquipped += LockPickupAfterEquip;
         // 칼의 소유자 정보 — 팀 값의 출처(registry)를 Core가 가지고 있어 Core가 넣어 준다
         weapon.SetKnifeOwner(photonView.Owner.ActorNumber, registry.MyTeam);
 
@@ -178,7 +185,8 @@ public class PlayerController : MonoBehaviourPun
 
     #region 조작 로직
 
-    // 밖(InputManager)에서 오는 호출은 Core가 같은 이름으로 한 줄 중계한다. 논리는 각 부품(이동·상호작용·무기)에.
+    // 밖(InputManager)에서 오는 호출은 Core가 같은 이름으로 중계한다. 논리는 각 부품(이동·상호작용·무기)에.
+    // 블록인 둘(RotatePlayer·PickUpAndDrop)만 Core의 일(조준점 보관·Q 키의 순서)이 한 줄 섞여 있다.
     public void MovePlayer(Vector3 _moveAxis) => movement.MovePlayer(_moveAxis);
     public void RotatePlayer(Vector3 _aimPos)
     {
@@ -188,7 +196,28 @@ public class PlayerController : MonoBehaviourPun
     public void SprintStart(InputAction.CallbackContext ctx) => movement.SprintStart(ctx);
     public void SprintEnd(InputAction.CallbackContext ctx) => movement.SprintEnd(ctx);
     public void TryRoll(InputAction.CallbackContext ctx) => movement.TryRoll(ctx);
-    public void PickUpAndDrop(InputAction.CallbackContext ctx) => interaction.PickUpAndDrop(ctx);
+    // Q 키의 규칙 — 잠금 중이면 아무것도 안 함, 노드가 있으면 줍기, 아니면 던지기.
+    // 두 부품을 어떤 순서로 쓰는가와 그 사이의 잠금은 Core의 일이라 여기서 가른다. 공통 가드(CanAct·performed)도 여기.
+    public void PickUpAndDrop(InputAction.CallbackContext ctx)
+    {
+        if (!CanAct || !ctx.performed) return;
+        if (Time.time < _pickupLockEnd) return;
+
+        PlayerInteraction.PickUpResult result = interaction.TryPickUp();
+        if (result == PlayerInteraction.PickUpResult.Requested)
+        {
+            _pickupLockEnd = Time.time + PickupLockAfterRequest;
+        }
+        if (result != PlayerInteraction.PickUpResult.None) return;
+
+        weapon.TryThrow();
+    }
+
+    // 장착이 도착한 직후 Q 연타로 발밑 노드(교체로 떨어진 총)를 즉시 되줍는 루프 방지
+    private void LockPickupAfterEquip()
+    {
+        _pickupLockEnd = Time.time + PickupLockAfterEquip;
+    }
     public void TryInteract(InputAction.CallbackContext ctx) => interaction.TryInteract(ctx);
     public void TryAttack(Vector3 _aimPos, bool _isHeld = false) => weapon.TryAttack(_aimPos, _isHeld);
     public void TrySwapWeapon(InputAction.CallbackContext ctx) => weapon.TrySwapWeapon(ctx);
