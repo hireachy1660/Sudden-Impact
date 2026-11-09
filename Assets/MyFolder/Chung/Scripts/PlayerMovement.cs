@@ -24,6 +24,8 @@ public class PlayerMovement : MonoBehaviourPun, IOwnerOnlyPart
     private Vector3 lastMoveDir;
     private bool isSprinting;
     private float lastRollTime;
+    // 구르기 코루틴이 물리 틱마다 새 대기 객체를 만들지 않도록 한 번만 만들어 재사용
+    private static readonly WaitForFixedUpdate s_waitForFixedUpdate = new WaitForFixedUpdate();
 
     // Core가 Awake에서 한 번 읽어 보관한다(애니메이터는 Core의 게터를 읽는다)
     public float MoveSpeed => moveSpeed;
@@ -157,7 +159,7 @@ public class PlayerMovement : MonoBehaviourPun, IOwnerOnlyPart
             // 오직 벨로시티(Velocity)만으로 구르기
             rb.linearVelocity = rollDirection * currentSpeed;
 
-            yield return new WaitForFixedUpdate();
+            yield return s_waitForFixedUpdate;
         }
 
         // 구르기가 끝난 후 잔여 속도를 소멸시켜 미끄러짐 방지

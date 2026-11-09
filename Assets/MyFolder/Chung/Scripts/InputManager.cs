@@ -39,6 +39,9 @@ public class InputManager : MonoBehaviour
     private bool isAiming = false;
     private bool isOnMenu = false;
 
+    // 입력 루프가 물리 틱마다 새 대기 객체를 만들지 않도록 한 번만 만들어 재사용
+    private static readonly WaitForFixedUpdate s_waitForFixedUpdate = new WaitForFixedUpdate();
+
 
     private void Awake()
     {
@@ -131,7 +134,7 @@ public class InputManager : MonoBehaviour
     {
         while (player != null)
         {
-            yield return new WaitForFixedUpdate();
+            yield return s_waitForFixedUpdate;
 
             if (!playerMap.enabled) continue;
 

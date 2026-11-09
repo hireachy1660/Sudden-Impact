@@ -36,6 +36,8 @@ public abstract class Gun : Weapon
     protected float lastFireTime;                             // 마지막으로 총을 쏜 시간을 기억하는 변수
     private float lastRippleTime;
     private Coroutine flashCoroutine;
+    // 총구 플래시 대기(0.03초) — 발사마다 새로 만들지 않고 총 인스턴스 전부가 재사용
+    private static readonly WaitForSeconds s_flashWait = new WaitForSeconds(0.03f);
 
     public int CurrentAmmo => currentAmmo;
     public int MaxAmmo => maxAmmo;
@@ -171,7 +173,7 @@ public abstract class Gun : Weapon
         if (flashLight != null) flashLight.enabled = true;
 
         // 타이밍은 0.02초 ~ 0.04초 동안 켜지게
-        yield return new WaitForSeconds(0.03f);
+        yield return s_flashWait;
 
         // 끄기
         if (flashLight != null) flashLight.enabled = false;

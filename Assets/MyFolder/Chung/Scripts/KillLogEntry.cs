@@ -21,6 +21,14 @@ public class KillLogEntry : MonoBehaviour
     [SerializeField] private float displayDuration = 3f;   // 표시 지속 시간
     [SerializeField] private float fadeDuration = 1f;   // 페이드 아웃 시간
 
+    // displayDuration 대기 객체 — 직렬화 값이라 Awake에서 1회 생성해 재사용
+    private WaitForSeconds _displayWait;
+
+    private void Awake()
+    {
+        _displayWait = new WaitForSeconds(displayDuration);
+    }
+
     // ─── 외부 호출 ────────────────────────────────────────────────────
 
     /// <summary>
@@ -43,7 +51,7 @@ public class KillLogEntry : MonoBehaviour
     private IEnumerator FadeOutAndDestroy()
     {
         // displayDuration 동안 완전히 표시
-        yield return new WaitForSeconds(displayDuration);
+        yield return _displayWait;
 
         // fadeDuration 동안 서서히 투명해짐
         float elapsed = 0f;

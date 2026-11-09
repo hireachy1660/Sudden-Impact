@@ -46,6 +46,8 @@ public class PlayerController : MonoBehaviourPun
     [SerializeField] private PlayerState playerState;
 
     private Collider col;
+    // 사망 연출 대기 객체 — deathAnimDuration이 직렬화 값이라 Awake에서 1회 생성해 재사용
+    private WaitForSeconds _deathWait;
     // 같은 오브젝트에 붙은 부품들. Core가 리스폰·라운드 종료를 받아 순회하며 알린다.
     private IPlayerPart[] parts;
     private PlayerMovement movement;
@@ -83,6 +85,7 @@ public class PlayerController : MonoBehaviourPun
         health = GetComponent<PlayerHealth>();
         interaction = GetComponent<PlayerInteraction>();
         weapon = GetComponent<PlayerWeapon>();
+        _deathWait = new WaitForSeconds(deathAnimDuration);
 
         // 애니메이터가 원격에서도 읽는 값이라 부품을 지우기 전에 Core가 보관한다
         MoveSpeed = movement.MoveSpeed;
@@ -352,7 +355,7 @@ public class PlayerController : MonoBehaviourPun
 
     private IEnumerator DeathRoutine()
     {
-        yield return new WaitForSeconds(deathAnimDuration);
+        yield return _deathWait;
         gameObject.SetActive(false);
     }
 

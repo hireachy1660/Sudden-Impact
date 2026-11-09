@@ -20,6 +20,8 @@ public class PlayerInteraction : MonoBehaviourPun, IOwnerOnlyPart
 
     private PlayerController core;
     private List<WeaponPickupNode> nearbyNodes = new List<WeaponPickupNode>();
+    // 가까운 노드 폴링 간격(~5프레임) — 루프마다 새로 만들지 않고 재사용
+    private static readonly WaitForSeconds s_nodePollInterval = new WaitForSeconds(5f / 60f);
 
     public void Bind(PlayerController _core) => core = _core;
 
@@ -87,7 +89,7 @@ public class PlayerInteraction : MonoBehaviourPun, IOwnerOnlyPart
 
         while (nearbyNodes.Count > 0)
         {
-            yield return new WaitForSeconds(5f / 60f); // ~5 frames
+            yield return s_nodePollInterval;
 
             float minSqrDist = float.MaxValue;
             WeaponPickupNode tempClosest = null;

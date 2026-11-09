@@ -24,6 +24,11 @@ public class RoundManager : MonoBehaviourPunCallbacks
         get { return roundStartDelay; }
     }
 
+    // 코루틴 대기 객체 — 매번 새로 만들지 않고 재사용(roundStartDelay는 직렬화 값이라 Awake에서 1회 생성)
+    private WaitForSeconds _roundStartWait;
+    private static readonly WaitForSeconds s_returnToLobbyWait = new WaitForSeconds(5f);
+    private static readonly WaitForSeconds s_countDownWait = new WaitForSeconds(3f);
+
     [Header("스폰 설정")]
     [SerializeField] private Transform[] teamASpawnPoints;
     [SerializeField] private Transform[] teamBSpawnPoints;
@@ -48,6 +53,7 @@ public class RoundManager : MonoBehaviourPunCallbacks
     {
         Instance = this;
         startButton?.onClick.AddListener(StartRound);
+        _roundStartWait = new WaitForSeconds(roundStartDelay);
     }
 
     private void Start()
@@ -279,7 +285,7 @@ public class RoundManager : MonoBehaviourPunCallbacks
         }
 
         Debug.Log($"[GameManager] {roundStartDelay}초 후 다음 라운드 시작");
-        yield return new WaitForSeconds(roundStartDelay);
+        yield return _roundStartWait;
         FogOfWar.Instance.ResetFogOfWar();
         StartRound();
     }
@@ -373,7 +379,7 @@ public class RoundManager : MonoBehaviourPunCallbacks
 
     private IEnumerator ReturnToLobbyCoroutine()
     {
-        yield return new WaitForSeconds(5f);
+        yield return s_returnToLobbyWait;
         if (PhotonNetwork.IsMasterClient)
         {
             PhotonNetwork.LoadLevel(lobbySceneName); // 실제 로비 씬 이름으로 변경
@@ -384,7 +390,7 @@ public class RoundManager : MonoBehaviourPunCallbacks
 
     private IEnumerator CountDownCoroutine()
     {
-        yield return new WaitForSeconds(3f);
+        yield return s_countDownWait;
         
         StartRound();
     }

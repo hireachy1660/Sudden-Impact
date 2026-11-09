@@ -28,6 +28,8 @@ public class KillFloatText : MonoBehaviour
     [SerializeField] private float popInDuration = 0.18f;
     [SerializeField] private float idleDuration = 0.75f;
     [SerializeField] private float popOutDuration = 0.12f;
+    // idleDuration 대기 객체 — 직렬화 값이라 Awake에서 1회 생성해 재사용
+    private WaitForSeconds _idleWait;
 
     [Header("Underlay Color")]
     // [CH 추가] false로 끄면 UNDERLAY_ON 키워드 자체를 비활성화 → 잔상 완전 제거 (비교 촬영용)
@@ -48,6 +50,7 @@ public class KillFloatText : MonoBehaviour
     private void Awake()
     {
         if (tmp == null) tmp = GetComponent<TextMeshPro>();
+        _idleWait = new WaitForSeconds(idleDuration);
 
         // 머티리얼 인스턴스 분리 후 캐싱 (첫 접근 시 자동 분리)
         _mat = tmp.fontMaterial;
@@ -108,7 +111,7 @@ public class KillFloatText : MonoBehaviour
 
         // ── Idle : 궤도 운동 + 상승 (LateUpdate에서 처리) ──
         _state = State.Idle;
-        yield return new WaitForSeconds(idleDuration);
+        yield return _idleWait;
 
         // ── Pop-Out : 스케일 1 → 0 ────────────────────────
         _state = State.PopOut;

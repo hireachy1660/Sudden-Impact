@@ -42,6 +42,10 @@ public class PlayerAnimator : MonoBehaviourPun
     private MaterialPropertyBlock _mpb;
     private Coroutine _stunBlinkCoroutine;
     private Coroutine _hitFlashCoroutine;
+    // 코루틴 대기 객체 — 매번 새로 만들지 않고 재사용(길이가 직렬화 값인 둘은 Awake에서 1회 생성)
+    private static readonly WaitForSeconds s_rollLayerWait = new WaitForSeconds(0.2f);
+    private WaitForSeconds _hitFlashWait;
+    private WaitForSeconds _blinkWait;
     private static readonly int s_BaseColor = Shader.PropertyToID("_BaseColor");
     private static readonly int s_Color = Shader.PropertyToID("_Color");
     private static readonly int s_FlashIntensity = Shader.PropertyToID("_FlashIntensity");
@@ -70,6 +74,8 @@ public class PlayerAnimator : MonoBehaviourPun
         // 이 컴포넌트는 모델(자식) 오브젝트에 붙어 있어 컨트롤러가 있는 오브젝트에서 가져온다
         health = playerController.GetComponent<PlayerHealth>();
         weapon = playerController.GetComponent<PlayerWeapon>();
+        _hitFlashWait = new WaitForSeconds(hitFlashDuration);
+        _blinkWait = new WaitForSeconds(blinkInterval);
 
         _mpb = new MaterialPropertyBlock();
         if (bodyRenderers == null || bodyRenderers.Length == 0)
@@ -189,7 +195,7 @@ public class PlayerAnimator : MonoBehaviourPun
     {
         animator.SetLayerWeight(1, 0f);
         animator.SetTrigger(hashRoll);
-        yield return new WaitForSeconds(0.2f);
+        yield return s_rollLayerWait;
         animator.SetLayerWeight(1, 1f);
     }
 
@@ -258,7 +264,7 @@ public class PlayerAnimator : MonoBehaviourPun
     {
         // _FlashIntensity 1 → 텍스처를 흰색으로 lerp (EnemyShader 전용 프로퍼티)
         SetFlash(1f);
-        yield return new WaitForSeconds(hitFlashDuration);
+        yield return _hitFlashWait;
         SetFlash(0f);
         _hitFlashCoroutine = null;
     }
@@ -282,7 +288,7 @@ public class PlayerAnimator : MonoBehaviourPun
         {
             visible = !visible;
             SetRenderersVisible(visible);
-            yield return new WaitForSeconds(blinkInterval);
+            yield return _blinkWait;
         }
         SetRenderersVisible(true);
         SetRenderersColor(_originalColor);
