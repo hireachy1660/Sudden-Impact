@@ -13,6 +13,8 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
 {
     [Tooltip("혈흔 프리팹")]
     [SerializeField] private GameObject neonBloodPrefab;
+    [Tooltip("콜라이더 바닥(bounds.min.y)에서 혈흔 y까지의 오프셋. 모델의 발이 캡슐 바닥보다 아래라 음수 — 전의 고정 y(-1.35)와 같은 높이가 되게 화면 보고 맞춘 값")]
+    [SerializeField] private float bloodYOffset = -0.35f;
 
     [Header("Parameters")]
     [SerializeField] private float maxHp = 100f;
@@ -26,6 +28,8 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
     [SerializeField] private float curHp;
 
     private PlayerController core;
+    // 혈흔을 발 위치에 깔기 위한 자기 오브젝트의 콜라이더 — P_Player2에는 캡슐 하나
+    private Collider bodyCollider;
     // 기절 종료 시각(PhotonNetwork.Time 기준). 보낸 쪽이 계산해 RPC로 실어 보내므로 모든 클라이언트가 같은 순간에 풀린다.
     private double stunEndTime;
 
@@ -36,6 +40,11 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
     public event Action<int> OnDied;
 
     public void Bind(PlayerController _core) => core = _core;
+
+    private void Awake()
+    {
+        bodyCollider = GetComponent<Collider>();
+    }
 
     private void OnEnable()
     {
@@ -103,7 +112,8 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
             }
         }
 
-        Vector3 bloodPos = new Vector3(transform.position.x, -1.35f, transform.position.z);
+        // 혈흔은 콜라이더 바닥 기준 오프셋 위치에 — 바닥 높이를 상수로 박지 않는다(카펫·단차에서도 발을 따름). 사망 처리(콜라이더 끄기)보다 앞이라 bounds가 유효하다
+        Vector3 bloodPos = new Vector3(transform.position.x, bodyCollider.bounds.min.y + bloodYOffset, transform.position.z);
         Instantiate(neonBloodPrefab, bloodPos, Quaternion.identity);
 
         if (curHp <= 0)

@@ -174,9 +174,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e3519240090d3643a730ea532da25a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerWeapon
-  weaponAttachPoint: {fileID: 107669909597435356}
   myKnife: {fileID: 298153680274639072}
-  meleeAttackCooldown: 0.5
   allGuns:
   - {fileID: 6872525959425915694}
   - {fileID: 5859568415962895923}
