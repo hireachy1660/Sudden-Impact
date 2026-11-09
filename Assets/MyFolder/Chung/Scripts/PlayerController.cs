@@ -7,8 +7,8 @@ using UnityEngine.InputSystem;
 /// <summary>
 /// 플레이어 Core — 상태·팀·깃발·생명주기와 입력 중계. 부품(IPlayerPart)을 Awake에서 수집하고, 원격 복제본에서는 소유자 전용 부품을 끄고 지운다.
 /// <para>부품 규칙</para>
-/// <para>① 부품이 동작을 정의하고, 어떤 부품을 어떤 순서로 쓰는가(입력 중계·Die의 순서·Q 키의 줍기 우선)는 Core가 정한다.</para>
-/// <para>② 상태 쓰기는 SetPlayerState 하나. 부품은 Core를 읽기만 한다.</para>
+/// <para>① 부품이 동작(기제)을 정의하고, 자격·순서(정책)는 Core가 정한다 — 입력 중계의 가드(CanAct 등)·Q 키의 줍기 우선·Die의 순서·모든 클라이언트에 보낼 RPC. 분기가 동작 논리면 부품, 자격·순서면 Core.</para>
+/// <para>② 상태 쓰기는 Core의 전이 동사(BeginSprint·EndSprint·Stun·EndStun)로만 — SetPlayerState는 private. 부품은 Core를 읽기만 한다.</para>
 /// <para>③ 알림은 사실의 주인이 자기 이벤트로 — Health = 피격·기절, Weapon = 공격·던지기·장착, Core = 구르기·상호작용. 연출(PlayerAnimator)은 듣기만 한다.</para>
 /// <para>④ 네트워크: RPC 수신자는 모든 클라이언트의 같은 오브젝트에 있어야 하므로 부품이 둘로 나뉜다 — 모든 클라이언트 부품(Health·Weapon: RPC와 원격이 읽는 값을 가짐)과
 /// 소유자 전용 부품(Movement·Interaction: IOwnerOnlyPart, RPC와 원격이 읽는 값이 없음). 원격 애니메이터가 읽는 값(속도·상태·무기)은 Core 또는 모든 클라이언트 부품에 둔다.</para>
@@ -176,7 +176,25 @@ public class PlayerController : MonoBehaviourPun
         foreach (var p in parts) p.OnRoundEndReset();
     }
 
-    public void SetPlayerState(PlayerState _state)
+    // 상태를 쓰는 길은 이 동사들뿐이다 — 부품은 SetPlayerState를 부를 수 없다(private). 전이 조건(어느 상태에서만 바뀌는가)도 여기.
+    public void BeginSprint() => SetPlayerState(PlayerState.Sprint);
+
+    // 기절·사망 중에 Shift를 떼도 그 상태를 Idle로 덮어쓰지 않는다
+    public void EndSprint()
+    {
+        if (playerState == PlayerState.Sprint) SetPlayerState(PlayerState.Idle);
+    }
+
+    public void Stun() => SetPlayerState(PlayerState.Stunned);
+
+    // 기절 중 사망하면 Dead라 Idle로 덮지 않는다 — 만료 "때"는 Health가 stunEndTime으로 판단해 부른다.
+    // Health 쪽 Stunned 검사와 이중이지만, 호출자가 늘어도 규칙은 여기서 보장한다.
+    public void EndStun()
+    {
+        if (playerState == PlayerState.Stunned) SetPlayerState(PlayerState.Idle);
+    }
+
+    private void SetPlayerState(PlayerState _state)
     {
         playerState = _state;
     }
@@ -203,17 +221,28 @@ public class PlayerController : MonoBehaviourPun
 
     #region 조작 로직
 
-    // 밖(InputManager)에서 오는 호출은 Core가 같은 이름으로 중계한다. 논리는 각 부품(이동·상호작용·무기)에.
-    // 블록인 둘(RotatePlayer·PickUpAndDrop)에만 Core의 일(조준점 보관·Q 키의 순서와 잠금)이 섞여 있다.
+    // 밖(InputManager)에서 오는 호출은 Core가 같은 이름으로 중계한다. 논리(기제)는 각 부품(이동·상호작용·무기)에.
+    // 중계가 가지는 것은 정책 — 자격 가드(CanAct 등)·순서(Q 키)·조준점 보관·모든 클라이언트에 보낼 RPC. 분기가 동작 논리면 부품, 자격·순서면 Core.
     public void MovePlayer(Vector3 _moveAxis) => movement.MovePlayer(_moveAxis);
     public void RotatePlayer(Vector3 _aimPos)
     {
         AimPosition = _aimPos;
+        if (!CanAct || playerState == PlayerState.Rolling) return;
         movement.RotatePlayer(_aimPos);
     }
-    public void SprintStart(InputAction.CallbackContext ctx) => movement.SprintStart(ctx);
-    public void SprintEnd(InputAction.CallbackContext ctx) => movement.SprintEnd(ctx);
-    public void TryRoll(InputAction.CallbackContext ctx) => movement.TryRoll(ctx);
+    public void SprintStart(InputAction.CallbackContext ctx)
+    {
+        if (!CanAct) return;
+        movement.SprintStart();
+    }
+    public void SprintEnd(InputAction.CallbackContext ctx) => movement.SprintEnd();
+    public void TryRoll(InputAction.CallbackContext ctx)
+    {
+        if (!CanAct) return;
+        if (!movement.TryRoll()) return;
+        // 무적 상태(Rolling)와 애니 이벤트는 모든 클라이언트에서 — Core가 쏜다. 지속시간은 Movement의 값
+        photonView.RPC(nameof(StartRollRPC), RpcTarget.All, movement.RollDuration);
+    }
     // Q 키의 규칙 — 잠금 중이면 아무것도 안 함, 노드가 있으면 줍기, 아니면 던지기.
     // 두 부품을 어떤 순서로 쓰는가와 그 사이의 잠금은 Core의 일이라 여기서 가른다. 공통 가드(CanAct·performed)도 여기.
     public void PickUpAndDrop(InputAction.CallbackContext ctx)
@@ -231,9 +260,23 @@ public class PlayerController : MonoBehaviourPun
         weapon.TryThrow();
     }
 
-    public void TryInteract(InputAction.CallbackContext ctx) => interaction.TryInteract(ctx);
-    public void TryAttack(Vector3 _aimPos, bool _isHeld = false) => weapon.TryAttack(_aimPos, _isHeld);
-    public void TrySwapWeapon(InputAction.CallbackContext ctx) => weapon.TrySwapWeapon(ctx);
+    public void TryInteract(InputAction.CallbackContext ctx)
+    {
+        if (!CanAct) return;
+        // 상호작용 애니는 모든 클라이언트에서 보여야 하므로 Core가 RPC로 — 상호작용이 실제로 일어났을 때만
+        if (interaction.TryInteract()) photonView.RPC(nameof(InteractAnimRPC), RpcTarget.All);
+    }
+    public void TryAttack(Vector3 _aimPos, bool _isHeld = false)
+    {
+        // 달리기·구르기 중 공격 금지는 기존 규칙 그대로
+        if (!CanAct || playerState == PlayerState.Sprint || playerState == PlayerState.Rolling) return;
+        weapon.TryAttack(_aimPos, _isHeld);
+    }
+    public void TrySwapWeapon(InputAction.CallbackContext ctx)
+    {
+        if (!CanAct) return;
+        weapon.TrySwapWeapon();
+    }
 
     // 장착이 도착한 직후 Q 연타로 발밑 노드(교체로 떨어진 총)를 즉시 되줍는 루프 방지
     private void LockPickupAfterEquip()
@@ -246,7 +289,7 @@ public class PlayerController : MonoBehaviourPun
     // 지속시간은 보낸 쪽 값을 받아 쓴다(프리팹 수치가 Movement로 옮겨가 Core에 없음).
     /// <param name="duration">구르기 지속 시간(초) — 보낸 쪽 PlayerMovement의 rollDuration</param>
     [PunRPC]
-    public void StartRollRPC(float duration)
+    private void StartRollRPC(float duration)
     {
         StartCoroutine(RollingStateCoroutine(duration));
     }
@@ -265,7 +308,7 @@ public class PlayerController : MonoBehaviourPun
 
     // 상호작용 애니 이벤트의 RPC 입구. 논리는 PlayerInteraction에 있지만 RPC 수신자는 모든 클라이언트에 있어야 하므로 Core에 둔다.
     [PunRPC]
-    public void InteractAnimRPC()
+    private void InteractAnimRPC()
     {
         OnInteractEvent?.Invoke();
     }

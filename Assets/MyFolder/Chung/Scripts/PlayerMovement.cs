@@ -1,11 +1,10 @@
 ﻿using Photon.Pun;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 /// <summary>
 /// 이동·회전·달리기·구르기 부품. 소유자 전용(IOwnerOnlyPart) — 원격 복제본에서는 Core가 Awake에서 지운다.
-/// 상태 읽기·쓰기는 Core(PlayerController)를 거친다.
+/// 상태 읽기는 Core(PlayerController)에서, 상태 전이는 Core의 동사(BeginSprint·EndSprint)로. 자격 가드와 무적 RPC는 Core 중계가 가진다.
 /// </summary>
 [RequireComponent(typeof(PlayerController))]
 public class PlayerMovement : MonoBehaviourPun, IOwnerOnlyPart
@@ -28,6 +27,8 @@ public class PlayerMovement : MonoBehaviourPun, IOwnerOnlyPart
 
     // Core가 Awake에서 한 번 읽어 보관한다(애니메이터는 Core의 게터를 읽는다)
     public float MoveSpeed => moveSpeed;
+    // Core가 StartRollRPC의 인자로 보낸다(무적 지속시간 = 구르기 지속시간)
+    public float RollDuration => rollDuration;
 
     private void Awake()
     {
@@ -81,8 +82,6 @@ public class PlayerMovement : MonoBehaviourPun, IOwnerOnlyPart
 
     public void RotatePlayer(Vector3 _aimPos)
     {
-        if (!core.CanAct || core.GetPlayerState == PlayerController.PlayerState.Rolling) return;
-
         Vector3 lookPos = _aimPos - transform.position;
         lookPos.y = 0;
 
@@ -95,28 +94,22 @@ public class PlayerMovement : MonoBehaviourPun, IOwnerOnlyPart
         }
     }
 
-    public void SprintStart(InputAction.CallbackContext ctx)
+    public void SprintStart()
     {
-        if (!core.CanAct) return;
-
         isSprinting = true;
-        core.SetPlayerState(PlayerController.PlayerState.Sprint);
+        core.BeginSprint();
     }
 
-    public void SprintEnd(InputAction.CallbackContext ctx)
+    public void SprintEnd()
     {
         isSprinting = false;
-        // 기절·사망 중에 Shift를 떼도 그 상태를 Idle로 덮어쓰지 않는다
-        if (core.GetPlayerState == PlayerController.PlayerState.Sprint) core.SetPlayerState(PlayerController.PlayerState.Idle);
+        core.EndSprint();
     }
 
-    public void TryRoll(InputAction.CallbackContext ctx)
+    // 구르기를 시작했으면 true(쿨다운 중이면 false). 자격 가드와 무적 RPC(StartRollRPC)는 Core 중계가 한다.
+    public bool TryRoll()
     {
-        if (!core.CanAct) return;
-        if (Time.time < lastRollTime + rollCooldown)
-        {
-            return;
-        }
+        if (Time.time < lastRollTime + rollCooldown) return false;
 
         // 이동 코루틴
         StartCoroutine(RollCoroutine());
@@ -125,9 +118,8 @@ public class PlayerMovement : MonoBehaviourPun, IOwnerOnlyPart
         // TryRoll은 로컬 플레이어 입력에서만 호출되므로 IsMine 보장됨
         GameEvents.RollStarted(rollCooldown);
 
-        // 무적 RPC. 상태(Rolling)와 애니 이벤트는 Core가 모든 클라이언트에서 걸고, 지속시간은 여기 값을 보낸다
-        photonView.RPC(nameof(PlayerController.StartRollRPC), RpcTarget.All, rollDuration);
         lastRollTime = Time.time;
+        return true;
     }
 
     private IEnumerator RollCoroutine()

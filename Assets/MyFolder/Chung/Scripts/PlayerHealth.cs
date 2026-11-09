@@ -126,16 +126,17 @@ public class PlayerHealth : MonoBehaviourPun, IAttackReceiver, IPlayerPart
         if (core.GetPlayerState == PlayerController.PlayerState.Dead
             || core.GetPlayerState == PlayerController.PlayerState.NotReady) return;
         stunEndTime = _endTime;
-        core.SetPlayerState(PlayerController.PlayerState.Stunned);
+        core.Stun();
         OnStunnedEvent?.Invoke();
     }
 
     private void Update()
     {
-        // 기절 상태일 때만 만료를 검사한다. 기절 중 사망하면 상태가 Dead라 여기서 Idle로 덮어쓰지 않는다(코루틴 방식에서 생기던 버그).
+        // 기절 상태일 때만 만료를 검사한다 — 여기의 Stunned 검사는 매 프레임 호출을 막는 용도이고,
+        // 전이 규칙("Stunned에서만 Idle로" — 기절 중 사망하면 Dead를 덮지 않는다) 자체는 Core.EndStun이 가진다.
         if (core.GetPlayerState == PlayerController.PlayerState.Stunned && PhotonNetwork.Time >= stunEndTime)
         {
-            core.SetPlayerState(PlayerController.PlayerState.Idle);
+            core.EndStun();
         }
     }
 }

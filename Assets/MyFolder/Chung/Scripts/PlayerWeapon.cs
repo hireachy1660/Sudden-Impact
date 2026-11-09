@@ -1,12 +1,11 @@
 ﻿using Photon.Pun;
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 /// <summary>
 /// 무기 부품: 장착한 총과 칼의 상태, 장착·전환·공격·던지기.
 /// 모든 클라이언트에 남는다(IOwnerOnlyPart가 아니다) — 무기 RPC를 받는 쪽이고, 원격의 애니메이터도 UseGun·MyEquippedGun을 읽는다.
-/// 플레이어 상태(CanAct 등)는 Core(PlayerController)에서 읽는다.
+/// 자격 가드(CanAct·달리기·구르기 중 금지)는 Core 중계가 가진다. Core에서 읽는 것은 조준점(AimPosition)만.
 /// </summary>
 [RequireComponent(typeof(PlayerController))]
 public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
@@ -74,10 +73,8 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
     }
 
     #region 무기 전환
-    public void TrySwapWeapon(InputAction.CallbackContext ctx)
+    public void TrySwapWeapon()
     {
-        if (!core.CanAct) return;
-
         // useGun은 여기서 쓰지 않는다 — 보낼 값만 정하고, 실제 갱신은 모든 클라이언트의 SwapWeapon이 한다
         bool nextUseGun = myEquippedGun != null && !useGun;
         photonView.RPC(nameof(SwapWeapon), RpcTarget.All, nextUseGun);
@@ -106,11 +103,6 @@ public class PlayerWeapon : MonoBehaviourPun, IPlayerPart
 
     public void TryAttack(Vector3 _aimPos, bool _isHeld = false)
     {
-        // 달리기·구르기 중 공격 금지는 기존 규칙 그대로
-        if (!core.CanAct
-            || core.GetPlayerState == PlayerController.PlayerState.Sprint
-            || core.GetPlayerState == PlayerController.PlayerState.Rolling) return;
-
         if (useGun)
         {
             myEquippedGun.Attack(_aimPos, _isHeld);

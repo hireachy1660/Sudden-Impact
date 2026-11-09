@@ -2,11 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 /// <summary>
 /// 줍기 노드·문 상호작용 부품. 소유자 전용(IOwnerOnlyPart) — 원격 복제본에서는 Core가 Awake에서 지운다.
-/// 그래서 RPC 수신자와 애니 이벤트는 두지 않는다. 플레이어 상태는 Core(PlayerController)에서 읽는다.
+/// 그래서 RPC 수신자와 애니 이벤트는 두지 않는다. 자격 가드와 애니 RPC는 Core 중계가 가진다 — Core 참조는 IInteractable.Interact(core)에 넘기는 용도만.
 /// 무기(PlayerWeapon)와의 연결은 없다 — 던지기와 Q 잠금(줍기 쿨다운)은 Core가 TryPickUp의 결과를 보고 처리한다.
 /// </summary>
 [RequireComponent(typeof(PlayerController))]
@@ -134,10 +133,9 @@ public class PlayerInteraction : MonoBehaviourPun, IOwnerOnlyPart
         closestNode = null;
     }
 
-    public void TryInteract(InputAction.CallbackContext ctx)
+    // 상호작용 대상이 있어 실행했으면 true. 자격 가드와 애니 RPC(InteractAnimRPC)는 Core 중계가 한다.
+    public bool TryInteract()
     {
-        if (!core.CanAct) return;
-
         // 1. 내 주변 2m 안의 가구/오브젝트 검색
         Collider[] hits = Physics.OverlapSphere(transform.position, interactRadius, interactableLayer);
 
@@ -146,13 +144,11 @@ public class PlayerInteraction : MonoBehaviourPun, IOwnerOnlyPart
             // 2. 인터페이스 추출 시도
             if (hit.TryGetComponent<IInteractable>(out var target))
             {
-                // 3. 된다면 실행
+                // 3. 된다면 실행 — 한 번에 하나만 상호작용
                 target.Interact(core);
-                // 상호작용 애니는 모든 클라이언트에서 보여야 하므로 Core의 RPC 안에서 발화한다
-                photonView.RPC(nameof(PlayerController.InteractAnimRPC), RpcTarget.All);
-
-                break; // 한 번에 하나만 상호작용
+                return true;
             }
         }
+        return false;
     }
 }
